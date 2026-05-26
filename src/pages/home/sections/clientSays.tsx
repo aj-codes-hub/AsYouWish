@@ -1,5 +1,4 @@
 import React from 'react'
-import ProductCard from '../../../components/productCard'
 import ClientSaysCard from '../../../components/clientSaysCard'
 
 const ClientSays:React.FC = () => {
