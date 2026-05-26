@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+h1{
+  font-family: 'Times New Roman', Times, serif;
+}
+
+.text-primary{
+  color: #B76E79;
+}
+
+.bg-primary{
+  background-color: #B76E79 ;
+}
+
+.bg-secondary{
+  background-color: #E8B4B8;
+}
