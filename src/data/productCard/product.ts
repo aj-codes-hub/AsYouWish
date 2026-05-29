@@ -9,11 +9,11 @@ export const Product: ProductType[] = [
        Rating: 5,
        discount: 50,
        likes: 1200,
-       mainImage: "mainImage",
+       mainImage: "./images/blue-dress.jpg",
        moreImages:[
-        "image 1",
-        "image 2",
-        "image 3",
+        "./images/blue-dress.jpg",
+        "./images/blue-dress.jpg",
+        "./images/blue-dress.jpg",
        ],
        review: [
            {
@@ -21,11 +21,23 @@ export const Product: ProductType[] = [
             customerName: "Sara",
             message: "customer says Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptas inventore, id officia dolorem reprehenderit incidunt nobis, eum quasi, quos explicabo culpa. Facere quidem alias placeat atque dignissimos aliquam nisi et.",
             Rating: 5,
-            mainImage: "main image",
-            moreImages: [
-                "image 1",
-                "image 2",
-                "image 3",
+            mainImage: "./images/blue-dress.jpg",
+            moreImages:[
+                "./images/blue-dress.jpg",
+                "./images/blue-dress.jpg",
+                "./images/blue-dress.jpg",
+            ],
+           },
+            {
+            id: 2,
+            customerName: "johan",
+            message: "customer says Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptas inventore, id officia dolorem reprehenderit incidunt nobis, eum quasi, quos explicabo culpa. Facere quidem alias placeat atque dignissimos aliquam nisi et.",
+            Rating: 5,
+            mainImage: "./images/blue-dress.jpg",
+            moreImages:[
+                "./images/blue-dress.jpg",
+                "./images/blue-dress.jpg",
+                "./images/blue-dress.jpg",
             ],
            },
        ]

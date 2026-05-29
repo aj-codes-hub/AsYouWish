@@ -9,19 +9,19 @@ import { useNavigate } from 'react-router-dom';
 interface ProductCardPrpos {
     Image?: string;
     price?: number;
-
+    className?:string;
 }
 
-const ProductCard:React.FC<ProductCardPrpos> = ({Image,price}) => {
+const ProductCard:React.FC<ProductCardPrpos> = ({Image,price,className}) => {
 
 const navigate = useNavigate();
 
   return (
-    <div className='sm:h-[380px] h-[70vw] w-[100%] overflow-hidden md:rounded-2xl rounded-xl shadow-sm hover:shadow-2xl hover:scale-[1.01] transition-all duration-500 cursor-pointer group'>
+    <div className={`sm:h-[380px] h-[70vw] w-[100%] overflow-hidden md:rounded-2xl sm:rounded-xl  shadow-xl hover:shadow-2xl hover:scale-[1.01] transition-all duration-500 cursor-pointer group ${className}`}>
         <div className='h-[80%] w-full overflow-hidden relative'>
            <img onClick={() => navigate("/product-detail")} src={Image} className='group-hover:scale-[1.08] transition-all duration-500'/>
            
-           <div className='rounded-full md:text-[18px] text-[15px] md:p-[10px] p-[8px] bg-white absolute top-[10px] right-[10px]'>
+           <div className='rounded-full md:text-[18px] text-[15px] md:p-[10px] p-[8px] bg-white/60 absolute top-[10px] right-[10px]'>
                  <FaRegHeart />
            </div>
 
@@ -36,13 +36,13 @@ const navigate = useNavigate();
                 <FiShoppingCart />Add to cart 
             </button>
 
-            <h2 className='sm:text-[14px] text-[9px] leading-0 mt-[10px] ml-[14px]'>
+            <h2 className='sm:text-[14px] text-[9px] leading-0 mt-[10px] ml-[10px]'>
                 Modern Abaya Collection
             </h2>
 
-            <div className='flex justify-between items-center h-full mx-[14px]'>
+            <div className='flex justify-between items-center h-full mx-[10px]'>
 
-            <h1 className='text-primary font-semibold sm:text-[16px] text-[10px]'>
+            <h1 className='text-primary font-semibold sm:text-[16px] text-[16px]'>
                 Rs. {price} 
             </h1>
 

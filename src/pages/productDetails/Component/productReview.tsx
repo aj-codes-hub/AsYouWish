@@ -3,38 +3,52 @@ import { FaStar } from "react-icons/fa";
 import { FaAngleLeft , FaAngleRight } from "react-icons/fa6";
 
 
+interface ProductReviewProps {
+    key: number;
+    customerName: string;
+    message:string;
+    Rating: number;
+    mainImage: string;
+    moreImages: string[];
 
-const ProductReview:React.FC = () => {
+}
+
+
+const ProductReview:React.FC<ProductReviewProps> = ({key,customerName,message,Rating,mainImage,moreImages}) => {
   return (
-    <div className='ml-[20px] relative'>
+    <div key={key} className='ml-[20px] relative'>
       
-        <hr className='opacity-[30%] mb-[20px] text-gray-400' />
+        <hr className='opacity-[30%] mb-[20px] mt-[10px] text-gray-400' />
 
-        <h1 className='text-[18px] mb-[5px]'>Customer name</h1>
+        <h1 className='text-[18px] mb-[5px]'>{customerName}</h1>
         <div className='flex md:gap-2 gap-1 text-yellow-500 md:text-[16px] text-[12px]'>
            <FaStar />
            <FaStar />
            <FaStar />
            <FaStar />
            <FaStar />
-           <p className='text-black'>5/5</p>
+           <p className='text-black'>5/{Rating}</p>
         </div>
-       <p className='border my-[10px] text-[15px] text-gray-600 w-[70%]'>
-        customer says Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptas inventore, id officia dolorem reprehenderit incidunt nobis, eum quasi, quos explicabo culpa. Facere quidem alias placeat atque dignissimos aliquam nisi et.
+       <p className='my-[10px] text-[15px] text-gray-600 w-[70%]'>
+                 {message}
         </p>
 
         
-        <div className='border-2 absolute left-[72%] top-10 border-red-500 h-[170px] w-[170px]'>
-
+        <div className='absolute left-[72%] top-10 bg-cover h-[170px] w-[170px] overflow-hidden'>
+               <img src={mainImage} alt="" />
         </div>
           
-        <div className='flex border gap-10'> 
+        <div className='flex gap-10'> 
 
         <div className='flex mx-auto items-center justify-center gap-4'>
           <FaAngleLeft size={20}/>
-             <div className='border-2 border-blue-500 h-[50px] w-[57px]'></div>
-             <div className='border-2 border-blue-500 h-[50px] w-[57px]'></div>
-             <div className='border-2 border-blue-500 h-[50px] w-[57px]'></div>
+
+          {moreImages.map((item ,index)=>(
+             <div key={index} className='h-[50px] w-[57px] overflow-hidden'>
+              <img src={item} alt="" />
+             </div>
+          ))}
+
           <FaAngleRight size={20}/>
         </div>
 

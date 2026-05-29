@@ -33,7 +33,7 @@ const OpenMenu = () => {
 
 
   return (
-    <div className='bg-white h-[65px] w-full justify-between fixed top-0 z-[999] flex items-center shadow-sm px-[30px] xl:px-[0]'>
+    <div className='bg-white h-[65px] w-full justify-between fixed top-0 z-[999] flex items-center shadow-sm px-[15px] xl:px-[0]'>
        <div className='max-w-[1100px] h-full mx-auto w-full justify-between flex items-center'>
      
      <h1 className='text-primary font-semibold'>

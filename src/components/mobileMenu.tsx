@@ -24,7 +24,7 @@ const MobileMenu:React.FC<MobileMenuProps> = ({isMenuOpen,setIsMenuOpen}) => {
       </h1>
 
            
-      <div className='text-[22px] gap-1 mt-[30px]'>
+      <div className='text-[22px] gap-1 mt-[30px] flex flex-col items-start'>
               <button onClick={() => navigate("/") } className='cursor-pointer transition-colors duration-150 hover:text-[#B76E79] hover:font-semibold p-[10px]'>Home</button>
               <button className='cursor-pointer transition-colors duration-150 hover:text-[#B76E79] hover:font-semibold p-[10px]'>Shop</button>
               <button className='cursor-pointer transition-colors duration-150 hover:text-[#B76E79] hover:font-semibold p-[10px]'>Collections</button>

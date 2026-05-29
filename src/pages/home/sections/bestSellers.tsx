@@ -16,9 +16,9 @@ const BestSellers:React.FC = () => {
         </p>
 
         <div className='grid md:grid-cols-3 sm:grid-cols-2 grid-cols-1 justify-center items-center gap-6 mt-[40px] px-[30px]'>
-            <ProductCard Image='./images/blue-dress.jpg' price={6999}/>
-            <ProductCard Image='./images/white-dress.jpg' price={1599}/>
-            <ProductCard Image='./images/golden-dress.jpg' price={2399}/>
+            <ProductCard Image='./images/blue-dress.jpg' price={6999} className='h-[550px]'/>
+            <ProductCard Image='./images/white-dress.jpg' price={1599} className='h-[550px] '/>
+            <ProductCard Image='./images/golden-dress.jpg' price={2399} className='h-[550px] '/>
         </div>
 
         </div>
