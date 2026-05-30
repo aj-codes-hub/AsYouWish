@@ -9,9 +9,9 @@ const HeroSection:React.FC = () => {
       <img src="./images/hero-image.jpg"
            className='absolute z-10 w-full h-full'/>   
       
-      <div className='flex justify-center items-center w-full h-full bg-white/80 absolute z-20 px-[30px]'>
+      <div className='flex justify-center items-center w-full h-full bg-white/60 absolute z-20 px-[30px]'>
 
-      <div className='text-center w-[500px]'>
+      <div className='text-center w-[500px] bg-white/2 backdrop-blur-[2px] p-4'>
        
        <h1 className='font-[500] text-[61px]'>
          Elevate Your Style

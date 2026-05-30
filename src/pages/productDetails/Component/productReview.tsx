@@ -29,19 +29,19 @@ const ProductReview:React.FC<ProductReviewProps> = ({key,customerName,message,Ra
            <FaStar />
            <p className='text-black'>5/{Rating}</p>
         </div>
-       <p className='my-[10px] text-[15px] text-gray-600 w-[70%]'>
+       <p className='my-[10px] text-[15px] text-gray-600 sm:w-[70%] w-full'>
                  {message}
         </p>
 
         
-        <div className='absolute left-[72%] top-10 bg-cover h-[170px] w-[170px] overflow-hidden'>
+        <div className='absolute left-[72%] top-10 bg-cover h-[170px] w-[170px] overflow-hidden sm:block hidden'>
                <img src={mainImage} alt="" />
         </div>
           
         <div className='flex gap-10'> 
 
         <div className='flex mx-auto items-center justify-center gap-4'>
-          <FaAngleLeft size={20}/>
+          
 
           {moreImages.map((item ,index)=>(
              <div key={index} className='h-[50px] w-[57px] overflow-hidden'>
@@ -49,7 +49,7 @@ const ProductReview:React.FC<ProductReviewProps> = ({key,customerName,message,Ra
              </div>
           ))}
 
-          <FaAngleRight size={20}/>
+  
         </div>
 
         </div>
