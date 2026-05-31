@@ -10,6 +10,7 @@ interface ProductCardPrpos {
     Image?: string;
     price?: number;
     className?:string;
+    
 }
 
 const ProductCard:React.FC<ProductCardPrpos> = ({Image,price,className}) => {
@@ -31,8 +32,8 @@ const navigate = useNavigate();
         <div className='h-[20%] group relative py-[5px]'>
 
            {/* Add to cart button */}
-            <button className='bg-primary text-white flex gap-2 items-center justify-center lg:text-[16px] sm:text-[14px] text-[9px] w-full absolute group-hover:-mt-[40px] sm:-mt-[35px] -mt-[20px] lg:-mt-[6px]
-                               group-hover:h-[40px] lg:h-[0px] sm:h-[35px] h-[20px] cursor-pointer overflow-hidden transition-all duration-300'>
+            <button className='bg-primary text-white flex gap-2 items-center justify-center lg:text-[16px] sm:text-[14px] text-[9px] w-full absolute group-hover:-mt-[40px] sm:-mt-[35px] -mt-[30px] lg:-mt-[6px]
+                               group-hover:h-[40px] lg:h-[0px] sm:h-[35px] h-[30px] cursor-pointer overflow-hidden transition-all duration-300'>
                 <FiShoppingCart />Add to cart 
             </button>
 

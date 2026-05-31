@@ -14,7 +14,7 @@ const FeaturedCollection:React.FC = () => {
             Handpicked styles for the modern woman
         </p>
 
-        <div className='grid xl:grid-cols-4 md:grid-cols-3 grid-cols-2 justify-center items-center gap-6 mt-[40px] px-[30px]'>
+        <div className='grid xl:grid-cols-4 md:grid-cols-3 grid-cols-2 justify-center items-center sm:gap-6 gap-4 mt-[40px] sm:px-[30px] px-[12px]'>
             <ProductCard Image='./images/blue-dress.jpg' price={6999}/>
             <ProductCard Image='./images/white-dress.jpg' price={1599}/>
             <ProductCard Image='./images/golden-dress.jpg' price={2399}/>

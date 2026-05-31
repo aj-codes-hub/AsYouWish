@@ -70,7 +70,7 @@ const ProductDetail:React.FC = () => {
               <h1 className='text-[26px] mt-[15px] leading-6 text-primary sm:block hidden'>Rs. {item.price}</h1>
               <p className='gap-2 text-[12px] sm:flex hidden'>
                 <span className='line-through font-semibold text-gray-400 '>Rs. 499</span>
-                <span className='bg-[#068fff] px-[5px] py-[1px] rounded-full text-[10px]'>-{item.discount}%</span>
+                <span className='bg-[#f4ee36] px-[5px] py-[1px] rounded-full text-[10px]'>-{item.discount}%</span>
                </p>
 
                 <hr className='opacity-[30%] my-[20px] text-gray-400 sm:block hidden'/>
@@ -139,14 +139,14 @@ const ProductDetail:React.FC = () => {
 
               </div>
               <div className='w-[65%] h-full relative'>
-                 <button className='bg-gradient-to-tl from-[#05DE71] to-[#228754] w-[55%] h-full left-[-5%] -skew-x-30 z-[20] absolute'>
-                        <p className='skew-x-20 text-[24px]'>
+                 <button className='bg-gradient-to-tl from-[#05DE71] to-[#05DF72] w-[55%] h-full left-[-5%] -skew-x-30 z-[20] absolute'>
+                        <p className='skew-x-20 text-[24px] font-semibol text-white'>
                           buy
                          </p>
                  </button>
 
                   <button className='bg-gradient-to-tl from-[#B76E79] to-[#f58194] w-[60%] h-full -right-[3%] z-[10] absolute'>
-                        <p className=' text-[20px]'>
+                        <p className=' text-[20px] font-semibol text-white'>
                           Add to cart
                          </p>
                  </button>
