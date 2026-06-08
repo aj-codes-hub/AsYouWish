@@ -1,5 +1,6 @@
 import React from 'react'
 import ProductCard from '../../../components/productCard'
+import { Product } from '../../../data/productCard/product'
 
 const FeaturedCollection:React.FC = () => {
   return (
@@ -15,10 +16,16 @@ const FeaturedCollection:React.FC = () => {
         </p>
 
         <div className='grid xl:grid-cols-4 md:grid-cols-3 grid-cols-2 justify-center items-center sm:gap-6 gap-4 mt-[40px] sm:px-[30px] px-[12px]'>
-            <ProductCard Image='./images/blue-dress.jpg' price={6999}/>
-            <ProductCard Image='./images/white-dress.jpg' price={1599}/>
-            <ProductCard Image='./images/golden-dress.jpg' price={2399}/>
-            <ProductCard Image='./images/yellow-dress.jpg' price={3999}/>
+            {Product.map((item)=>(
+
+            <ProductCard key={item.id}
+                         id={item.id}
+                         Image={item.mainImage}
+                         price={item.price}
+                         title={item.title}/>
+                         
+
+            ))}
         </div>
 
         </div>

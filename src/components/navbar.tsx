@@ -4,6 +4,8 @@ import { FaRegHeart } from "react-icons/fa";
 import { FiShoppingCart } from "react-icons/fi";
 import { LuMenu } from "react-icons/lu";
 import { useLocation, Link, useNavigate } from 'react-router-dom';
+import { useCart } from '../pages/context/cartContext';
+import { IoHeart } from "react-icons/io5";
 
 
 type NavbarProps = {
@@ -11,6 +13,8 @@ type NavbarProps = {
 }
 
 const Navbar:React.FC<NavbarProps> = ({setIsMenuOpen}) => {
+
+   const { totalItems } = useCart();  // Component ke andar yeh line
 
 const [isOpen, setIsOpen] = useState(false);
 
@@ -36,7 +40,8 @@ const OpenMenu = () => {
     <div className='bg-white h-[65px] w-full justify-between fixed top-0 z-[999] flex items-center shadow-sm px-[15px] xl:px-[0]'>
        <div className='max-w-[1100px] h-full mx-auto w-full justify-between flex items-center'>
      
-     <h1 className='text-primary font-semibold'>
+     <h1 onClick={() => window.location.pathname='/'}
+         className='text-primary font-semibold cursor-pointer'>
        AS YOU WISH
      </h1>
 
@@ -56,18 +61,37 @@ const OpenMenu = () => {
 
      </nav>
 
-     <div className='flex items-center gap-6 text-[16px]'>
-       <IoSearch />
-       <FaRegHeart />
-          <div onClick={() => navigate('/add-To-cart')}
+     <div className='flex items-center  text-[16px]'>
+
+       <button className='p-[10px] rounded-full'>
+           <IoSearch />
+       </button>
+
+       <Link to={'/favurite-product'}
+             className={`p-[10px] rounded-full transform-all duration-300
+                        ${window.location.pathname === '/favurite-product' ? 'bg-[#fef4f0]' : ''}`}>
+           {window.location.pathname === '/favurite-product' 
+             ? <IoHeart className='text-[19px] text-[#B76E79] '/> 
+             : <FaRegHeart />}
+       </Link>
+       
+          <Link to="/cart"
              className={`cursor-pointer h-[40px] w-[40px] flex items-center justify-center rounded-full  relative 
-                        ${window.location.pathname === '/add-To-cart' ? 'bg-[#FFF8F5]' : ''}`}>
+                        ${window.location.pathname === '/cart' ? 'bg-[#fef4f0]' : ''}`}>
+
+
+       {totalItems > 0 && (
 
         <div className='rounded-full w-[13px] h-[13px] flex items-center justify-center overflow-hidden bg-primary text-white absolute text-[9.5px] font-semibold top-[14%] right-[6%]'>
-          <h2>2</h2>
+          <h2 className=''>{totalItems}</h2>
         </div>
+
+
+       )}
+        
+
        <FiShoppingCart />
-       </div>
+       </Link>
      </div>
 
      <button onClick={OpenMenu} className='md:hidden block text-[24px]'>

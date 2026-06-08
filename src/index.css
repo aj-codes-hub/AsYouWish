@@ -15,3 +15,240 @@ h1{
 .bg-secondary{
   background-color: #E8B4B8;
 }
+
+
+
+
+.addToCartAnimation {
+   animation: CartAnimation 1s ease-in-out;
+   top: 50%;
+   font-size: 0px;
+   left: 50%;
+   transform: translate(-50%, -50%);
+}
+
+@keyframes CartAnimation {
+  0%{
+   padding: 0px;
+   font-size: 0px;
+   top: 50%;
+   left: 50%;
+   transform: translate(-50%, -50%);
+  }
+  30%{
+    padding: 10px;
+    font-size: 40px;
+  }
+   60%{
+    padding: 10px;
+    font-size: 30px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  100%{
+    padding: 0px;
+    font-size: 0px;
+    top: 10%;
+    left: 90%;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.addToWsihlistAnimation {
+   animation: wishlistAnimation 1s ease-in-out;
+   top: 50%;
+   font-size: 0px;
+   left: 50%;
+   transform: translate(-50%, -50%);
+}
+
+@keyframes wishlistAnimation {
+  0%{
+   padding: 0px;
+   font-size: 0px;
+   top: 50%;
+   left: 50%;
+   transform: translate(-50%, -50%);
+  }
+  30%{
+    padding: 10px;
+    font-size: 60px;
+  }
+   60%{
+    padding: 10px;
+    font-size: 40px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  100%{
+    padding: 0px;
+    font-size: 0px;
+    top: 8%;
+    left: 85%;
+    transform: translate(-50%, -50%);
+  }
+}
+
+
+@media (max-width: 466px) {
+
+  .addToCartAnimation {
+   animation: CartAnimation 1s ease-in-out;
+   top: 50%;
+   font-size: 0px;
+   left: 50%;
+   transform: translate(-50%, -50%);
+}
+
+@keyframes CartAnimation {
+  0%{
+   padding: 0px;
+   font-size: 0px;
+   top: 50%;
+   left: 50%;
+   transform: translate(-50%, -50%);
+  }
+  30%{
+    padding: 10px;
+    font-size: 30px;
+  }
+   60%{
+    padding: 10px;
+    font-size: 30px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  100%{
+    padding: 0px;
+    font-size: 0px;
+    top: 6%;
+    left: 70%;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.addToWsihlistAnimation {
+   animation: wishlistAnimation 1s ease-in-out;
+   top: 50%;
+   font-size: 0px;
+   left: 50%;
+   transform: translate(-50%, -50%);
+}
+
+@keyframes wishlistAnimation {
+  0%{
+   padding: 0px;
+   font-size: 0px;
+   top: 50%;
+   left: 50%;
+   transform: translate(-50%, -50%);
+  }
+  30%{
+    padding: 10px;
+    font-size: 60px;
+  }
+   60%{
+    padding: 10px;
+    font-size: 40px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  100%{
+    padding: 0px;
+    font-size: 0px;
+    top: 6%;
+    left: 65%;
+    transform: translate(-50%, -50%);
+  }
+}
+ 
+}
+
+
+
+@media (min-width: 467px) and (max-width: 767px) {
+
+  .addToCartAnimation {
+   animation: CartAnimation 1s ease-in-out;
+   top: 50%;
+   font-size: 0px;
+   left: 50%;
+   transform: translate(-50%, -50%);
+}
+
+@keyframes CartAnimation {
+  0%{
+   padding: 0px;
+   font-size: 0px;
+   top: 50%;
+   left: 50%;
+   transform: translate(-50%, -50%);
+  }
+  30%{
+    padding: 10px;
+    font-size: 30px;
+  }
+   60%{
+    padding: 10px;
+    font-size: 30px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  100%{
+    padding: 0px;
+    font-size: 0px;
+    top: 8%;
+    left: 65%;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.addToWsihlistAnimation {
+   animation: wishlistAnimation 1s ease-in-out;
+   top: 50%;
+   font-size: 0px;
+   left: 50%;
+   transform: translate(-50%, -50%);
+}
+
+@keyframes wishlistAnimation {
+  0%{
+   padding: 0px;
+   font-size: 0px;
+   top: 50%;
+   left: 50%;
+   transform: translate(-50%, -50%);
+  }
+  30%{
+    padding: 10px;
+    font-size: 60px;
+  }
+   60%{
+    padding: 10px;
+    font-size: 40px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  100%{
+    padding: 0px;
+    font-size: 0px;
+    top: 8%;
+    left: 60%;
+    transform: translate(-50%, -50%);
+  }
+}
+ 
+}
+
+.icon-gradient {
+  background: linear-gradient(135deg, #B76E79, #8B5CF6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}

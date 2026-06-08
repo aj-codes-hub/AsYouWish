@@ -6,29 +6,46 @@ import ProductDetail from "./pages/productDetails/productDetail"
 import Footer from "./components/footer";
 import { BrowserRouter, Routes , Route } from "react-router-dom";
 import ScrollToTop from "./components/scrollToTop";
-import AddToCart from "./pages/addToCart/addToCart";
+import CartPage from "./pages/Cart/Cart"
+import { CartProvider, useCart } from "./pages/context/cartContext";
+import { useWishlist, WishlistProvider } from './pages/context/wishlistContext';
+import AddToCartAnimation from "./components/addToCartAnimation copy";
+import LikeProduct from "./pages/Liked/likeProduct";
+import AddToWishlistAnimation from "./components/addToWishlistAnimation";
 
-function App() {
-
+function AppContent() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { isAnimating } = useCart(); 
+  const { isAnimatingwishlist } = useWishlist();
 
   return (
-    <BrowserRouter>
-
-     <ScrollToTop />
-
-     <Navbar setIsMenuOpen={setIsMenuOpen}/>
-        <MobileMenu isMenuOpen={isMenuOpen}
-                    setIsMenuOpen={setIsMenuOpen}/>
+    <>
+      <BrowserRouter>
+        <ScrollToTop />
+        <Navbar setIsMenuOpen={setIsMenuOpen} />
+        <AddToCartAnimation runAnimation={isAnimating} />
+        <AddToWishlistAnimation runAnination={isAnimatingwishlist}/>
+        <MobileMenu isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/product-detail" element={<ProductDetail />} />
-          <Route path="/add-To-cart" element={<AddToCart />} />
-
-        </Routes>            
-     <Footer />
-     </BrowserRouter>
-  )
+          <Route path="/product-detail/:id" element={<ProductDetail />} />
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/favurite-product" element={<LikeProduct />} />
+        </Routes>
+        <Footer />
+      </BrowserRouter>
+    </>
+  );
 }
 
-export default App
+function App() {
+  return (
+    <WishlistProvider>
+    <CartProvider>
+      <AppContent />
+    </CartProvider>
+    </WishlistProvider>
+  );
+}
+
+export default App;

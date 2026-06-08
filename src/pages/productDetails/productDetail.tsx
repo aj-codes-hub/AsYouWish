@@ -4,22 +4,48 @@ import { FaRegHeart } from "react-icons/fa";
 import { IoShareSocialOutline } from "react-icons/io5";
 import ProductReview from './Component/productReview';
 import { Product } from '../../data/productCard/product'
+import { useParams } from 'react-router-dom';
+import { useCart } from '../context/cartContext';
 
 
 const ProductDetail:React.FC = () => {
+  
+// Component ke ANDAR (useParams ke baad) yeh line add karo
+const { addToCart } = useCart();
+
+// Ek function banao add to cart ke liye
+const handleAddToCart = () => {
+  if (SinglePorduct) {
+    addToCart(SinglePorduct);
+  }
+};
+
+
+
+const { id } =  useParams();
+
+const SinglePorduct = Product.find(item => item.id === Number(id))
+
+  if (!SinglePorduct) {
+    return (
+      <div className='text-center py-20'>
+        <h1 className='text-2xl text-red-500'>Product not found!</h1>
+      </div>
+    );
+  }
+
   return (
     <div className='w-full bg-[#FFF8F5] border border-[#fff0]'>
-      {Product.map((item) => (
               <div className='max-w-[1100px] w-full mx-auto pb-[100px]'>
 
         <div className='w-full  sm:h-[380px] sm:mt-[100px] mt-[60px] sm:flex justify-between'>
             <div className='sm:h-full h-[55vh] sm:w-[30%] w-[98%] sm:mx-0 mx-auto overflow-hidden'>
               <div className=' sm:h-[82%] h-full w-[100%] overflow-hidden'>
-                  <img src={item.mainImage} className='bg-cover' alt="image" />
+                  <img src={SinglePorduct.mainImage} className='w-full h-full object-cover' alt="image" />
               </div>
 
               <div className='h-[18%] w-full sm:flex items-center justify-center gap-4 hidden'>
-                {item.moreImages.map((image , index) =>(
+                {SinglePorduct.moreImages.map((image , index) =>(
                   <div key={index} className=' h-[50px] w-[57px] overflow-hidden'>
                     <img src={image} alt="more images" />
                   </div>
@@ -31,20 +57,20 @@ const ProductDetail:React.FC = () => {
             <div className='sm:w-[69%] w-full p-4'>
 
                 <h1 className='sm:text-[30px] text-[25px]'> 
-                 {item.title}
+                 {SinglePorduct.title}
                 </h1>
                 
                   <p className='xl:h-[75px] sm:text-[16px] text-[13px]'> 
-                    {item.details}
+                    {SinglePorduct.details}
                   </p>
 
                 <div className='w-full flex justify-between items-center sm:my-[30px] my-[20px]'>
 
               <div className='sm:hidden block'>
-              <h1 className='text-[34px] leading-6 text-primary'>Rs. {item.price}</h1>
+              <h1 className='text-[34px] leading-6 text-primary'>Rs. {SinglePorduct.price}</h1>
               <p className='flex gap-2 text-[15px]'>
                 <span className='line-through font-semibold text-gray-400 '>Rs. 499</span>
-                <span>-{item.discount}%</span>
+                <span>-{SinglePorduct.discount}%</span>
                </p>
               </div>
 
@@ -54,7 +80,7 @@ const ProductDetail:React.FC = () => {
                              <FaStar />
                              <FaStar />
                              <FaStar /> 
-                              <p className='text-black'>5/{item.Rating}</p>
+                              <p className='text-black'>5/{SinglePorduct.Rating}</p>
                       </div>
 
                    <div className='sm:flex gap-3 hidden'>
@@ -67,10 +93,10 @@ const ProductDetail:React.FC = () => {
 
                 <hr className='opacity-[30%] my-[20px] text-gray-400 sm:block hidden'/>
 
-              <h1 className='text-[26px] mt-[15px] leading-6 text-primary sm:block hidden'>Rs. {item.price}</h1>
+              <h1 className='text-[26px] mt-[15px] leading-6 text-primary sm:block hidden'>Rs. {SinglePorduct.price}</h1>
               <p className='gap-2 text-[12px] sm:flex hidden'>
                 <span className='line-through font-semibold text-gray-400 '>Rs. 499</span>
-                <span className='bg-[#f4ee36] px-[5px] py-[1px] rounded-full text-[10px]'>-{item.discount}%</span>
+                <span className='bg-[#f4ee36] px-[5px] py-[1px] rounded-full text-[10px]'>-{SinglePorduct.discount}%</span>
                </p>
 
                 <hr className='opacity-[30%] my-[20px] text-gray-400 sm:block hidden'/>
@@ -81,7 +107,8 @@ const ProductDetail:React.FC = () => {
                 Buy Now 
                </button>
 
-               <button className='bg-primary w-[50%] py-[6px] text-white rounded-sm text-[14px] cursor-pointer'> 
+               <button  onClick={handleAddToCart}
+                        className='bg-primary w-[50%] py-[6px] text-white rounded-sm text-[14px] cursor-pointer'> 
                 Add To Cart
                </button>
 
@@ -115,7 +142,7 @@ const ProductDetail:React.FC = () => {
                 Customer Review
             </h1>
            
-           {item.review.map((item)=>(
+           {SinglePorduct.review.map((item)=>(
              <ProductReview key={item.id}
                             customerName={item.customerName}
                             message={item.message}
@@ -128,7 +155,6 @@ const ProductDetail:React.FC = () => {
 
 
       </div>
-      ))}
 
       <div className='bg-black/10 backdrop-blur-xs w-full h-[60px] fixed bottom-0 left-0 flex sm:hidden justify-between z-[99]'>
               <div className='h-full  w-[30%] flex gap-[40px] items-center justify-center'>
