@@ -27,10 +27,10 @@ const NewArrivals:React.FC = () => {
          
 
         <div className='grid xl:grid-cols-4 md:grid-cols-3 grid-cols-2 justify-center items-center sm:gap-6 gap-4 mt-[40px] sm:px-[30px] px-[12px]'>
-            <ProductCard Image='./images/golden-dress.jpg' price={2399}/>
-            <ProductCard Image='./images/yellow-dress.jpg' price={3999}/>
-            <ProductCard Image='./images/blue-dress.jpg' price={6999}/>
-            <ProductCard Image='./images/white-dress.jpg' price={1599}/>
+            <ProductCard id={4444} Image='./images/golden-dress.jpg' price={2399}/>
+            <ProductCard id={5555} Image='./images/yellow-dress.jpg' price={3999}/>
+            <ProductCard id={6666} Image='./images/blue-dress.jpg' price={6999}/>
+            <ProductCard id={7777} Image='./images/white-dress.jpg' price={1599}/>
         </div>
         
     </div>

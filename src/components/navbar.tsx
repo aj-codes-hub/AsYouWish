@@ -3,7 +3,7 @@ import { IoSearch } from "react-icons/io5";
 import { FaRegHeart } from "react-icons/fa";
 import { FiShoppingCart } from "react-icons/fi";
 import { LuMenu } from "react-icons/lu";
-import { useLocation, Link, useNavigate } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import { useCart } from '../pages/context/cartContext';
 import { IoHeart } from "react-icons/io5";
 
@@ -25,7 +25,6 @@ const OpenMenu = () => {
 }
 
   const Location = useLocation();
-  const navigate = useNavigate();
 
 
   const MenuList = [

@@ -18,7 +18,6 @@ export type ProductType = {
     price: number;
     Rating: number;
     discount: number;
-    likes: boolean;
     mainImage: string;
     moreImages: string[];
     review: ReviewType[];
