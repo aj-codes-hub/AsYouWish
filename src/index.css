@@ -252,3 +252,30 @@ h1{
   background-clip: text;
   color: transparent;
 }
+
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #B76E79;
+  border-radius: 10px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+/* Hover pe dikhe */
+.custom-scrollbar:hover::-webkit-scrollbar-thumb {
+  opacity: 1;
+}
+
+/* Ya phir body hover pe */
+.custom-scrollbar:hover::-webkit-scrollbar-thumb {
+  opacity: 1;
+}

@@ -9,13 +9,13 @@ const {cart, removeFromCart, updateQuantity, totalItems, totalPrice } = useCart(
 
 if(cart.length === 0){
   return(
-    <div className='flex items-center justify-center w-full h-screen relative bg-[#0000003f]'>
+    <div className='flex items-center justify-center w-full sm:h-screen h-[80vh] relative bg-[#0000003f]'>
       <img src="/images/empty-closet.jpg" alt="empty-closet" 
           className='absolute w-full h-full z-[-10]' 
       />
-     <div className='text-center py-20 px-30 backdrop-blur-xs bg-white/10'>
-        <h1 className='text-2xl font-bold mb-4'>Your Cart is Empty 😢</h1>
-        <Link to='/' className='bg-primary text-white px-6 py-2 rounded-lg'>
+     <div className='text-center sm:py-20 py-8 sm:px-30 px-10 backdrop-blur-xs bg-white/10'>
+        <h1 className='sm:text-2xl text-[22px] font-bold mb-4'>Your Cart is Empty 😢</h1>
+        <Link to='/' className='bg-primary text-white sm:px-6 px-4 py-2 sm:rounded-lg rounded-sm sm:text-[16px] text-[15px]'> 
           Continue Shopping
         </Link>
       </div>
@@ -24,7 +24,7 @@ if(cart.length === 0){
 };
 
   return (
-    <div className='container mx-auto p-4 min-h-screen'>
+    <div className='container mx-auto p-4 min-h-[80vh]'>
       <h1 className='text-2xl font-bold mb-6'>Shopping Cart</h1>
       
       <div className='flex flex-col lg:flex-row gap-8'>

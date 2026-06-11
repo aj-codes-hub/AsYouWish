@@ -13,7 +13,7 @@ const HeroSection:React.FC = () => {
 
       <div className='text-center w-[500px] bg-white/2 backdrop-blur-[2px] p-4'>
        
-       <h1 className='font-[500] text-[61px]'>
+       <h1 className='font-[500] text-[61px]'> 
          Elevate Your Style
        </h1>
        <p className='text-[20px]'>

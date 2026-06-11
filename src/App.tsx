@@ -12,17 +12,23 @@ import { useWishlist, WishlistProvider } from './pages/context/wishlistContext';
 import AddToCartAnimation from "./components/addToCartAnimation copy";
 import LikeProduct from "./pages/Liked/likeProduct";
 import AddToWishlistAnimation from "./components/addToWishlistAnimation";
+import LoginModal from "./Auth/loginModal";
+import SignupModal from "./Auth/signupModal";
 
 function AppContent() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { isAnimating } = useCart(); 
   const { isAnimatingwishlist } = useWishlist();
+  const [openLoginModal, setOpenLoginModal] = useState(false);
+  const [openSignUpModal, setOpenSignUpModal] = useState(false);
 
   return (
     <>
       <BrowserRouter>
         <ScrollToTop />
-        <Navbar setIsMenuOpen={setIsMenuOpen} />
+        <Navbar setIsMenuOpen={setIsMenuOpen} isOpenLogiModal={setOpenLoginModal} />
+        <LoginModal  hideLoginModal={setOpenLoginModal} isOpenLoginModal={openLoginModal} showSignUpModal={setOpenSignUpModal}/>
+        <SignupModal hideSignUpModal={setOpenSignUpModal} isOpenSignUPModal={openSignUpModal} showLoginModal={setOpenLoginModal}  />
         <AddToCartAnimation runAnimation={isAnimating} />
         <AddToWishlistAnimation runAnination={isAnimatingwishlist}/>
         <MobileMenu isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />

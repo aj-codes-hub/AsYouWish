@@ -56,12 +56,12 @@ const handlePorductClick = () => {
   return (
     <>
     <div key={key}
-         className={`sm:h-[380px] h-[70vw] w-[100%] overflow-hidden md:rounded-2xl sm:rounded-xl  shadow-xl hover:shadow-2xl hover:scale-[1.01] transition-all duration-500 cursor-pointer group ${className}`}>
+         className={`sm:h-[380px] h-[70vw] w-[100%] overflow-hidden sm:rounded-xl  shadow-xl hover:shadow-2xl hover:scale-[1.01] transition-all duration-500 cursor-pointer group ${className}`}>
         <div className='h-[80%] w-full overflow-hidden relative'>
            <img onClick={handlePorductClick} src={Image} className='group-hover:scale-[1.08] transition-all duration-500'/>
            
            <div  onClick={handleWishClick}
-                 className='rounded-full md:text-[18px] text-[15px] md:p-[10px] p-[8px] bg-white/60 absolute top-[10px] right-[10px]'>
+                 className='rounded-full md:text-[18px] text-[16px] md:p-[10px] p-[9px] bg-white/60 absolute top-[10px] right-[10px]'>
             {liked ? <IoHeart className='text-[19px] text-[#B76E79] '/> 
                    : <FaRegHeart /> }
            </div>
@@ -81,17 +81,17 @@ const handlePorductClick = () => {
                 Modern Abaya Collection
             </h2>
 
-            <div className='flex justify-between items-center h-full mx-[10px]'>
+            <div className='flex justify-between items-center h-full mx-[10px] flex'>
 
-            <h1 className='text-primary font-semibold sm:text-[16px] text-[16px]'>
+            <h2 className='text-primary font-semibold leading-[15px] sm:text-[18px] text-[18px] flex flex-col'>
                 Rs. {price} 
-            </h1>
-
-            <button onClick={handlePorductClick} className='bg-primary sm:text-[10px] text-[8px] text-white rounded-sm px-[10px] py-[2px]
-                                cursor-pointer'>
-                    more Details
-            </button>
-    
+                <span className='line-through text-left text-[12.5px] tracking-widest text-gray-400 font-semibold ml-[6px]'>
+                    Rs. 464
+                </span>
+            </h2>    
+             <span className='text-[11.5px] inline-block text-whit bg-[yellow] rounded-full px-[6px] py-[1px] ml-[6px]'>
+                        50% OFF
+            </span>
             </div>
         </div>
 

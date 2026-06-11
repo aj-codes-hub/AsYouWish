@@ -6,17 +6,20 @@ import { LuMenu } from "react-icons/lu";
 import { useLocation, Link } from 'react-router-dom';
 import { useCart } from '../pages/context/cartContext';
 import { IoHeart } from "react-icons/io5";
+import { IoPersonOutline } from "react-icons/io5";
 
 
 type NavbarProps = {
    setIsMenuOpen:React.Dispatch<React.SetStateAction<boolean>>;
+   isOpenLogiModal:React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const Navbar:React.FC<NavbarProps> = ({setIsMenuOpen}) => {
+const Navbar:React.FC<NavbarProps> = ({setIsMenuOpen,isOpenLogiModal}) => {
 
-   const { totalItems } = useCart();  // Component ke andar yeh line
+   const { totalItems } = useCart();  
 
 const [isOpen, setIsOpen] = useState(false);
+
 
 const OpenMenu = () => {
   setIsMenuOpen(true);
@@ -73,6 +76,11 @@ const OpenMenu = () => {
              ? <IoHeart className='text-[19px] text-[#B76E79] '/> 
              : <FaRegHeart />}
        </Link>
+
+        <button  onClick={() =>  isOpenLogiModal(true)}
+                 className='p-[10px] rounded-full text-[20px] cursor-pointer'>
+           <IoPersonOutline />
+       </button>
        
           <Link to="/cart"
              className={`cursor-pointer h-[40px] w-[40px] flex items-center justify-center rounded-full  relative 
