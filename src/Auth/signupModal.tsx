@@ -36,7 +36,7 @@ const handleOpenSignInModel = () => {
 
 
      <div className='bg-white absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 py-[25px] 
-                       rounded-2xl min-h-[520px] sm:w-[360px] max-w-[360px] w-[95%]'>
+                       rounded-2xl sm:w-[360px] max-w-[360px] w-[95%] signup-entry'>
      <div  onClick={() => hideSignUpModal(false)}
            className='absolute top-[0px] right-[0px] cursor-pointer text-black p-[15px]'>
       <RxCross1 />
@@ -51,7 +51,7 @@ const handleOpenSignInModel = () => {
         
         
         <form action="">
-        <div className='px-[20px] overflow-hidden hover:overflow-y-scroll custom-scrollbar h-[390px]'>
+        <div className='px-[20px] overflow-hidden overflow-y-scroll xl:hover:overflow-y-scroll xl:overflow-y-hidden  custom-scrollbar h-[390px]'>
 
           <div className='mt-[20px] flex flex-col gap-3'>
           <Input type='text' 

@@ -31,8 +31,7 @@ const handleOpenSignupModel = () => {
 
 
      <div className={`bg-white absolute left-1/2 -translate-y-1/2 -translate-x-1/2 py-[25px] px-[20px] 
-                      transition-all duration-300 rounded-2xl sm:w-[360px] max-w-[360px] w-[95%] 
-                      ${isOpenLoginModal ? "min-h-[400px] top-1/2" : "min-h-[0px] top-1"}`}>
+                       rounded-2xl sm:w-[360px] max-w-[360px] w-[95%] login-entry`}>
 
                         
      <div  onClick={() => hideLoginModal(false)}

@@ -9,7 +9,7 @@ import ScrollToTop from "./components/scrollToTop";
 import CartPage from "./pages/Cart/Cart"
 import { CartProvider, useCart } from "./pages/context/cartContext";
 import { useWishlist, WishlistProvider } from './pages/context/wishlistContext';
-import AddToCartAnimation from "./components/addToCartAnimation copy";
+import AddToCartAnimation from "./components/addToCartAnimation";
 import LikeProduct from "./pages/Liked/likeProduct";
 import AddToWishlistAnimation from "./components/addToWishlistAnimation";
 import LoginModal from "./Auth/loginModal";

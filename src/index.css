@@ -279,3 +279,55 @@ h1{
 .custom-scrollbar:hover::-webkit-scrollbar-thumb {
   opacity: 1;
 }
+
+.login-entry {
+    animation:loginEntry .3s ease-in;
+    height: 420px;
+    top: 50%;
+    overflow: hidden;
+}
+
+@keyframes  loginEntry{
+  0%{
+    height: 0px;
+    top: 0%;
+  }
+  50%{
+    height: 420px;
+    top: 55%;
+  }
+  70%{
+    height: 420px;
+    top: 45%;
+  }
+  100%{
+    height: 420px;
+    top: 50%;
+  }
+}
+
+.signup-entry {
+    animation:signupEntry .3s ease-in;
+    height: 535px;
+    top: 50%;
+    overflow: hidden;
+}
+
+@keyframes  signupEntry{
+  0%{
+    height: 0px;
+    top: 20%;
+  }
+  50%{
+    height:535px;
+    top: 55%;
+  }
+  70%{
+    height: 535px;
+    top: 45%;
+  }
+  100%{
+    height: 535px;
+    top: 50%;
+  }
+}

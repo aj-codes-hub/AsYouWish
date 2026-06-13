@@ -1,12 +1,17 @@
 import React, { useState } from 'react'
-import { IoSearch } from "react-icons/io5";
+import { CiSearch } from "react-icons/ci";
 import { FaRegHeart } from "react-icons/fa";
-import { FiShoppingCart } from "react-icons/fi";
+import { PiShoppingCartSimpleThin } from "react-icons/pi";
 import { LuMenu } from "react-icons/lu";
 import { useLocation, Link } from 'react-router-dom';
 import { useCart } from '../pages/context/cartContext';
 import { IoHeart } from "react-icons/io5";
 import { IoPersonOutline } from "react-icons/io5";
+import { CiHome } from "react-icons/ci";
+import { CiHeart } from "react-icons/ci";
+
+
+
 
 
 type NavbarProps = {
@@ -39,8 +44,8 @@ const OpenMenu = () => {
 
 
   return (
-    <div className='bg-white h-[65px] w-full justify-between fixed top-0 z-[999] flex items-center shadow-sm px-[15px] xl:px-[0]'>
-       <div className='max-w-[1100px] h-full mx-auto w-full justify-between flex items-center'>
+    <div className='bg-white h-[65px] w-full justify-between fixed sm:top-0 bottom-0 z-[999] flex items-center shadow-sm sm:px-[15px] xl:px-[0]'>
+       <div className='max-w-[1100px] h-full mx-auto w-full justify-between sm:flex items-center hidden'>
      
      <h1 onClick={() => window.location.pathname='/'}
          className='text-primary font-semibold cursor-pointer'>
@@ -66,7 +71,7 @@ const OpenMenu = () => {
      <div className='flex items-center  text-[16px]'>
 
        <button className='p-[10px] rounded-full'>
-           <IoSearch />
+           <CiSearch />
        </button>
 
        <Link to={'/favurite-product'}
@@ -97,7 +102,7 @@ const OpenMenu = () => {
        )}
         
 
-       <FiShoppingCart />
+       <PiShoppingCartSimpleThin />
        </Link>
      </div>
 
@@ -105,6 +110,41 @@ const OpenMenu = () => {
          <LuMenu />         
      </button>
      </div>
+    
+    {/* mobile menu starts here  */}
+
+
+
+    <div className='grid grid-cols-5 h-full w-full sm:hidden'>
+     
+      <div className='flex flex-col items-center justify-center text-[26px]'>
+      <CiHeart />
+      <h2 className='text-[11px]'>favorite</h2>
+     </div>
+
+      <div className='flex flex-col items-center justify-center text-[26px]'>
+      <PiShoppingCartSimpleThin />
+      <h2 className='text-[11px]'>Cart</h2>
+     </div>
+
+      <div className='flex flex-col items-center justify-center text-[26px]'>
+      <CiHome />
+      <h2 className='text-[11px]'>Home</h2>
+     </div>
+
+      <div className='flex flex-col items-center justify-center text-[26px]'>
+      <CiSearch />
+      <h2 className='text-[11px]'>Search</h2>
+     </div>
+   
+
+     <div className='flex flex-col items-center justify-center text-[26px]'>
+      <IoPersonOutline />
+      <h2 className='text-[11px]'>Account</h2>
+     </div>
+
+
+    </div>
 
     </div>
   )
