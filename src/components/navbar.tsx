@@ -9,7 +9,9 @@ import { IoHeart } from "react-icons/io5";
 import { IoPersonOutline } from "react-icons/io5";
 import { CiHome } from "react-icons/ci";
 import { CiHeart } from "react-icons/ci";
-
+import { FiShoppingCart } from "react-icons/fi";
+import { LuSearch } from "react-icons/lu";
+import { CiMenuBurger } from "react-icons/ci";
 
 
 
@@ -71,7 +73,7 @@ const OpenMenu = () => {
      <div className='flex items-center  text-[16px]'>
 
        <button className='p-[10px] rounded-full'>
-           <CiSearch />
+           <LuSearch />
        </button>
 
        <Link to={'/favurite-product'}
@@ -102,7 +104,7 @@ const OpenMenu = () => {
        )}
         
 
-       <PiShoppingCartSimpleThin />
+       <FiShoppingCart />
        </Link>
      </div>
 
@@ -113,13 +115,16 @@ const OpenMenu = () => {
     
     {/* mobile menu starts here  */}
 
-
+    <h1 className='fixed text-primary top-[12px] left-1/2 -translate-x-1/2 font-bold text-[30px] sm:hidden'>
+      <img src="/images/Logo.png" className='h-[35px] w-[150px]' />
+    </h1>
 
     <div className='grid grid-cols-5 h-full w-full sm:hidden'>
      
       <div className='flex flex-col items-center justify-center text-[26px]'>
-      <CiHeart />
-      <h2 className='text-[11px]'>favorite</h2>
+      <CiSearch className='absolute bg-white rounded-full ml-4 mb-2 text-[22px]'/>
+      <CiMenuBurger />
+      <h2 className='text-[11px]'>menu</h2>
      </div>
 
       <div className='flex flex-col items-center justify-center text-[26px]'>
@@ -133,7 +138,7 @@ const OpenMenu = () => {
      </div>
 
       <div className='flex flex-col items-center justify-center text-[26px]'>
-      <CiSearch />
+      <CiHeart />
       <h2 className='text-[11px]'>Search</h2>
      </div>
    

@@ -3,7 +3,7 @@ import ClientSaysCard from '../../../components/clientSaysCard'
 
 const ClientSays:React.FC = () => {
   return (
-    <div className='w-full py-[60px] '>
+    <div className='w-full py-[60px] bg-white'>
    
      <div className='max-w-[1100px] mx-auto'>
 

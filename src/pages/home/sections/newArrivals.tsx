@@ -3,7 +3,7 @@ import ProductCard from '../../../components/productCard'
 
 const NewArrivals:React.FC = () => {
   return (
-     <div className='max-w-[1100px] mx-auto w-full py-[60px]'>
+     <div className='max-w-[1100px] mx-auto w-full py-[60px] bg-white'>
         
         <div className='relative w-full px-[30px] xl:px-[0px]'>
 

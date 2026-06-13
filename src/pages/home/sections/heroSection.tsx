@@ -4,19 +4,19 @@ import { FaArrowRight } from "react-icons/fa";
 
 const HeroSection:React.FC = () => {
   return (
-    <div className='h-[600px] w-full relative'> 
+    <div className='h-[600px] w-full fixed z-[-20] top-0'> 
          
       <img src="./images/hero-image.jpg"
            className='absolute z-10 w-full h-full'/>   
       
-      <div className='flex justify-center items-center w-full h-full bg-white/60 absolute z-20 px-[30px]'>
+      <div className='flex justify-center items-center w-full h-full sm:text-black text-white sm:bg-white/60 bg-black/40 absolute z-20 px-[30px]'>
 
-      <div className='text-center w-[500px] bg-white/2 backdrop-blur-[2px] p-4'>
+      <div className='text-center sm:w-[500px] bg-white/2 backdrop-blur-[2px] p-4 w-full max-w-[310px]'>
        
        <h1 className='font-[500] text-[61px]'> 
          Elevate Your Style
        </h1>
-       <p className='text-[20px]'>
+       <p className='sm:text-[20px] text-[16px]'>
           Discover timeless elegance with our curated collection of premium women's fashion
        </p>
 

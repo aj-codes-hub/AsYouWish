@@ -4,8 +4,13 @@ import { Product } from '../../../data/productCard/product'
 
 const FeaturedCollection:React.FC = () => {
   return (
-    <div className='w-full bg-[#FFF8F5] py-[60px]'>
+    <div className='w-full bg-[#FFF8F5] py-[60px] mt-[600px] relative'>
    
+      <div className='w-full h-[120px] absolute top-[-70px] overflow-hidden sm:hidden'>
+        <img src="/images/downBorder.png" className=''/>
+      </div>
+
+
      <div className='max-w-[1100px] mx-auto'>
 
         <h1 className='font-sans md:text-[45px] text-[35px] text-center md:leading-12 leading-10'>
@@ -22,9 +27,8 @@ const FeaturedCollection:React.FC = () => {
                          id={item.id}
                          Image={item.mainImage}
                          price={item.price}
-                         title={item.title}/>
-                         
-
+                         title={item.title}
+                         />
             ))}
         </div>
 
