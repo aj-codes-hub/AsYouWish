@@ -127,23 +127,26 @@ const OpenMenu = () => {
       <h2 className='text-[11px]'>menu</h2>
      </div>
 
-      <div className='flex flex-col items-center justify-center text-[26px]'>
+      <Link to="/cart" className={`flex flex-col items-center justify-center text-[26px] rounded-[30%] 
+                              ${window.location.pathname === "/cart" ? 'm-1 bg-black text-white' : ''}`}>
       <PiShoppingCartSimpleThin />
       <h2 className='text-[11px]'>Cart</h2>
-     </div>
+     </Link>
 
-      <div className='flex flex-col items-center justify-center text-[26px]'>
+      <Link to='/' className={`flex flex-col items-center justify-center text-[26px] rounded-[30%] 
+                              ${window.location.pathname === "/" ? 'm-1 bg-black text-white' : ''}`}>
       <CiHome />
       <h2 className='text-[11px]'>Home</h2>
-     </div>
+     </Link>
 
-      <div className='flex flex-col items-center justify-center text-[26px]'>
+      <Link to={'/favurite-product'} className={`flex flex-col items-center justify-center text-[26px] rounded-[30%] 
+                                     ${window.location.pathname === "/favurite-product" ? 'm-1 bg-black text-white' : ''}`}>
       <CiHeart />
-      <h2 className='text-[11px]'>Search</h2>
-     </div>
+      <h2 className='text-[11px]'>Favurite</h2>
+     </Link>
    
 
-     <div className='flex flex-col items-center justify-center text-[26px]'>
+     <div onClick={() =>  isOpenLogiModal(true)} className='flex flex-col items-center justify-center text-[26px]'>
       <IoPersonOutline />
       <h2 className='text-[11px]'>Account</h2>
      </div>

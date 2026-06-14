@@ -66,6 +66,11 @@ const handlePorductClick = () => {
                    : <FaRegHeart /> }
            </div>
 
+           <button  onClick={handleAddToCart}
+                     className='rounded-r-full px-[10px] py-[8px] text-[10px] bg-white/60 absolute bottom-[10px] left-[0px] flex items-center justify-center'> 
+                <FiShoppingCart /> + 
+            </button>
+
         </div>
          
          <div className='h-[20%] group relative py-[5px]'>

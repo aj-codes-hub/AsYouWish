@@ -24,7 +24,7 @@ const handleOpenSignupModel = () => {
 
   
   return (
-    <div className={`${isOpenLoginModal ? "fixed min-h-screen w-screen z-[9999]" : "hidden"}`}>
+    <div className={`fixed top-0 ${isOpenLoginModal ? "min-h-screen w-screen z-[9999]" : "hidden"}`}>
     <div onClick={() => hideLoginModal(false)}
         className='bg-black/30 absolute w-full h-full'>
     </div>
