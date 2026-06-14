@@ -56,7 +56,7 @@ const handlePorductClick = () => {
   return (
     <>
     <div key={key}
-         className={`sm:h-[380px] h-[70vw] w-[100%] overflow-hidden sm:rounded-xl  shadow-xl hover:shadow-2xl hover:scale-[1.01] transition-all duration-500 cursor-pointer group ${className}`}>
+         className={`sm:h-[380px] h-[270px] w-[100%] overflow-hidden sm:rounded-xl sm:shadow-xl hover:shadow-2xl hover:scale-[1.01] transition-all duration-500 cursor-pointer group ${className}`}>
         <div className='h-[80%] w-full overflow-hidden relative'>
            <img onClick={handlePorductClick} src={Image} className='group-hover:scale-[1.08] transition-all duration-500'/>
            
@@ -72,8 +72,8 @@ const handlePorductClick = () => {
 
            {/* Add to cart button */}
             <button  onClick={handleAddToCart}
-                     className='bg-primary text-white flex gap-2 items-center justify-center lg:text-[16px] sm:text-[14px] text-[9px] w-full absolute group-hover:-mt-[40px] sm:-mt-[35px] -mt-[30px] lg:-mt-[6px]
-                               group-hover:h-[40px] lg:h-[0px] sm:h-[35px] h-[30px] cursor-pointer overflow-hidden transition-all duration-300'>
+                     className='bg-primary text-white sm:flex hidden gap-2 items-center justify-center lg:text-[16px] text-[14px] w-full absolute group-hover:-mt-[40px] sm:-mt-[35px] -mt-[30px] lg:-mt-[6px]
+                               group-hover:h-[40px] lg:h-[0px] h-[35px] cursor-pointer overflow-hidden transition-all duration-300'>
                 <FiShoppingCart />Add to cart 
             </button>
 
@@ -83,13 +83,13 @@ const handlePorductClick = () => {
 
             <div className='flex justify-between items-center h-full mx-[10px] flex'>
 
-            <h2 className='text-primary font-semibold leading-[15px] sm:text-[18px] text-[18px] flex flex-col'>
+            <h2 className='text-primary font-semibold leading-[15px] sm:text-[18px] text-[17px] flex flex-col'>
                 Rs. {price} 
-                <span className='line-through text-left text-[12.5px] tracking-widest text-gray-400 font-semibold ml-[6px]'>
+                <span className='line-through text-left sm:text-[12.5px] text-[10px] tracking-widest text-gray-400 font-semibold ml-[6px]'>
                     Rs. 464
                 </span>
             </h2>    
-             <span className='text-[11.5px] inline-block text-whit bg-[yellow] rounded-full px-[6px] py-[1px] ml-[6px]'>
+             <span className='sm:text-[11.5px] text-[8px] inline-block text-whit bg-[yellow] rounded-full px-[6px] py-[1px] ml-[6px]'>
                         50% OFF
             </span>
             </div>
