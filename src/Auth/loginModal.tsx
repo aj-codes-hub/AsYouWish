@@ -30,8 +30,8 @@ const handleOpenSignupModel = () => {
     </div>
 
 
-     <div className={`bg-white absolute left-1/2 -translate-y-1/2 -translate-x-1/2 py-[25px] px-[20px] 
-                       rounded-2xl sm:w-[360px] max-w-[360px] w-[95%] login-entry`}>
+     <div className={`bg-white absolute left-1/2 sm:-translate-y-1/2 -translate-x-1/2 py-[25px] px-[20px] 
+                       sm:rounded-2xl sm:w-[360px] sm:max-w-[360px] sm:w-[95%] w-full top-0 sm:top-1/2 login-entry`}>
 
                         
      <div  onClick={() => hideLoginModal(false)}
@@ -48,7 +48,7 @@ const handleOpenSignupModel = () => {
 
         <form action="">
           
-          <div className='mt-[20px] flex flex-col gap-3'>
+          <div className='sm:mt-[20px] mt-[50px] flex flex-col sm:gap-3 gap-5'>
           <Input type='email' 
                  value={email}
                  name='email'
@@ -68,7 +68,7 @@ const handleOpenSignupModel = () => {
          
           </div>
            
-        <div className='flex my-[12px]'>
+        <div className='flex sm:my-[12px] my-[16px]'>
             <input type="checkbox" className='cursor-pointer'/>
             <p className='ml-[5px] text-[14px]'>Remamber Me</p>
             <a href="#"
@@ -78,13 +78,13 @@ const handleOpenSignupModel = () => {
         </div>         
 
          <button type='submit' 
-                 className='mt-[8px] bg-primary w-full cursor-pointer rounded-full text-white font-semibold text-[14px] h-[40px]'>
+                 className='sm:mt-[8px] mt-[12px] bg-primary w-full cursor-pointer rounded-full text-white font-semibold text-[14px] h-[40px]'>
              LOGIN
          </button>
 
-         <div className='flex justify-between items-center my-[14px]'>
+         <div className='flex justify-between items-center sm:my-[14px] my-[18px]'>
     
-          <div className='border-b w-[32%] border-black/30'/>
+          <div className='border-b w-[32%] border-black/30'/> 
           <h2 className='text-[13px] text-black/70 font-bold'>
             OR LOGIN WITH
           </h2>

@@ -35,8 +35,8 @@ const handleOpenSignInModel = () => {
     </div>
 
 
-     <div className='bg-white absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 py-[25px] 
-                       rounded-2xl sm:w-[360px] max-w-[360px] w-[95%] signup-entry'>
+     <div className='bg-white absolute sm:top-1/2 top-0 left-1/2 sm:-translate-y-1/2 -translate-x-1/2 py-[25px] 
+                       sm:rounded-2xl sm:w-[360px] sm:max-w-[360px] sm:w-[95%] w-full signup-entry'>
      <div  onClick={() => hideSignUpModal(false)}
            className='absolute top-[0px] right-[0px] cursor-pointer text-black p-[15px]'>
       <RxCross1 />
