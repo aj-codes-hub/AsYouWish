@@ -4,7 +4,7 @@ import { Product } from '../../../data/productCard/product'
 
 const FeaturedCollection:React.FC = () => {
   return (
-    <div className='w-full bg-[#FFF8F5] py-[60px] mt-[600px] relative'>
+    <div className='w-full bg-[#FFF8F5] py-[60px] mt-[620px] sm:mt-0 relative'>
    
       <div className='w-full h-[120px] absolute top-[-70px] overflow-hidden sm:hidden'>
         <img src="/images/downBorder.png" className=''/>
