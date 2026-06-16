@@ -12,6 +12,7 @@ import { CiHeart } from "react-icons/ci";
 import { FiShoppingCart } from "react-icons/fi";
 import { LuSearch } from "react-icons/lu";
 import { CiMenuBurger } from "react-icons/ci";
+import { useWishlist } from '../pages/context/wishlistContext';
 
 
 
@@ -24,6 +25,7 @@ type NavbarProps = {
 const Navbar:React.FC<NavbarProps> = ({setIsMenuOpen,isOpenLogiModal}) => {
 
    const { totalItems } = useCart();  
+   const { totalWishlistItems } = useWishlist()
 
 const [isOpen, setIsOpen] = useState(false);
 
@@ -46,13 +48,14 @@ const OpenMenu = () => {
 
 
   return (
-    <div className='bg-white h-[65px] w-full justify-between fixed sm:top-0 bottom-0 z-[999] flex items-center shadow-sm sm:px-[15px] xl:px-[0]'>
+    <div className='bg-[#fdfdfd] h-[65px] w-full justify-between fixed sm:top-0 bottom-0 z-[999] flex items-center shadow-sm sm:px-[15px] xl:px-[0]'>
        <div className='max-w-[1100px] h-full mx-auto w-full justify-between sm:flex items-center hidden'>
      
-     <h1 onClick={() => window.location.pathname='/'}
-         className='text-primary font-semibold cursor-pointer'>
-       AS YOU WISH
-     </h1>
+     <div className='cursor-pointer md:h-[45px] md:w-[160px] h-[30px] w-[110px] relative'
+          onClick={() => window.location.pathname='/'}>
+     <img src='/images/Logo.png' alt='LOGO'
+          className='w-full h-full'/>
+     </div>     
 
      <nav className='text-[14px] gap-1 hidden md:flex'>
         {MenuList.map((item, index)=>(
@@ -77,11 +80,23 @@ const OpenMenu = () => {
        </button>
 
        <Link to={'/favurite-product'}
-             className={`p-[10px] rounded-full transform-all duration-300
+             className={`p-[10px] rounded-full transform-all duration-300 relative
                         ${window.location.pathname === '/favurite-product' ? 'bg-[#fef4f0]' : ''}`}>
            {window.location.pathname === '/favurite-product' 
              ? <IoHeart className='text-[19px] text-[#B76E79] '/> 
              : <FaRegHeart />}
+
+          
+      {totalWishlistItems > 0 && (
+
+        <div className='rounded-full w-[12px] h-[12px] flex items-center justify-center overflow-hidden bg-primary text-white absolute text-[9.5px] font-semibold top-[14%] right-[6%]'>
+          <h2 className=''>{totalWishlistItems}</h2>
+        </div>
+
+
+       )}
+
+
        </Link>
 
         <button  onClick={() =>  isOpenLogiModal(true)}
@@ -127,10 +142,20 @@ const OpenMenu = () => {
       <h2 className='text-[11px]'>menu</h2>
      </div>
 
-      <Link to="/cart" className={`flex flex-col items-center justify-center text-[26px] rounded-[30%] 
+      <Link to="/cart" className={`flex flex-col items-center justify-center text-[26px] rounded-[30%] relative
                               ${window.location.pathname === "/cart" ? 'm-1 bg-black text-white' : ''}`}>
       <PiShoppingCartSimpleThin />
       <h2 className='text-[11px]'>Cart</h2>
+       
+        {totalItems > 0 && (
+
+        <div className='rounded-full w-[13px] h-[13px] flex items-center justify-center overflow-hidden bg-primary text-white absolute text-[9.5px] font-semibold top-[15%] right-[26%]'>
+          <h2 className=''>{totalItems}</h2>
+        </div>
+
+
+       )}
+
      </Link>
 
       <Link to='/' className={`flex flex-col items-center justify-center text-[26px] rounded-[30%] 
@@ -139,10 +164,20 @@ const OpenMenu = () => {
       <h2 className='text-[11px]'>Home</h2>
      </Link>
 
-      <Link to={'/favurite-product'} className={`flex flex-col items-center justify-center text-[26px] rounded-[30%] 
+      <Link to={'/favurite-product'} className={`flex flex-col items-center justify-center text-[26px] rounded-[30%] relative
                                      ${window.location.pathname === "/favurite-product" ? 'm-1 bg-black text-white' : ''}`}>
       <CiHeart />
       <h2 className='text-[11px]'>Favurite</h2>
+     
+      {totalWishlistItems > 0 && (
+
+        <div className='rounded-full w-[13px] h-[13px] flex items-center justify-center overflow-hidden bg-primary text-white absolute text-[9.5px] font-semibold top-[15%] right-[26%]'>
+          <h2 className=''>{totalWishlistItems}</h2>
+        </div>
+
+
+       )}
+      
      </Link>
    
 

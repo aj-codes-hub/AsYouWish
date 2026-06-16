@@ -123,7 +123,7 @@ const handleOpenSignInModel = () => {
     
           <div className='border-b w-[32%] border-black/30'/>
           <h2 className='text-[13px] text-black/70 font-bold'>
-            OR LOGIN WITH
+            OR SIGN-UP WITH
           </h2>
           <div className='border-b w-[32%] border-black/30'/>
           

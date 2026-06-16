@@ -1,10 +1,11 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { FiShoppingCart } from "react-icons/fi";
 import { FaRegHeart } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../pages/context/cartContext';
 import { IoHeart } from "react-icons/io5";
 import { useWishlist } from '../pages/context/wishlistContext';
+import { FaStar } from "react-icons/fa";
 
 
 
@@ -22,6 +23,7 @@ const ProductCard:React.FC<ProductCardPrpos> = ({Image,price,className,key,id,ti
 
 
  const { addToWishlist , removeFromWishlist , isInWishlist } = useWishlist();   
+
 
 const liked = isInWishlist(id);
 
@@ -56,8 +58,8 @@ const handlePorductClick = () => {
   return (
     <>
     <div key={key}
-         className={`sm:h-[380px] h-[270px] w-[100%] overflow-hidden sm:rounded-xl sm:shadow-xl hover:shadow-2xl hover:scale-[1.01] transition-all duration-500 cursor-pointer group ${className}`}>
-        <div className='h-[80%] w-full overflow-hidden relative'>
+         className={`sm:h-[380px] h-[290px] w-[100%] overflow-hidden hover:rounded-xl hover:shadow-2xl hover:scale-[1.01] transition-all duration-500 cursor-pointer group ${className}`}>
+        <div className='h-[75%] w-full overflow-hidden relative'>
            <img onClick={handlePorductClick} src={Image} className='group-hover:scale-[1.08] transition-all duration-500'/>
            
            <div  onClick={handleWishClick}
@@ -67,8 +69,9 @@ const handlePorductClick = () => {
            </div>
 
            <button  onClick={handleAddToCart}
-                     className='rounded-r-full px-[10px] py-[8px] text-[10px] bg-white/60 absolute bottom-[10px] left-[0px] flex items-center justify-center'> 
-                <FiShoppingCart /> + 
+                     className='rounded-r-full px-[10px] gap-1 py-[6px] text-[12px] bg-white/60 absolute bottom-[10px] left-[0px] flex items-center justify-center sm:hidden'> 
+                <span className='text-[12px]'> Add to </span>
+                <FiShoppingCart />
             </button>
 
         </div>
@@ -81,16 +84,20 @@ const handlePorductClick = () => {
                                group-hover:h-[40px] lg:h-[0px] h-[35px] cursor-pointer overflow-hidden transition-all duration-300'>
                 <FiShoppingCart />Add to cart 
             </button>
+             
+             <h2 className='text-[12px] sm:text-[14px] tracking-wider leading-2 font-semibold sm:font-normal text-[#30303071] sm:mt-[6px] sm:ml-[12px]'>
+                Embroidered | Lawn
+             </h2>
 
-            <h2 className='sm:text-[14px] text-[9px] leading-0 mt-[10px] ml-[10px]'>
-                Modern Abaya Collection
+            <h2 className='sm:text-[14px] text-[11.6px] leading-0 mt-[12px] sm:mt-[18px] sm:ml-[12px]'>
+                    Unstitched 3 Piece
             </h2>
 
-            <div className='flex justify-between items-center h-full mx-[10px] flex'>
+            <div className='flex justify-between items-center h-full flex sm:mx-[12px]'>
 
             <h2 className='text-primary font-semibold leading-[15px] sm:text-[18px] text-[17px] flex flex-col'>
-                Rs. {price} 
-                <span className='line-through text-left sm:text-[12.5px] text-[10px] tracking-widest text-gray-400 font-semibold ml-[6px]'>
+                PKR. {price} 
+                <span className='line-through text-left sm:text-[12.5px] text-[10px] tracking-[2px] text-gray-400 font-semibold ml-[6px]'>
                     Rs. 464
                 </span>
             </h2>    

@@ -2,16 +2,19 @@ import React from 'react'
 import { FaArrowRight } from "react-icons/fa";
 
 
+
+
+
 const HeroSection:React.FC = () => {
   return (
-    <div className='sm:h-[600px] h-[620px] w-full fixed sm:relative z-[-20] top-0'> 
+    <div className='sm:h-[600px] h-[620px] w-full fixed sm:relative z-[-20] sm:z-[1] top-0'> 
          
       <img src="./images/hero-image.jpg"
            className='absolute z-10 w-full h-full'/>   
       
       <div className='flex justify-center items-center w-full h-full sm:text-black text-white sm:bg-white/60 bg-white/20 absolute z-20 px-[30px]'>
 
-      <div className='text-center sm:max-w-[500px] sm:bg-white/2 bg-black/10 backdrop-blur-[2px] p-4 w-full max-w-[340px]'>
+      <div className='text-center sm:max-w-[500px] sm:bg-white/2 bg-black/10 backdrop-blur-[1.5px] p-4 w-full max-w-[340px]'>
        
        <h1 className='font-[500] text-[61px]'> 
          Elevate Your Style

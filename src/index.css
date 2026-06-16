@@ -1,8 +1,17 @@
 @import "tailwindcss";
+@import "swiper/css";
+@import "swiper/css/navigation";
+@import "swiper/css/pagination";
+@import "swiper/css/scrollbar";
 
 h1{
   font-family: 'Times New Roman', Times, serif;
 }
+
+.swiper-pagination-bullet-active {
+   background-color: #B76E79;   
+}
+
 
 .text-primary{
   color: #B76E79;
@@ -17,7 +26,9 @@ h1{
 }
 
 
-
+.logo-shadow{
+  box-shadow: 0 0px 60px 2px rgba(0, 0, 0, 0.724);
+}
 
 .addToCartAnimation {
    animation: CartAnimation 1s ease-in-out;
@@ -92,7 +103,7 @@ h1{
 }
 
 
-@media (max-width: 466px) {
+@media (max-width: 640px) {
 
   .addToCartAnimation {
    animation: CartAnimation 1s ease-in-out;
@@ -124,8 +135,8 @@ h1{
   100%{
     padding: 0px;
     font-size: 0px;
-    top: 6%;
-    left: 70%;
+    top: 94%;
+    left: 30%;
     transform: translate(-50%, -50%);
   }
 }
@@ -160,7 +171,7 @@ h1{
   100%{
     padding: 0px;
     font-size: 0px;
-    top: 6%;
+    top: 94%;
     left: 65%;
     transform: translate(-50%, -50%);
   }
@@ -170,7 +181,7 @@ h1{
 
 
 
-@media (min-width: 467px) and (max-width: 767px) {
+@media (min-width: 640px) and (max-width: 768px) {
 
   .addToCartAnimation {
    animation: CartAnimation 1s ease-in-out;
@@ -239,7 +250,7 @@ h1{
     padding: 0px;
     font-size: 0px;
     top: 8%;
-    left: 60%;
+    left: 55%;
     transform: translate(-50%, -50%);
   }
 }

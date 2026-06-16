@@ -1,7 +1,15 @@
-import React from 'react'
+import React, { useRef } from 'react' 
 import ProductCard from '../../../components/productCard'
+import { Swiper, SwiperSlide } from 'swiper/react'
+import { Pagination , Navigation , Autoplay } from 'swiper/modules'
+import { Product } from '../../../data/productCard/product'
+import { FaAngleLeft , FaAngleRight } from "react-icons/fa6";
 
 const NewArrivals:React.FC = () => {
+  
+     const swiperRef = useRef<any>(null);
+
+
   return (
      <div className='max-w-[1100px] mx-auto w-full py-[60px] bg-white'>
         
@@ -23,15 +31,71 @@ const NewArrivals:React.FC = () => {
 
         </div>
         
+       <div className='mt-[40px] sm:px-[30px] px-[12px] relative'>
+      
+       <Swiper
+        onSwiper={(swiper) => (swiperRef.current = swiper)}
+        modules={[Navigation, Pagination, Autoplay]}  
+        spaceBetween={20}                              
+            
+        breakpoints={{
+            0: {
+                slidesPerView: 2,
+                spaceBetween: 10,
+            },
+            480: {
+                slidesPerView: 2,
+                spaceBetween: 15,
+            },
+            640: {
+                slidesPerView: 2,
+                spaceBetween: 20,
+            },
+            768: {
+                slidesPerView: 3,
+                spaceBetween: 25,
+            },
+            1024: {
+                slidesPerView: 4,
+                spaceBetween: 30,
+            },
+            1280: {
+                slidesPerView: 4,
+                spaceBetween: 35,
+            },
+            }}                                                          
+        pagination={{ clickable: true }}              
+        autoplay={{ delay: 3000 }}                    
+        loop={true}                                  
+        className="mySwiper sm:h-[430px] h-[330px] mt-[5px]"
+    
+      >
        
-         
+       {Product.map((item,index)=>(
+        <SwiperSlide key={index}>
+            <ProductCard id={item.id}
+                         Image={item.mainImage}
+                         price={item.price}
+                         title={item.title}
+                         />
+        </SwiperSlide>
+       ))}
+        
 
-        <div className='grid xl:grid-cols-4 md:grid-cols-3 grid-cols-2 justify-center items-center sm:gap-6 gap-4 mt-[40px] sm:px-[30px] px-[12px]'>
-            <ProductCard id={4444} Image='./images/golden-dress.jpg' price={2399}/>
-            <ProductCard id={5555} Image='./images/yellow-dress.jpg' price={3999}/>
-            <ProductCard id={6666} Image='./images/blue-dress.jpg' price={6999}/>
-            <ProductCard id={7777} Image='./images/white-dress.jpg' price={1599}/>
-        </div>
+      </Swiper>
+
+      <div className='absolute xl:w-[105%] w-[100%] left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 md:flex justify-between items-center text-[22px] hidden'>  
+        <button onClick={() => swiperRef.current?.slideNext()}
+                className='p-[5px] cursor-pointer hover:scale-[1.2] transform duration-300'>
+            <FaAngleLeft />
+        </button>
+         <button onClick={() => swiperRef.current?.slidePrev()}
+                className='p-[5px] cursor-pointer hover:scale-[1.2] transform duration-300'>
+            <FaAngleRight />
+        </button>
+      </div>
+
+      </div>
         
     </div>
   )

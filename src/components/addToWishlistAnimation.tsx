@@ -10,7 +10,7 @@ const AddToWishlistAnimation:React.FC<AddToWishlistAnimationProps> = ({runAninat
 
 
   return (
-    <div className='h-screen w-screen flex fixed z-[99] pointer-events-none'>
+    <div className='h-screen w-screen flex fixed z-[9999] pointer-events-none top-0 left-0'>
         <div className={`bg-transparent text-primary flex items-center justify-center absolute 
                          ${runAnination ? 'addToWsihlistAnimation': 'text-[0px]'}`}>
             <IoHeart />

@@ -37,14 +37,17 @@ const addToWishlist = (product: any) => {
         price: product.price,
         mainImage: product.mainImage,
       }
-      setWishlist([...wishlist,newItem]);
-
+      setTimeout(()=>{
+       setWishlist([...wishlist,newItem]);
+       },1000);
       setIsAnimatingwishlist(true);
       setTimeout(() => {
         setIsAnimatingwishlist(false);
       },1400);
+  
     }
 };
+
 
 const isInWishlist = (id: number) => {
      return wishlist.some(item => item.id === id);

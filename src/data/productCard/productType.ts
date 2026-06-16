@@ -12,7 +12,7 @@ export type ReviewType = {
 
 export type ProductType = {
     id: number;
-    Event: string;
+    Event?: string;
     title: string;
     details: string;
     price: number;

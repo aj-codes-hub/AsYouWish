@@ -171,4 +171,131 @@ export const Product: ProductType[] = [
        ]
     },
 
+
+     {
+       id: 5,
+       title: "Product name in detail",
+       details: "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Placeat nisi quam quasi nesciunt incidunt voluptates illo voluptatibus. Ab earum amet, velit incidunt repellat, iure sapiente temporibus unde nulla excepturi sit.",
+       price: 999,
+       Rating: 5,
+       discount: 50,
+       mainImage: "/images/golden-dress.jpg",
+       moreImages:[
+        "/images/golden-dress.jpg",
+        "/images/golden-dress.jpg",
+        "/images/golden-dress.jpg",
+       ],
+       review: [
+           {
+            id: 1,
+            customerName: "Sara",
+            message: "customer says Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptas inventore, id officia dolorem reprehenderit incidunt nobis, eum quasi, quos explicabo culpa. Facere quidem alias placeat atque dignissimos aliquam nisi et.",
+            Rating: 5,
+            mainImage: "/images/golden-dress.jpg",
+            moreImages:[
+                "/images/golden-dress.jpg",
+                "/images/golden-dress.jpg",
+                "/images/golden-dress.jpg",
+            ],
+           },
+            {
+            id: 2,
+            customerName: "johan",
+            message: "customer says Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptas inventore, id officia dolorem reprehenderit incidunt nobis, eum quasi, quos explicabo culpa. Facere quidem alias placeat atque dignissimos aliquam nisi et.",
+            Rating: 5,
+            mainImage: "/images/golden-dress.jpg",
+            moreImages:[
+                "/images/golden-dress.jpg",
+                "/images/golden-dress.jpg",
+                "/images/golden-dress.jpg",
+            ],
+           },
+       ]
+    },
+
+
+     {
+       id: 6,
+       title: "Product name in detail",
+       details: "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Placeat nisi quam quasi nesciunt incidunt voluptates illo voluptatibus. Ab earum amet, velit incidunt repellat, iure sapiente temporibus unde nulla excepturi sit.",
+       price: 999,
+       Rating: 5,
+       discount: 50,
+       mainImage: "/images/golden-dress.jpg",
+       moreImages:[
+        "/images/golden-dress.jpg",
+        "/images/golden-dress.jpg",
+        "/images/golden-dress.jpg",
+       ],
+       review: [
+           {
+            id: 1,
+            customerName: "Sara",
+            message: "customer says Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptas inventore, id officia dolorem reprehenderit incidunt nobis, eum quasi, quos explicabo culpa. Facere quidem alias placeat atque dignissimos aliquam nisi et.",
+            Rating: 5,
+            mainImage: "/images/golden-dress.jpg",
+            moreImages:[
+                "/images/golden-dress.jpg",
+                "/images/golden-dress.jpg",
+                "/images/golden-dress.jpg",
+            ],
+           },
+            {
+            id: 2,
+            customerName: "johan",
+            message: "customer says Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptas inventore, id officia dolorem reprehenderit incidunt nobis, eum quasi, quos explicabo culpa. Facere quidem alias placeat atque dignissimos aliquam nisi et.",
+            Rating: 5,
+            mainImage: "/images/golden-dress.jpg",
+            moreImages:[
+                "/images/golden-dress.jpg",
+                "/images/golden-dress.jpg",
+                "/images/golden-dress.jpg",
+            ],
+           },
+       ]
+    },
+
+     {
+       id: 7,
+       title: "Product name in detail",
+       details: "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Placeat nisi quam quasi nesciunt incidunt voluptates illo voluptatibus. Ab earum amet, velit incidunt repellat, iure sapiente temporibus unde nulla excepturi sit.",
+       price: 999,
+       Rating: 5,
+       discount: 50,
+       mainImage: "/images/golden-dress.jpg",
+       moreImages:[
+        "/images/golden-dress.jpg",
+        "/images/golden-dress.jpg",
+        "/images/golden-dress.jpg",
+       ],
+       review: [
+           {
+            id: 1,
+            customerName: "Sara",
+            message: "customer says Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptas inventore, id officia dolorem reprehenderit incidunt nobis, eum quasi, quos explicabo culpa. Facere quidem alias placeat atque dignissimos aliquam nisi et.",
+            Rating: 5,
+            mainImage: "/images/golden-dress.jpg",
+            moreImages:[
+                "/images/golden-dress.jpg",
+                "/images/golden-dress.jpg",
+                "/images/golden-dress.jpg",
+            ],
+           },
+            {
+            id: 2,
+            customerName: "johan",
+            message: "customer says Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptas inventore, id officia dolorem reprehenderit incidunt nobis, eum quasi, quos explicabo culpa. Facere quidem alias placeat atque dignissimos aliquam nisi et.",
+            Rating: 5,
+            mainImage: "/images/golden-dress.jpg",
+            moreImages:[
+                "/images/golden-dress.jpg",
+                "/images/golden-dress.jpg",
+                "/images/golden-dress.jpg",
+            ],
+           },
+       ]
+    },
+
+    
+
 ]

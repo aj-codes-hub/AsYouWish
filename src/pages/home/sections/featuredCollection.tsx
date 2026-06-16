@@ -3,6 +3,11 @@ import ProductCard from '../../../components/productCard'
 import { Product } from '../../../data/productCard/product'
 
 const FeaturedCollection:React.FC = () => {
+
+  
+  const FutureCollection = Product.filter(Product => Product.Event === 'FeaturedCollection');
+
+
   return (
     <div className='w-full bg-[#FFF8F5] py-[60px] mt-[620px] sm:mt-0 relative'>
    
@@ -21,10 +26,9 @@ const FeaturedCollection:React.FC = () => {
         </p>
 
         <div className='grid xl:grid-cols-4 md:grid-cols-3 grid-cols-2 justify-center items-center sm:gap-6 gap-4 mt-[40px] sm:px-[30px] px-[10px]'>
-            {Product.map((item)=>(
+            {FutureCollection.map((item)=>(
 
-            <ProductCard key={item.id}
-                         id={item.id}
+            <ProductCard id={item.id}
                          Image={item.mainImage}
                          price={item.price}
                          title={item.title}
