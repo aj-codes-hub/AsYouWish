@@ -1,11 +1,10 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { FiShoppingCart } from "react-icons/fi";
 import { FaRegHeart } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../pages/context/cartContext';
 import { IoHeart } from "react-icons/io5";
 import { useWishlist } from '../pages/context/wishlistContext';
-import { FaStar } from "react-icons/fa";
 
 
 
@@ -15,11 +14,10 @@ interface ProductCardPrpos {
     Image?: string;
     price?: number;
     className?:string;
-    key?:number;
     title?:string;
 }
 
-const ProductCard:React.FC<ProductCardPrpos> = ({Image,price,className,key,id,title}) => {
+const ProductCard:React.FC<ProductCardPrpos> = ({Image,price,className,id,title}) => {
 
 
  const { addToWishlist , removeFromWishlist , isInWishlist } = useWishlist();   
@@ -57,7 +55,7 @@ const handlePorductClick = () => {
 
   return (
     <>
-    <div key={key}
+    <div
          className={`sm:h-[380px] h-[290px] w-[100%] overflow-hidden hover:rounded-xl hover:shadow-2xl hover:scale-[1.01] transition-all duration-500 cursor-pointer group ${className}`}>
         <div className='h-[75%] w-full overflow-hidden relative'>
            <img onClick={handlePorductClick} src={Image} className='group-hover:scale-[1.08] transition-all duration-500'/>
