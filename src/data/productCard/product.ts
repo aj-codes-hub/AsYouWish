@@ -11,9 +11,9 @@ export const Product: ProductType[] = [
        discount: 50,
        mainImage: "/images/blue-dress.jpg",
        moreImages:[
-        "/images/blue-dress.jpg",
-        "/images/blue-dress.jpg",
-        "/images/blue-dress.jpg",
+        "/images/yellow-dress.jpg",
+        "/images/white-dress.jpg",
+        "/images/golden-dress.jpg",
        ],
        review: [
            {

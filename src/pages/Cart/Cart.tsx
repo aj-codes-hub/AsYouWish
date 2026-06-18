@@ -1,11 +1,26 @@
 import React from 'react'
 import { useCart } from '../context/cartContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 
 const CartPage:React.FC = () => {
 
-const {cart, removeFromCart, updateQuantity, totalItems, totalPrice } = useCart();
+const {cart, removeFromCart, updateQuantity, totalItems, totalPrice, clearBuyNow } = useCart();
+
+const navigate = useNavigate();
+
+  const handleCheckout = () => {
+    if (cart.length === 0) {
+      alert('Your cart is empty!');
+      return;
+    }
+    
+    // ✅ IMPORTANT: Cart se checkout kar rahe hain to buyNowProduct clear karo
+    clearBuyNow();  // <- YEH LINE ADD KARO
+    
+    navigate('/checkout');
+  };
+
 
 if(cart.length === 0){
   return(
@@ -79,7 +94,7 @@ if(cart.length === 0){
         
         {/* Right side - Order summary */}
         <div className='lg:w-1/3'>
-          <div className='bg-gray-50 p-6 rounded-lg'>
+          <div className='bg-gray-50 p-6 rounded-lg shadow sticky top-[80px]'>
             <h2 className='text-xl font-bold mb-4'>Order Summary</h2>
             
             <div className='flex justify-between mb-2'>
@@ -92,7 +107,8 @@ if(cart.length === 0){
               <span className='text-primary font-bold'>Rs. {totalPrice}</span>
             </div>
             
-            <button className='bg-primary text-white w-full py-3 rounded-lg'>
+            <button  onClick={handleCheckout}
+                     className='bg-primary text-white w-full py-3 rounded-lg'>
               Proceed to Checkout
             </button>
           </div>

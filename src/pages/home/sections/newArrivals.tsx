@@ -61,7 +61,7 @@ const NewArrivals:React.FC = () => {
             },
             1280: {
                 slidesPerView: 4,
-                spaceBetween: 35,
+                spaceBetween: 20,
             },
             }}                                                          
         pagination={{ clickable: true }}              

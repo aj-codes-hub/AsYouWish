@@ -1,16 +1,15 @@
-import React, { createContext, useContext, useState } from 'react'
+// context/wishlistContext.tsx
+import React, { createContext, useState, useContext, useEffect } from 'react';
 
-
-
-interface wishlistItemType {
+interface WishlistItemType {
     id: number;
     title: string;
     price: number;
     mainImage: string;
 }
 
-interface wishlistContextType {
-    wishlist: wishlistItemType[];
+interface WishlistContextType {
+    wishlist: WishlistItemType[];
     addToWishlist: (product: any) => void;
     removeFromWishlist: (id: number) => void;
     isInWishlist: (id: number) => boolean;
@@ -18,60 +17,71 @@ interface wishlistContextType {
     isAnimatingwishlist: boolean;
 }
 
+const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
 
-const wishlistContext = createContext<wishlistContextType | undefined>(undefined);
+export const WishlistProvider = ({ children }: { children: React.ReactNode }) => {
+    
+    // ✅ LocalStorage se wishlist load karo
+    const [wishlist, setWishlist] = useState<WishlistItemType[]>(() => {
+        const savedWishlist = localStorage.getItem('wishlist');
+        return savedWishlist ? JSON.parse(savedWishlist) : [];
+    });
 
-export const WishlistProvider = ({children} : {children : React.ReactNode}) => {
+    const [isAnimatingwishlist, setIsAnimatingWishlist] = useState(false);
 
-const [wishlist, setWishlist] = useState<wishlistItemType[]>([]);
-const [isAnimatingwishlist, setIsAnimatingwishlist] = useState(false);
+    // ✅ Jab wishlist change ho localStorage update karo
+    useEffect(() => {
+        localStorage.setItem('wishlist', JSON.stringify(wishlist));
+    }, [wishlist]);
 
+    const addToWishlist = (product: any) => {
+        setIsAnimatingWishlist(true);
+        
+        const exists = wishlist.find(item => item.id === product.id);
+        
+        if (!exists) {
+            const newItem = {
+                id: product.id,
+                title: product.title,
+                price: product.price,
+                mainImage: product.mainImage
+            };
+            setWishlist([...wishlist, newItem]);
+        }
 
-const addToWishlist = (product: any) => {
+        setTimeout(() => {
+            setIsAnimatingWishlist(false);
+        }, 1000);
+    };
 
-    const exists = wishlist.find(item => item.id === product.id);
-    if(!exists){
-      const newItem = {
-        id: product.id,
-        title: product.title,
-        price: product.price,
-        mainImage: product.mainImage,
-      }
-      setTimeout(()=>{
-       setWishlist([...wishlist,newItem]);
-       },1000);
-      setIsAnimatingwishlist(true);
-      setTimeout(() => {
-        setIsAnimatingwishlist(false);
-      },1400);
-  
-    }
+    const removeFromWishlist = (id: number) => {
+        setWishlist(wishlist.filter(item => item.id !== id));
+    };
+
+    const isInWishlist = (id: number) => {
+        return wishlist.some(item => item.id === id);
+    };
+
+    const totalWishlistItems = wishlist.length;
+
+    return (
+        <WishlistContext.Provider value={{
+            wishlist,
+            addToWishlist,
+            removeFromWishlist,
+            isInWishlist,
+            totalWishlistItems,
+            isAnimatingwishlist
+        }}>
+            {children}
+        </WishlistContext.Provider>
+    );
 };
 
-
-const isInWishlist = (id: number) => {
-     return wishlist.some(item => item.id === id);
-}
-
-const removeFromWishlist = (id: number) => {
-    setWishlist(wishlist.filter(item => item.id !== id));
-}
-
-const totalWishlistItems = wishlist.length;
-
-
-return (
-     <wishlistContext.Provider value={{wishlist,totalWishlistItems,removeFromWishlist,addToWishlist,isInWishlist,isAnimatingwishlist}}>
-        {children}
-     </wishlistContext.Provider>
-);
-
-}
-
 export const useWishlist = () => {
-    const context = useContext(wishlistContext);
-    if(!context){
-     throw new Error('useWishlist must be used within WishlistProvider')
+    const context = useContext(WishlistContext);
+    if (!context) {
+        throw new Error('useWishlist must be used within WishlistProvider');
     }
     return context;
 };

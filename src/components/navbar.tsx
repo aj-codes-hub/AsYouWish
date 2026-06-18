@@ -3,7 +3,7 @@ import { CiSearch } from "react-icons/ci";
 import { FaRegHeart } from "react-icons/fa";
 import { PiShoppingCartSimpleThin } from "react-icons/pi";
 import { LuMenu } from "react-icons/lu";
-import { useLocation, Link } from 'react-router-dom';
+import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../pages/context/cartContext';
 import { IoHeart } from "react-icons/io5";
 import { IoPersonOutline } from "react-icons/io5";
@@ -13,6 +13,7 @@ import { FiShoppingCart } from "react-icons/fi";
 import { LuSearch } from "react-icons/lu";
 import { CiMenuBurger } from "react-icons/ci";
 import { useWishlist } from '../pages/context/wishlistContext';
+import { useAuth } from '../Auth/authContext';
 
 
 
@@ -24,16 +25,27 @@ type NavbarProps = {
 
 const Navbar:React.FC<NavbarProps> = ({setIsMenuOpen,isOpenLogiModal}) => {
 
+   const { isLoggedIn } = useAuth();
    const { totalItems } = useCart();  
    const { totalWishlistItems } = useWishlist()
+   const navigation = useNavigate();
 
 const [isOpen, setIsOpen] = useState(false);
 
 
 const OpenMenu = () => {
-  setIsMenuOpen(true);
-  setIsOpen(!isOpen);
+ 
+    setIsMenuOpen(true);
+    setIsOpen(!isOpen);
+}
 
+const hangleLoginModalOpen = () => {
+  if(isLoggedIn){
+     navigation('/Profile');
+  }
+  else{
+    isOpenLogiModal(true);
+  }
 }
 
   const Location = useLocation();
@@ -99,7 +111,7 @@ const OpenMenu = () => {
 
        </Link>
 
-        <button  onClick={() =>  isOpenLogiModal(true)}
+        <button  onClick={hangleLoginModalOpen}
                  className='p-[10px] rounded-full text-[20px] cursor-pointer'>
            <IoPersonOutline />
        </button>
@@ -181,7 +193,8 @@ const OpenMenu = () => {
      </Link>
    
 
-     <div onClick={() =>  isOpenLogiModal(true)} className='flex flex-col items-center justify-center text-[26px]'>
+     <div onClick={hangleLoginModalOpen} className={`flex flex-col items-center justify-center text-[26px] rounded-[30%] 
+                                         ${window.location.pathname === "/Profile" ? 'm-1 bg-black text-white' : ''}`}>
       <IoPersonOutline />
       <h2 className='text-[11px]'>Account</h2>
      </div>

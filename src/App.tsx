@@ -14,6 +14,10 @@ import LikeProduct from "./pages/Liked/likeProduct";
 import AddToWishlistAnimation from "./components/addToWishlistAnimation";
 import LoginModal from "./Auth/loginModal";
 import SignupModal from "./Auth/signupModal";
+import OrderSuccessPage from "./pages/OrderSuccessPage";
+import CheckoutPage from "./pages/CheckoutPage";
+import { AuthProvider } from "./Auth/authContext";
+import UserProfilePage from "./pages/UserProfile/UserProfilePage";
 
 function AppContent() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -34,9 +38,12 @@ function AppContent() {
         <MobileMenu isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/profile" element={<UserProfilePage />} /> 
           <Route path="/product-detail/:id" element={<ProductDetail />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/favurite-product" element={<LikeProduct />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/order-success" element={<OrderSuccessPage />} />
         </Routes>
         <Footer />
       </BrowserRouter>
@@ -46,11 +53,13 @@ function AppContent() {
 
 function App() {
   return (
+    <AuthProvider>
     <WishlistProvider>
     <CartProvider>
       <AppContent />
     </CartProvider>
     </WishlistProvider>
+    </AuthProvider>
   );
 }
 

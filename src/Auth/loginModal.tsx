@@ -3,6 +3,8 @@ import Input from '../components/input'
 import { FcGoogle } from "react-icons/fc";
 import { FaFacebook } from "react-icons/fa";
 import { RxCross1 } from "react-icons/rx";
+import { useAuth } from './authContext';
+import { useNavigate } from 'react-router-dom';
 
 
 interface LoginProps {
@@ -14,14 +16,24 @@ interface LoginProps {
 
 const LoginModal:React.FC<LoginProps> = ({hideLoginModal,isOpenLoginModal,showSignUpModal}) => {
    
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
  
 const handleOpenSignupModel = () => {
       hideLoginModal(false);
       showSignUpModal(true);
 }
 
+    const handleLogin = (e: React.FormEvent) => {
+        e.preventDefault();
+        const success = login(email, password);
+        if (success) {
+            hideLoginModal(false);
+            navigate('/Profile')
+        }
+    };
   
   return (
     <div className={`fixed top-0 ${isOpenLoginModal ? "min-h-screen w-screen z-[9999]" : "hidden"}`}>
@@ -77,7 +89,8 @@ const handleOpenSignupModel = () => {
             </a>
         </div>         
 
-         <button type='submit' 
+         <button onClick={handleLogin}
+                 type='submit' 
                  className='sm:mt-[8px] mt-[12px] bg-primary w-full cursor-pointer rounded-full text-white font-semibold text-[14px] h-[40px]'>
              LOGIN
          </button>

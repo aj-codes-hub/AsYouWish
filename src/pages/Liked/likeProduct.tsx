@@ -16,7 +16,7 @@ const LikeProduct:React.FC = () => {
 
   if (wishlist.length === 0) {
     return (
-      <div className='text-center py-20 pt-[65px]'>
+      <div className='text-center py-20 pt-[65px] h-screen flex flex-col items-center justify-center'>
         <h1 className='text-2xl font-bold mb-4'>Your Wishlist is Empty 💔</h1>
         <p className='text-gray-500 mb-6'>Save your favorite items here!</p>
         <Link to='/' className='bg-primary text-white px-6 py-2 rounded-lg'>

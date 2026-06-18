@@ -1,0 +1,594 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useCart } from './context/cartContext';
+import { useAuth } from '../Auth/authContext';
+import { 
+  FaUser, 
+  FaEnvelope, 
+  FaPhone, 
+  FaMapMarkerAlt, 
+  FaBuilding,
+  FaHome,
+  FaMapPin,
+  FaTruck,
+  FaShieldAlt,
+  FaUndo,
+  FaCreditCard,
+  FaMoneyBillWave,
+  FaMobileAlt,
+  FaCheckCircle,
+  FaPlus,
+  FaEdit
+} from 'react-icons/fa';
+import { FiShoppingCart, FiClock } from 'react-icons/fi';
+
+interface AddressType {
+  id: number;
+  label: string;
+  address: string;
+  city: string;
+  zipCode: string;
+  isDefault: boolean;
+}
+
+const CheckoutPage = () => {
+  const navigate = useNavigate();
+  const { user, isLoggedIn } = useAuth();
+  const { 
+    cart, 
+    totalPrice, 
+    buyNowProduct, 
+    clearBuyNow, 
+    clearCart,
+    totalItems
+  } = useCart();
+
+  // Get saved addresses from localStorage
+  const [savedAddresses, setSavedAddresses] = useState<AddressType[]>(() => {
+    const addresses = localStorage.getItem('userAddresses');
+    return addresses ? JSON.parse(addresses) : [];
+  });
+
+  // Form state
+  const [formData, setFormData] = useState({
+    name: user?.name || '',
+    email: user?.email || '',
+    phone: user?.phone || '',
+    address: '',
+    city: '',
+    zipCode: '',
+    paymentMethod: 'cod',
+  });
+
+  // Selected address type: 'saved' or 'new'
+  const [addressType, setAddressType] = useState<'saved' | 'new'>(
+    savedAddresses.length > 0 ? 'saved' : 'new'
+  );
+  const [selectedAddressId, setSelectedAddressId] = useState<number | null>(
+    savedAddresses.find(addr => addr.isDefault)?.id || null
+  );
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showNewAddressForm, setShowNewAddressForm] = useState(false);
+
+  // Auto-fill form when user is logged in
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        name: user.name || '',
+        email: user.email || '',
+        phone: user.phone || '',
+      }));
+    }
+  }, [user]);
+
+  // Auto-fill address when saved address is selected
+  useEffect(() => {
+    if (addressType === 'saved' && selectedAddressId) {
+      const selected = savedAddresses.find(addr => addr.id === selectedAddressId);
+      if (selected) {
+        setFormData(prev => ({
+          ...prev,
+          address: selected.address,
+          city: selected.city,
+          zipCode: selected.zipCode,
+        }));
+      }
+    }
+  }, [selectedAddressId, addressType, savedAddresses]);
+
+  const isBuyNow = buyNowProduct !== null;
+  const checkoutProducts = isBuyNow ? [buyNowProduct] : cart;
+  const checkoutTotal = isBuyNow 
+    ? buyNowProduct.price * buyNowProduct.quantity 
+    : totalPrice;
+
+  if (checkoutProducts.length === 0 || !checkoutProducts[0]) {
+    navigate('/');
+    return null;
+  }
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleAddressTypeChange = (type: 'saved' | 'new') => {
+    setAddressType(type);
+    if (type === 'new') {
+      setFormData(prev => ({
+        ...prev,
+        address: '',
+        city: '',
+        zipCode: '',
+      }));
+    } else if (type === 'saved' && selectedAddressId) {
+      const selected = savedAddresses.find(addr => addr.id === selectedAddressId);
+      if (selected) {
+        setFormData(prev => ({
+          ...prev,
+          address: selected.address,
+          city: selected.city,
+          zipCode: selected.zipCode,
+        }));
+      }
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    setTimeout(() => {
+      const newOrder = {
+        id: '#' + Date.now().toString().slice(-6),
+        date: new Date().toLocaleDateString('en-US', { 
+          day: '2-digit', 
+          month: 'short', 
+          year: 'numeric' 
+        }),
+        total: checkoutTotal + 200,
+        items: checkoutProducts.length,
+        status: 'processing',
+        products: checkoutProducts.map((item: any) => ({
+          id: item.id,
+          title: item.title,
+          price: item.price,
+          quantity: item.quantity || 1,
+          mainImage: item.mainImage
+        })),
+        shippingAddress: `${formData.address}, ${formData.city}`,
+        paymentMethod: formData.paymentMethod,
+        customerName: formData.name,
+        customerEmail: formData.email,
+        customerPhone: formData.phone,
+      };
+
+      const existingOrders = JSON.parse(localStorage.getItem('userOrders') || '[]');
+      existingOrders.unshift(newOrder);
+      localStorage.setItem('userOrders', JSON.stringify(existingOrders));
+
+      if (isBuyNow) {
+        clearBuyNow();
+      } else {
+        clearCart();
+      }
+      
+      navigate('/order-success');
+    }, 2000);
+  };
+
+  const getLabelIcon = (label: string) => {
+    switch (label) {
+      case 'Home': return <FaHome className="text-[#B76E79]" />;
+      case 'Office': return <FaBuilding className="text-[#B76E79]" />;
+      default: return <FaMapPin className="text-[#B76E79]" />;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 sm:py-12">
+      <div className="container mx-auto px-4 max-w-6xl mt-[65px]">
+        
+        {/* Page Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-800">
+            {isBuyNow ? 'Buy Now' : 'Checkout'}
+          </h1>
+          <p className="text-gray-500 mt-1">
+            {isBuyNow ? 'Complete your purchase' : 'Review and confirm your order'}
+          </p>
+        </div>
+
+        <div className="flex flex-col lg:flex-row gap-8">
+          
+          {/* ===== LEFT SIDE - FORM ===== */}
+          <div className="lg:w-2/3">
+            <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-gray-100">
+              
+              {/* Order Summary - Mobile */}
+              <div className="lg:hidden mb-6">
+                <h3 className="text-lg font-bold text-gray-800 mb-4">Order Summary</h3>
+                <div className="space-y-3 max-h-48 overflow-y-auto">
+                  {checkoutProducts.map((item: any) => (
+                    <div key={item.id} className="flex items-center gap-3 bg-gray-50 p-3 rounded-xl">
+                      <img 
+                        src={item.mainImage} 
+                        alt={item.title}
+                        className="w-14 h-14 object-cover rounded-lg"
+                      />
+                      <div className="flex-1">
+                        <p className="font-medium text-sm text-gray-800 line-clamp-1">{item.title}</p>
+                        <p className="text-[#B76E79] font-bold">Rs. {item.price}</p>
+                        {!isBuyNow && (
+                          <p className="text-xs text-gray-400">Qty: {item.quantity}</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex justify-between font-bold text-lg border-t pt-3 mt-3">
+                  <span className="text-gray-600">Total</span>
+                  <span className="text-[#B76E79]">Rs. {checkoutTotal + 200}</span>
+                </div>
+              </div>
+
+              {/* ===== CUSTOMER INFO ===== */}
+              <div className="mb-8">
+                <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2 mb-4">
+                  <span className="w-8 h-8 bg-[#B76E79]/10 rounded-lg flex items-center justify-center">
+                    <FaUser className="text-[#B76E79] text-sm" />
+                  </span>
+                  Customer Information
+                </h3>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                      Full Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      required
+                      value={formData.name}
+                      onChange={handleChange}
+                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#B76E79] focus:ring-2 focus:ring-[#B76E79]/20 transition"
+                      placeholder="Enter your name"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                      Email <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      required
+                      value={formData.email}
+                      onChange={handleChange}
+                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#B76E79] focus:ring-2 focus:ring-[#B76E79]/20 transition"
+                      placeholder="your@email.com"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                      Phone Number <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      required
+                      value={formData.phone}
+                      onChange={handleChange}
+                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#B76E79] focus:ring-2 focus:ring-[#B76E79]/20 transition"
+                      placeholder="03XX-XXXXXXX"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* ===== ADDRESS SECTION ===== */}
+              <div className="mb-8">
+                <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2 mb-4">
+                  <span className="w-8 h-8 bg-[#B76E79]/10 rounded-lg flex items-center justify-center">
+                    <FaMapMarkerAlt className="text-[#B76E79] text-sm" />
+                  </span>
+                  Shipping Address
+                </h3>
+
+                {/* Address Type Selection */}
+                {isLoggedIn && savedAddresses.length > 0 ? (
+                  <div className="space-y-4">
+                    <div className="flex flex-wrap gap-3">
+                      <button
+                        type="button"
+                        onClick={() => handleAddressTypeChange('saved')}
+                        className={`px-4 py-2.5 rounded-xl font-medium text-sm transition-all cursor-pointer hover:scale-105 ${
+                          addressType === 'saved'
+                            ? 'bg-[#B76E79] text-white shadow-lg shadow-[#B76E79]/30'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
+                      >
+                        <FaHome className="inline mr-2" />
+                        Saved Address
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleAddressTypeChange('new')}
+                        className={`px-4 py-2.5 rounded-xl font-medium text-sm transition-all cursor-pointer hover:scale-105 ${
+                          addressType === 'new'
+                            ? 'bg-[#B76E79] text-white shadow-lg shadow-[#B76E79]/30'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
+                      >
+                        <FaPlus className="inline mr-2" />
+                        New Address
+                      </button>
+                    </div>
+
+                    {/* Saved Addresses List */}
+                    {addressType === 'saved' && (
+                      <div className="space-y-2">
+                        {savedAddresses.map((addr) => (
+                          <div
+                            key={addr.id}
+                            onClick={() => setSelectedAddressId(addr.id)}
+                            className={`p-4 border-2 rounded-xl cursor-pointer transition-all hover:shadow-md ${
+                              selectedAddressId === addr.id
+                                ? 'border-[#B76E79] bg-[#B76E79]/5 shadow-md'
+                                : 'border-gray-200 hover:border-[#B76E79]/50'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              {getLabelIcon(addr.label)}
+                              <span className="font-semibold text-gray-800">{addr.label}</span>
+                              {addr.isDefault && (
+                                <span className="text-xs bg-[#B76E79]/10 text-[#B76E79] px-2 py-0.5 rounded-full font-medium">
+                                  Default
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-gray-600 text-sm mt-1">{addr.address}</p>
+                            <p className="text-gray-400 text-sm">{addr.city}, {addr.zipCode}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : null}
+
+                {/* New Address Form */}
+                {(addressType === 'new' || (!isLoggedIn || savedAddresses.length === 0)) && (
+                  <div className="space-y-4 mt-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="sm:col-span-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                          Address <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          name="address"
+                          required
+                          value={formData.address}
+                          onChange={handleChange}
+                          className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#B76E79] focus:ring-2 focus:ring-[#B76E79]/20 transition"
+                          placeholder="House #, Street, Area"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                          City <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          name="city"
+                          required
+                          value={formData.city}
+                          onChange={handleChange}
+                          className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#B76E79] focus:ring-2 focus:ring-[#B76E79]/20 transition"
+                          placeholder="Enter your city"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                          ZIP Code
+                        </label>
+                        <input
+                          type="text"
+                          name="zipCode"
+                          value={formData.zipCode}
+                          onChange={handleChange}
+                          className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#B76E79] focus:ring-2 focus:ring-[#B76E79]/20 transition"
+                          placeholder="75000"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* ===== PAYMENT METHOD ===== */}
+              <div className="mb-8">
+                <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2 mb-4">
+                  <span className="w-8 h-8 bg-[#B76E79]/10 rounded-lg flex items-center justify-center">
+                    <FaCreditCard className="text-[#B76E79] text-sm" />
+                  </span>
+                  Payment Method
+                </h3>
+
+                <div className="space-y-3">
+                  <label className={`flex items-center gap-4 p-4 border-2 rounded-xl cursor-pointer transition-all hover:shadow-md ${
+                    formData.paymentMethod === 'cod'
+                      ? 'border-[#B76E79] bg-[#B76E79]/5'
+                      : 'border-gray-200 hover:border-[#B76E79]/50'
+                  }`}>
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="cod"
+                      checked={formData.paymentMethod === 'cod'}
+                      onChange={handleChange}
+                      className="w-5 h-5 accent-[#B76E79]"
+                    />
+                    <FaMoneyBillWave className="text-2xl text-green-600" />
+                    <div>
+                      <p className="font-semibold text-gray-800">Cash on Delivery</p>
+                      <p className="text-sm text-gray-400">Pay when you receive your order</p>
+                    </div>
+                  </label>
+
+                  <label className={`flex items-center gap-4 p-4 border-2 rounded-xl cursor-pointer transition-all hover:shadow-md ${
+                    formData.paymentMethod === 'credit_card'
+                      ? 'border-[#B76E79] bg-[#B76E79]/5'
+                      : 'border-gray-200 hover:border-[#B76E79]/50'
+                  }`}>
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="credit_card"
+                      checked={formData.paymentMethod === 'credit_card'}
+                      onChange={handleChange}
+                      className="w-5 h-5 accent-[#B76E79]"
+                    />
+                    <FaCreditCard className="text-2xl text-blue-500" />
+                    <div>
+                      <p className="font-semibold text-gray-800">Credit Card</p>
+                      <p className="text-sm text-gray-400">Visa, Mastercard, American Express</p>
+                    </div>
+                  </label>
+
+                  <label className={`flex items-center gap-4 p-4 border-2 rounded-xl cursor-pointer transition-all hover:shadow-md ${
+                    formData.paymentMethod === 'jazzcash'
+                      ? 'border-[#B76E79] bg-[#B76E79]/5'
+                      : 'border-gray-200 hover:border-[#B76E79]/50'
+                  }`}>
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="jazzcash"
+                      checked={formData.paymentMethod === 'jazzcash'}
+                      onChange={handleChange}
+                      className="w-5 h-5 accent-[#B76E79]"
+                    />
+                    <FaMobileAlt className="text-2xl text-orange-500" />
+                    <div>
+                      <p className="font-semibold text-gray-800">JazzCash / EasyPaisa</p>
+                      <p className="text-sm text-gray-400">Pay through mobile wallet</p>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              {/* ===== PLACE ORDER BUTTON ===== */}
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full bg-[#B76E79] text-white py-4 rounded-xl font-semibold text-lg hover:bg-[#B76E79]/90 transition-all hover:shadow-lg hover:shadow-[#B76E79]/30 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              >
+                {isSubmitting ? (
+                  <span className="flex items-center justify-center gap-3">
+                    <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    Processing...
+                  </span>
+                ) : (
+                  <span className="flex items-center justify-center gap-2">
+                    <FaCheckCircle />
+                    Place Order
+                  </span>
+                )}
+              </button>
+
+              {/* Security Badges */}
+              <div className="flex items-center justify-center gap-6 mt-4 text-xs text-gray-400">
+                <span className="flex items-center gap-1">
+                  <FaShieldAlt className="text-green-500" /> Secure Checkout
+                </span>
+                <span className="flex items-center gap-1">
+                  <FaTruck className="text-[#B76E79]" /> Free Shipping
+                </span>
+                <span className="flex items-center gap-1">
+                  <FaUndo className="text-blue-500" /> Easy Returns
+                </span>
+              </div>
+            </form>
+          </div>
+
+          {/* ===== RIGHT SIDE - ORDER SUMMARY ===== */}
+          <div className="lg:w-1/3">
+            <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100 sticky top-[100px]">
+              <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <FiShoppingCart className="text-[#B76E79]" />
+                Order Summary
+              </h2>
+
+              <div className="space-y-3 max-h-64 overflow-y-auto">
+                {checkoutProducts.map((item: any) => (
+                  <div key={item.id} className="flex items-center gap-3 bg-gray-50 p-3 rounded-xl">
+                    <img 
+                      src={item.mainImage} 
+                      alt={item.title}
+                      className="w-14 h-14 object-cover rounded-lg"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-800 truncate">{item.title}</p>
+                      {!isBuyNow && (
+                        <p className="text-xs text-gray-400">Qty: {item.quantity}</p>
+                      )}
+                    </div>
+                    <p className="text-sm font-bold text-[#B76E79]">
+                      Rs. {item.price * (item.quantity || 1)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-4 space-y-3 border-t border-gray-200 pt-4">
+                {!isBuyNow && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Subtotal ({totalItems} items)</span>
+                    <span className="font-medium">Rs. {totalPrice}</span>
+                  </div>
+                )}
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Shipping</span>
+                  <span className="font-medium">Rs. 200</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Estimated Tax</span>
+                  <span className="font-medium">Rs. 0</span>
+                </div>
+                <div className="flex justify-between text-lg font-bold border-t border-gray-200 pt-3">
+                  <span>Total</span>
+                  <span className="text-[#B76E79]">Rs. {checkoutTotal + 200}</span>
+                </div>
+              </div>
+
+              <div className="mt-4 p-3 bg-green-50 rounded-xl flex items-center gap-2 text-sm text-green-700">
+                <FaTruck className="text-green-500" />
+                <span>Free delivery on orders above Rs. 2000</span>
+              </div>
+
+              <div className="mt-3 flex items-center justify-center gap-4 text-xs text-gray-400">
+                <span className="flex items-center gap-1">
+                  <FiClock /> 30 min delivery
+                </span>
+                <span className="flex items-center gap-1">
+                  <FaShieldAlt /> 100% secure
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default CheckoutPage;
