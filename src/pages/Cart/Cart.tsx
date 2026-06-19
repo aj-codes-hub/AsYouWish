@@ -50,9 +50,8 @@ const CartPage: React.FC = () => {
 
   return (
     <div className='container mx-auto p-4 sm:p-6 min-h-[80vh] bg-gray-50/50'>
-      <div className='flex items-center justify-between mb-6 sm:mb-8'>
+      <div className='flex items-center justify-between mb-6 mt-[40px] sm:mb-8'>
         <div>
-          <h1 className='text-2xl sm:text-3xl font-bold text-gray-900'>Shopping Cart</h1>
           <p className='text-gray-500 text-sm mt-1'>{totalItems} {totalItems === 1 ? 'item' : 'items'} in your cart</p>
         </div>
       </div>

@@ -25,7 +25,7 @@ const LikeProduct:React.FC = () => {
       <div className='max-w-[1100px] mx-auto'>
       <h1 className='text-2xl font-bold mb-6 text-center'> Your Fovutite Product ({wishlist.length})</h1>
       
-      <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
+      <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
         {wishlist.map((item) => (
           <ProductCard id={item.id}
                          Image={item.mainImage}

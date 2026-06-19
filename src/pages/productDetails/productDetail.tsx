@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { FaStar, FaRegStar, FaStarHalfAlt } from "react-icons/fa";
 import { FaRegHeart, FaHeart } from "react-icons/fa";
 import { IoShareSocialOutline } from "react-icons/io5";
@@ -26,6 +26,11 @@ const ProductDetail: React.FC = () => {
 
   // Check if product is in wishlist
   const isLiked = SingleProduct ? isInWishlist(SingleProduct.id) : false;
+
+  // ✅ Swipe state
+  const [touchStartX, setTouchStartX] = useState(0);
+  const [touchEndX, setTouchEndX] = useState(0);
+  const imageContainerRef = useRef<HTMLDivElement>(null);
 
   if (!SingleProduct) {
     return (
@@ -91,26 +96,105 @@ const ProductDetail: React.FC = () => {
     return stars;
   };
 
+  // ✅ Get all images array (main + moreImages)
+  const getAllImages = () => {
+    const images = [SingleProduct.mainImage];
+    if (SingleProduct.moreImages) {
+      images.push(...SingleProduct.moreImages);
+    }
+    return images;
+  };
+
+  const allImages = getAllImages();
+
+  // ✅ Handle image change on swipe
+  const handleImageChange = (direction: 'left' | 'right') => {
+    const currentIndex = allImages.indexOf(selectedImage);
+    if (direction === 'left') {
+      // Next image
+      const nextIndex = (currentIndex + 1) % allImages.length;
+      setSelectedImage(allImages[nextIndex]);
+    } else {
+      // Previous image
+      const prevIndex = (currentIndex - 1 + allImages.length) % allImages.length;
+      setSelectedImage(allImages[prevIndex]);
+    }
+  };
+
+  // ✅ Touch handlers for mobile swipe
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStartX(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEndX(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStartX || !touchEndX) return;
+    
+    const diff = touchStartX - touchEndX;
+    const threshold = 50; // Minimum swipe distance
+    
+    if (Math.abs(diff) > threshold) {
+      if (diff > 0) {
+        // Swiped left - Next image
+        handleImageChange('left');
+      } else {
+        // Swiped right - Previous image
+        handleImageChange('right');
+      }
+    }
+    
+    // Reset
+    setTouchStartX(0);
+    setTouchEndX(0);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 py-14 sm:py-12">
+      <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 py-12 sm:py-12">
 
         {/* Main Product Section */}
         <div className="bg-white sm:rounded-2xl shadow-lg overflow-hidden">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:p-4 sm:p-6 lg:p-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:p-4 sm:p-6 lg:p-8">
             
             {/* ===== LEFT SIDE - PRODUCT IMAGES ===== */}
             <div className="sm:space-y-4 space-y-0">
               
-              {/* Main Image Container - Relative for thumbnails overlay */}
-              <div className="relative bg-gray-100 sm:rounded-xl overflow-hidden aspect-square">
-                
+              {/* Main Image Container - with swipe support */}
+              <div 
+                ref={imageContainerRef}
+                className="relative bg-gray-100 sm:rounded-xl overflow-hidden aspect-square"
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+              >
                 {/* Main Image */}
                 <img
                   src={selectedImage}
                   alt={SingleProduct.title}
                   className="w-full h-full object-cover hover:scale-105 transition-transform duration-500 cursor-pointer"
                 />
+                
+                {/* ✅ Swipe Indicator - Left/Right arrows on mobile */}
+                <div className="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-2 pointer-events-none sm:hidden">
+                  <div className="pointer-events-auto bg-black/30 text-white p-1 rounded-full opacity-60">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </div>
+                  <div className="pointer-events-auto bg-black/30 text-white p-1 rounded-full opacity-60">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </div>
+
+                {/* ✅ Image counter on mobile */}
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/60 text-white text-xs px-3 py-1 rounded-full sm:hidden">
+                  {allImages.indexOf(selectedImage) + 1} / {allImages.length}
+                </div>
                 
                 {/* Discount Badge */}
                 {SingleProduct.discount && SingleProduct.discount > 0 && (
@@ -132,36 +216,19 @@ const ProductDetail: React.FC = () => {
                 </button>
 
                 {/* ===== MOBILE: THUMBNAILS ON TOP-RIGHT ===== */}
-                <div className="absolute top-1/2 -translate-y-1/2 right-2 sm:top-4 sm:right-6 flex flex-col gap-2 z-10 sm:hidden">
-                  {/* Main image thumbnail */}
-                  <div
-                    onClick={() => setSelectedImage(SingleProduct.mainImage)}
-                    className={`sm:w-14 sm:h-14 w-10 h-10 rounded-lg overflow-hidden cursor-pointer border-2 transition-all ${
-                      selectedImage === SingleProduct.mainImage
-                        ? 'border-[#B76E79] shadow-md'
-                        : 'border-white/80 hover:border-[#B76E79]/50'
-                    }`}
-                  >
-                    <img
-                      src={SingleProduct.mainImage}
-                      alt="Main"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  
-                  {/* Other thumbnails */}
-                  {SingleProduct.moreImages?.map((image, index) => (
+                <div className="absolute sm:top-4 sm:right-16 top-1/2 -translate-y-1/2 right-6 flex flex-col gap-2 z-10 sm:hidden">
+                  {allImages.map((img, index) => (
                     <div
                       key={index}
-                      onClick={() => setSelectedImage(image)}
-                      className={`sm:w-14 sm:h-14 w-10 h-10 rounded-lg overflow-hidden cursor-pointer border-2 transition-all ${
-                        selectedImage === image
+                      onClick={() => setSelectedImage(img)}
+                      className={`w-12 h-12 rounded-lg overflow-hidden cursor-pointer border-2 transition-all ${
+                        selectedImage === img
                           ? 'border-[#B76E79] shadow-md'
                           : 'border-white/80 hover:border-[#B76E79]/50'
                       }`}
                     >
                       <img
-                        src={image}
+                        src={img}
                         alt={`Thumbnail ${index + 1}`}
                         className="w-full h-full object-cover"
                       />
@@ -172,32 +239,18 @@ const ProductDetail: React.FC = () => {
 
               {/* ===== DESKTOP: THUMBNAILS AT BOTTOM ===== */}
               <div className="hidden sm:flex gap-3 overflow-x-auto pb-2">
-                <div
-                  onClick={() => setSelectedImage(SingleProduct.mainImage)}
-                  className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden cursor-pointer border-2 transition-all ${
-                    selectedImage === SingleProduct.mainImage
-                      ? 'border-[#B76E79] shadow-md'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  <img
-                    src={SingleProduct.mainImage}
-                    alt="Main"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                {SingleProduct.moreImages?.map((image, index) => (
+                {allImages.map((img, index) => (
                   <div
                     key={index}
-                    onClick={() => setSelectedImage(image)}
+                    onClick={() => setSelectedImage(img)}
                     className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden cursor-pointer border-2 transition-all ${
-                      selectedImage === image
+                      selectedImage === img
                         ? 'border-[#B76E79] shadow-md'
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
                     <img
-                      src={image}
+                      src={img}
                       alt={`Thumbnail ${index + 1}`}
                       className="w-full h-full object-cover"
                     />
@@ -207,7 +260,7 @@ const ProductDetail: React.FC = () => {
             </div>
 
             {/* ===== RIGHT SIDE - PRODUCT INFO ===== */}
-            <div className="sm:space-y-6 space-y-2 px-4">
+            <div className="sm:space-y-6 space-y-1 p-4">
               {/* Product Title */}
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 leading-tight">
                 {SingleProduct.title}
@@ -249,7 +302,7 @@ const ProductDetail: React.FC = () => {
                 {SingleProduct.details}
               </p>
 
-              {/* Quantity Selector - Hidden on mobile (only in fixed bar) */}
+              {/* Quantity Selector - Hidden on mobile */}
               <div className="hidden sm:flex items-center gap-4">
                 <span className="text-sm font-medium text-gray-700">Quantity:</span>
                 <div className="flex items-center border-2 border-gray-200 rounded-lg overflow-hidden">
@@ -271,7 +324,7 @@ const ProductDetail: React.FC = () => {
                 </div>
               </div>
 
-              {/* Action Buttons - Hidden on mobile (only in fixed bar) */}
+              {/* Action Buttons - Hidden on mobile */}
               <div className="hidden sm:flex flex-col sm:flex-row gap-3 pt-2">
                 <button
                   onClick={handleAddToCart}
@@ -323,7 +376,7 @@ const ProductDetail: React.FC = () => {
           {/* Product Details Tabs */}
           <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
             <div className="border-b border-gray-100">
-              <div className="flex overflow-x-auto ">
+              <div className="flex overflow-x-auto">
                 <button className="px-6 py-4 text-[#B76E79] font-semibold border-b-2 border-[#B76E79] cursor-pointer">
                   Product Details
                 </button>
@@ -395,9 +448,8 @@ const ProductDetail: React.FC = () => {
       </div>
 
       {/* ===== MOBILE FIXED BOTTOM BAR ===== */}
-      <div className="lg:hidden sticky-bottom-40 bottom-[65px] fixed sm:bottom-0 left-0 right-0 bg-white shadow-2xl border-t border-gray-100 z-50 px-4 py-3">
+      <div className="lg:hidden fixed bottom-[60px] sm:bottom-0 left-0 right-0 bg-white shadow-2xl border-t border-gray-100 z-50 px-4 py-3">
         <div className="flex items-center gap-3">
-          {/* Quantity on mobile */}
           <div className="flex items-center border-2 border-gray-200 rounded-lg overflow-hidden flex-shrink-0">
             <button
               onClick={() => handleQuantityChange('decrement')}
@@ -416,7 +468,6 @@ const ProductDetail: React.FC = () => {
             </button>
           </div>
 
-          {/* Wishlist on mobile */}
           <button
             onClick={handleWishlistToggle}
             className="p-3 bg-gray-100 rounded-xl flex-shrink-0 cursor-pointer"
@@ -428,7 +479,6 @@ const ProductDetail: React.FC = () => {
             )}
           </button>
 
-          {/* Action Buttons - ONLY IN FIXED BAR */}
           <button
             onClick={handleAddToCart}
             className="cursor-pointer flex-1 bg-[#B76E79] text-white py-3 rounded-xl font-semibold text-sm hover:bg-[#B76E79]/90 transition"

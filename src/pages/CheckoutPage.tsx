@@ -250,38 +250,11 @@ const CheckoutPage = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 sm:py-12">
       <div className="container mx-auto px-4 max-w-6xl mt-[65px]">
 
-        <div className="flex flex-col lg:flex-row gap-8">
+        <div className="flex flex-col-reverse lg:flex-row gap-8">
           
           {/* ===== LEFT SIDE - FORM ===== */}
           <div className="lg:w-2/3">
-            <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-gray-100">
-              
-              {/* Order Summary - Mobile */}
-              <div className="lg:hidden mb-6">
-                <h3 className="text-lg font-bold text-gray-800 mb-4">Order Summary</h3>
-                <div className="space-y-3 max-h-48 overflow-y-auto">
-                  {checkoutProducts.map((item: any) => (
-                    <div key={item.id} className="flex items-center gap-3 bg-gray-50 p-3 rounded-xl">
-                      <img 
-                        src={item.mainImage} 
-                        alt={item.title}
-                        className="w-14 h-14 object-cover rounded-lg"
-                      />
-                      <div className="flex-1">
-                        <p className="font-medium text-sm text-gray-800 line-clamp-1">{item.title}</p>
-                        <p className="text-[#B76E79] font-bold">Rs. {item.price}</p>
-                        {!isBuyNow && (
-                          <p className="text-xs text-gray-400">Qty: {item.quantity}</p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="flex justify-between font-bold text-lg border-t pt-3 mt-3">
-                  <span className="text-gray-600">Total</span>
-                  <span className="text-[#B76E79]">Rs. {checkoutTotal + 200}</span>
-                </div>
-              </div>
+            <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-gray-100">   
 
               {/* ===== CUSTOMER INFO ===== */}
               <div className="mb-8">
@@ -701,7 +674,7 @@ const CheckoutPage = () => {
 
               <div className="mt-3 flex items-center justify-center gap-4 text-xs text-gray-400">
                 <span className="flex items-center gap-1">
-                  <FiClock /> 30 min delivery
+                  <FiClock /> 10 day's delivery
                 </span>
                 <span className="flex items-center gap-1">
                   <FaShieldAlt /> 100% secure
