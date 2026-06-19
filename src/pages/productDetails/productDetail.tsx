@@ -395,7 +395,7 @@ const ProductDetail: React.FC = () => {
       </div>
 
       {/* ===== MOBILE FIXED BOTTOM BAR ===== */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white shadow-2xl border-t border-gray-100 z-50 px-4 py-3">
+      <div className="lg:hidden sticky-bottom-40 bottom-[65px] fixed sm:bottom-0 left-0 right-0 bg-white shadow-2xl border-t border-gray-100 z-50 px-4 py-3">
         <div className="flex items-center gap-3">
           {/* Quantity on mobile */}
           <div className="flex items-center border-2 border-gray-200 rounded-lg overflow-hidden flex-shrink-0">
