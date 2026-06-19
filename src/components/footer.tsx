@@ -81,7 +81,7 @@ const Footer:React.FC  = () => {
 
      <div className='border-t border-black/30 mx-auto w-[98%] flex items-center justify-center'>
         <p className='sm:py-[20px] py-[14px] sm:text-[12px] text-[8px] tracking-wider'>
-          © 2026 As you wish. All rights reserved. Crafted with elegance.
+          © 2026 Ali jan. All rights reserved. Crafted with elegance.
         </p>
      </div>       
 

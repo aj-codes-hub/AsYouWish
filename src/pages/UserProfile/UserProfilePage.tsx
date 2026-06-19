@@ -23,12 +23,13 @@ import {
     FaTrashAlt,
     FaHome,
     FaBuilding,
-    FaMapPin
+    FaMapPin,
+    FaSync
 } from 'react-icons/fa';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-// ✅ ORDER TYPE
+// ORDER TYPE
 interface OrderType {
     id: string;
     date: string;
@@ -43,7 +44,7 @@ interface OrderType {
     customerPhone: string;
 }
 
-// ✅ ADDRESS TYPE
+// ADDRESS TYPE
 interface AddressType {
     id: number;
     label: string;
@@ -58,7 +59,7 @@ const UserProfilePage = () => {
     const { totalItems } = useCart();
     const navigate = useNavigate();
 
-    // ✅ Edit mode state
+    // Edit mode state
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
@@ -66,13 +67,13 @@ const UserProfilePage = () => {
         phone: '',
     });
 
-    // ✅ Address state
+    // Address state
     const [addresses, setAddresses] = useState<AddressType[]>(() => {
         const savedAddresses = localStorage.getItem('userAddresses');
         return savedAddresses ? JSON.parse(savedAddresses) : [];
     });
 
-    // ✅ Add address modal
+    // Add address modal
     const [showAddAddress, setShowAddAddress] = useState(false);
     const [newAddress, setNewAddress] = useState({
         label: 'Home',
@@ -81,25 +82,33 @@ const UserProfilePage = () => {
         zipCode: '',
     });
 
-    // ✅ Orders state
+    // Orders state - with refresh function
     const [orders, setOrders] = useState<OrderType[]>(() => {
         const savedOrders = localStorage.getItem('userOrders');
         return savedOrders ? JSON.parse(savedOrders) : [];
     });
 
-    // ✅ Toast notifications
+    // ✅ Refresh orders function - Uses setOrders
+    const refreshOrders = () => {
+        const savedOrders = localStorage.getItem('userOrders');
+        setOrders(savedOrders ? JSON.parse(savedOrders) : []);
+    };
+
+    // Toast notifications
     const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
         if (type === 'success') toast.success(message);
         else if (type === 'error') toast.error(message);
         else toast.info(message);
     };
 
+    // ✅ Check login status
     useEffect(() => {
         if (!isLoggedIn) {
             navigate('/');
         }
     }, [isLoggedIn, navigate]);
 
+    // ✅ Set user data in form
     useEffect(() => {
         if (user) {
             setFormData({
@@ -115,10 +124,37 @@ const UserProfilePage = () => {
         localStorage.setItem('userAddresses', JSON.stringify(addresses));
     }, [addresses]);
 
+    // ✅ Listen for order updates from checkout page
+    useEffect(() => {
+        // Initial load
+        refreshOrders();
+
+        // Listen for storage changes (from other tabs)
+        const handleStorageChange = (e: StorageEvent) => {
+            if (e.key === 'userOrders') {
+                refreshOrders();
+            }
+        };
+
+        // Listen for custom event (same tab)
+        const handleOrderUpdate = () => {
+            refreshOrders();
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+        window.addEventListener('order-updated', handleOrderUpdate);
+
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+            window.removeEventListener('order-updated', handleOrderUpdate);
+        };
+    }, []); // ✅ Empty dependency array - runs once on mount
+
     if (!isLoggedIn || !user) {
         return null;
     }
 
+    // Handle form change
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setFormData({
             ...formData,
@@ -126,6 +162,7 @@ const UserProfilePage = () => {
         });
     };
 
+    // Handle address change
     const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setNewAddress({
             ...newAddress,
@@ -133,12 +170,14 @@ const UserProfilePage = () => {
         });
     };
 
+    // Save profile
     const handleSaveProfile = () => {
         updateUser(formData);
         setIsEditing(false);
         showToast('Profile updated successfully!', 'success');
     };
 
+    // Cancel edit
     const handleCancelEdit = () => {
         setFormData({
             name: user.name || '',
@@ -148,13 +187,14 @@ const UserProfilePage = () => {
         setIsEditing(false);
     };
 
+    // Logout
     const handleLogout = () => {
         logout();
         showToast('Logged out successfully!', 'info');
         navigate('/');
     };
 
-    // ✅ Add Address
+    // Add Address
     const handleAddAddress = () => {
         if (!newAddress.address || !newAddress.city) {
             showToast('Please fill address and city!', 'error');
@@ -176,14 +216,14 @@ const UserProfilePage = () => {
         showToast('Address added successfully!', 'success');
     };
 
-    // ✅ Delete Address
+    // Delete Address
     const handleDeleteAddress = (id: number) => {
         const updatedAddresses = addresses.filter(addr => addr.id !== id);
         setAddresses(updatedAddresses);
         showToast('Address removed!', 'info');
     };
 
-    // ✅ Set Default Address
+    // Set Default Address
     const handleSetDefault = (id: number) => {
         const updatedAddresses = addresses.map(addr => ({
             ...addr,
@@ -193,6 +233,7 @@ const UserProfilePage = () => {
         showToast('Default address updated!', 'success');
     };
 
+    // Get order status color
     const getOrderStatusColor = (status: string) => {
         switch (status) {
             case 'delivered': return 'text-green-500 bg-green-50';
@@ -203,6 +244,7 @@ const UserProfilePage = () => {
         }
     };
 
+    // Get order status icon
     const getOrderStatusIcon = (status: string) => {
         switch (status) {
             case 'delivered': return <FaCheckCircle className="text-green-500" />;
@@ -212,10 +254,10 @@ const UserProfilePage = () => {
         }
     };
 
-    // ✅ Get label icon
+    // Get label icon
     const getLabelIcon = (label: string) => {
         switch (label) {
-            case 'Home': return <FaHome className="text-primary" />;
+            case 'Home': return <FaHome className="text-[#B76E79]" />;
             case 'Office': return <FaBuilding className="text-blue-500" />;
             default: return <FaMapPin className="text-gray-500" />;
         }
@@ -235,7 +277,7 @@ const UserProfilePage = () => {
                             
                             {/* User Avatar */}
                             <div className="flex flex-col items-center text-center border-b border-gray-100 pb-6">
-                                <div className="w-28 h-28 bg-gradient-to-br from-[#b76e7945] to-[#b76e790a] rounded-full flex items-center justify-center text-primary text-5xl mb-4 border-4 border-[#b76e792b]">
+                                <div className="w-28 h-28 bg-gradient-to-br from-[#B76E79]/25 to-[#B76E79]/5 rounded-full flex items-center justify-center text-[#B76E79] text-5xl mb-4 border-4 border-[#B76E79]/20">
                                     <FaUserCircle />
                                 </div>
                                 <h2 className="text-xl font-bold text-gray-800">{user.name}</h2>
@@ -247,7 +289,7 @@ const UserProfilePage = () => {
 
                             {/* Navigation Links */}
                             <div className="py-6 border-b border-gray-100 space-y-1">
-                                <Link to="/profile" className="flex items-center gap-3 px-4 py-3 bg-[#b76e7922] text-primary rounded-xl font-medium transition">
+                                <Link to="/profile" className="flex items-center gap-3 px-4 py-3 bg-[#B76E79]/15 text-[#B76E79] rounded-xl font-medium transition">
                                     <FaUser className="text-sm" />
                                     <span>My Profile</span>
                                 </Link>
@@ -268,7 +310,7 @@ const UserProfilePage = () => {
                             <div className="pt-6">
                                 <button
                                     onClick={handleLogout}
-                                    className="w-full flex cursor-pointer  items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-red-50 to-red-100 text-red-600 rounded-xl hover:from-red-100 hover:to-red-200 transition font-medium"
+                                    className="w-full flex cursor-pointer items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-red-50 to-red-100 text-red-600 rounded-xl hover:from-red-100 hover:to-red-200 transition font-medium"
                                 >
                                     <FaSignOutAlt />
                                     <span>Logout</span>
@@ -284,8 +326,8 @@ const UserProfilePage = () => {
                         <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
                             <div className="flex items-center justify-between mb-6">
                                 <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                                    <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                                        <FaUser className="text-primary text-sm" />
+                                    <div className="w-8 h-8 bg-[#B76E79]/10 rounded-lg flex items-center justify-center">
+                                        <FaUser className="text-[#B76E79] text-sm" />
                                     </div>
                                     Personal Information
                                 </h3>
@@ -293,7 +335,7 @@ const UserProfilePage = () => {
                                 {!isEditing ? (
                                     <button
                                         onClick={() => setIsEditing(true)}
-                                        className="flex cursor-pointer items-center gap-2 text-primary hover:text-[#b76e79d6] font-medium bg-[#b76e7911] px-4 py-2 rounded-lg hover:bg-[#b76e7920] transition"
+                                        className="flex cursor-pointer items-center gap-2 text-[#B76E79] hover:text-[#B76E79]/80 font-medium bg-[#B76E79]/10 px-4 py-2 rounded-lg hover:bg-[#B76E79]/20 transition"
                                     >
                                         <FaEdit />
                                         <span>Edit</span>
@@ -302,7 +344,7 @@ const UserProfilePage = () => {
                                     <div className="flex gap-2">
                                         <button
                                             onClick={handleSaveProfile}
-                                            className="flex items-center cursor-pointer gap-2 bg-primary text-white px-4 py-2 rounded-lg hover:bg-[#b76e79e3] transition"
+                                            className="flex items-center cursor-pointer gap-2 bg-[#B76E79] text-white px-4 py-2 rounded-lg hover:bg-[#B76E79]/90 transition"
                                         >
                                             <FaSave />
                                             <span>Save</span>
@@ -321,7 +363,7 @@ const UserProfilePage = () => {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                 <div className="md:col-span-2">
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        <FaUser className="inline mr-2 text-primary" />
+                                        <FaUser className="inline mr-2 text-[#B76E79]" />
                                         Full Name
                                     </label>
                                     {isEditing ? (
@@ -330,7 +372,7 @@ const UserProfilePage = () => {
                                             name="name"
                                             value={formData.name}
                                             onChange={handleChange}
-                                            className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-[#b76e793c] transition"
+                                            className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#B76E79] focus:ring-2 focus:ring-[#B76E79]/20 transition"
                                             placeholder="Enter your name"
                                         />
                                     ) : (
@@ -340,7 +382,7 @@ const UserProfilePage = () => {
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        <FaEnvelope className="inline mr-2 text-primary" />
+                                        <FaEnvelope className="inline mr-2 text-[#B76E79]" />
                                         Email Address
                                     </label>
                                     {isEditing ? (
@@ -349,7 +391,7 @@ const UserProfilePage = () => {
                                             name="email"
                                             value={formData.email}
                                             onChange={handleChange}
-                                            className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-[#b76e793e] transition"
+                                            className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#B76E79] focus:ring-2 focus:ring-[#B76E79]/20 transition"
                                             placeholder="Enter your email"
                                         />
                                     ) : (
@@ -359,7 +401,7 @@ const UserProfilePage = () => {
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        <FaPhone className="inline mr-2 text-primary" />
+                                        <FaPhone className="inline mr-2 text-[#B76E79]" />
                                         Phone Number
                                     </label>
                                     {isEditing ? (
@@ -368,7 +410,7 @@ const UserProfilePage = () => {
                                             name="phone"
                                             value={formData.phone}
                                             onChange={handleChange}
-                                            className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-[#b76e7937] transition"
+                                            className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#B76E79] focus:ring-2 focus:ring-[#B76E79]/20 transition"
                                             placeholder="03XX-XXXXXXX"
                                         />
                                     ) : (
@@ -384,14 +426,14 @@ const UserProfilePage = () => {
                         <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
                             <div className="flex items-center justify-between mb-6">
                                 <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                                    <div className="w-8 h-8 bg-[#b76e792c] rounded-lg flex items-center justify-center">
-                                        <FaMapMarkerAlt className="text-primary text-sm" />
+                                    <div className="w-8 h-8 bg-[#B76E79]/15 rounded-lg flex items-center justify-center">
+                                        <FaMapMarkerAlt className="text-[#B76E79] text-sm" />
                                     </div>
                                     Saved Addresses
                                 </h3>
                                 <button
                                     onClick={() => setShowAddAddress(true)}
-                                    className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-xl hover:bg-[#b76e79d7] transition cursor-pointer"
+                                    className="flex items-center gap-2 bg-[#B76E79] text-white px-4 py-2 rounded-xl hover:bg-[#B76E79]/90 transition cursor-pointer"
                                 >
                                     <FaPlus className="text-sm" />
                                     <span>Add Address</span>
@@ -407,20 +449,20 @@ const UserProfilePage = () => {
                             ) : (
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {addresses.map((addr) => (
-                                        <div key={addr.id} className={`border-2 rounded-xl p-4 transition ${addr.isDefault ? 'border-primary bg-[#b76e7914]' : 'border-gray-200 hover:border-gray-300'}`}>
+                                        <div key={addr.id} className={`border-2 rounded-xl p-4 transition ${addr.isDefault ? 'border-[#B76E79] bg-[#B76E79]/8' : 'border-gray-200 hover:border-gray-300'}`}>
                                             <div className="flex items-start justify-between">
                                                 <div className="flex items-center gap-2">
                                                     {getLabelIcon(addr.label)}
                                                     <span className="font-semibold text-gray-800">{addr.label}</span>
                                                     {addr.isDefault && (
-                                                        <span className="text-xs bg-primary text-white px-2 py-0.5 rounded-full">Default</span>
+                                                        <span className="text-xs bg-[#B76E79] text-white px-2 py-0.5 rounded-full">Default</span>
                                                     )}
                                                 </div>
                                                 <div className="flex gap-1">
                                                     {!addr.isDefault && (
                                                         <button
                                                             onClick={() => handleSetDefault(addr.id)}
-                                                            className="text-xs text-primary hover:text-primary/80 font-medium cursor-pointer"
+                                                            className="text-xs text-[#B76E79] hover:text-[#B76E79]/80 font-medium cursor-pointer"
                                                         >
                                                             Set Default
                                                         </button>
@@ -445,16 +487,26 @@ const UserProfilePage = () => {
                         <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
                             <div className="flex items-center justify-between mb-6">
                                 <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                                    <div className="w-8 h-8 bg-[#b76e7935] rounded-lg flex items-center justify-center">
-                                        <FaShoppingBag className="text-primary text-sm" />
+                                    <div className="w-8 h-8 bg-[#B76E79]/15 rounded-lg flex items-center justify-center">
+                                        <FaShoppingBag className="text-[#B76E79] text-sm" />
                                     </div>
                                     Recent Orders
                                 </h3>
-                                {orders.length > 3 && (
-                                    <Link to="/orders" className="text-primary hover:underline text-sm font-medium">
-                                        View All →
-                                    </Link>
-                                )}
+                                <div className="flex items-center gap-3">
+                                    {/* ✅ Refresh Button - Uses setOrders */}
+                                    <button
+                                        onClick={refreshOrders}
+                                        className="text-[#B76E79] hover:text-[#B76E79]/80 hover:scale-110 transition cursor-pointer"
+                                        title="Refresh orders"
+                                    >
+                                        <FaSync className="text-sm" />
+                                    </button>
+                                    {orders.length > 3 && (
+                                        <Link to="/orders" className="text-[#B76E79] hover:underline text-sm font-medium">
+                                            View All →
+                                        </Link>
+                                    )}
+                                </div>
                             </div>
 
                             {orders.length === 0 ? (
@@ -462,14 +514,14 @@ const UserProfilePage = () => {
                                     <FaShoppingBag className="text-6xl text-gray-300 mx-auto mb-4" />
                                     <h4 className="text-xl font-medium text-gray-600">No Orders Yet</h4>
                                     <p className="text-gray-400 mt-2">Start shopping to see your orders here</p>
-                                    <Link to="/" className="inline-block mt-4 bg-primary text-white px-6 py-2 rounded-xl hover:bg-[#b76e79da] transition">
+                                    <Link to="/" className="inline-block mt-4 bg-[#B76E79] text-white px-6 py-2 rounded-xl hover:bg-[#B76E79]/90 transition">
                                         Start Shopping
                                     </Link>
                                 </div>
                             ) : (
                                 <div className="space-y-4">
                                     {orders.slice(0, 3).map((order, index) => (
-                                        <div key={index} className="border-2 border-gray-100 rounded-xl p-4 hover:border-[#b76e794b] hover:shadow-lg transition-all duration-300">
+                                        <div key={index} className="border-2 border-gray-100 rounded-xl p-4 hover:border-[#B76E79]/30 hover:shadow-lg transition-all duration-300">
                                             <div className="flex flex-wrap items-center justify-between gap-3">
                                                 <div>
                                                     <p className="font-bold text-gray-800">Order {order.id}</p>
@@ -485,7 +537,7 @@ const UserProfilePage = () => {
                                                     </span>
                                                 </div>
                                                 <div className="text-right">
-                                                    <p className="font-bold text-primary text-lg">Rs. {order.total}</p>
+                                                    <p className="font-bold text-[#B76E79] text-lg">Rs. {order.total}</p>
                                                     <p className="text-xs text-gray-500">{order.items} items</p>
                                                 </div>
                                             </div>
@@ -497,8 +549,8 @@ const UserProfilePage = () => {
 
                         {/* ===== STATS CARDS ===== */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div className="bg-gradient-to-br from-[#b76e7926] to-[#b76e7913] rounded-2xl shadow-lg p-6 text-center border border-primary/10">
-                                <p className="text-3xl font-bold text-primary">{orders.length}</p>
+                            <div className="bg-gradient-to-br from-[#B76E79]/15 to-[#B76E79]/5 rounded-2xl shadow-lg p-6 text-center border border-[#B76E79]/10">
+                                <p className="text-3xl font-bold text-[#B76E79]">{orders.length}</p>
                                 <p className="text-sm text-gray-600 mt-1">Total Orders</p>
                             </div>
                             <div className="bg-gradient-to-br from-blue-50 to-blue-100/30 rounded-2xl shadow-lg p-6 text-center border border-blue-100">
@@ -524,7 +576,7 @@ const UserProfilePage = () => {
                     <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl animate-scale-up">
                         <div className="flex items-center justify-between mb-6">
                             <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                                <FaMapMarkerAlt className="text-primary" />
+                                <FaMapMarkerAlt className="text-[#B76E79]" />
                                 Add New Address
                             </h3>
                             <button
@@ -542,7 +594,7 @@ const UserProfilePage = () => {
                                     name="label"
                                     value={newAddress.label}
                                     onChange={handleAddressChange}
-                                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-primary"
+                                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#B76E79] cursor-pointer"
                                 >
                                     <option value="Home">🏠 Home</option>
                                     <option value="Office">🏢 Office</option>
@@ -557,7 +609,7 @@ const UserProfilePage = () => {
                                     name="address"
                                     value={newAddress.address}
                                     onChange={handleAddressChange}
-                                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-primary"
+                                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#B76E79] transition cursor-pointer"
                                     placeholder="House #, Street, Area"
                                 />
                             </div>
@@ -569,7 +621,7 @@ const UserProfilePage = () => {
                                     name="city"
                                     value={newAddress.city}
                                     onChange={handleAddressChange}
-                                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-primary"
+                                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#B76E79] transition cursor-pointer"
                                     placeholder="Enter your city"
                                 />
                             </div>
@@ -581,7 +633,7 @@ const UserProfilePage = () => {
                                     name="zipCode"
                                     value={newAddress.zipCode}
                                     onChange={handleAddressChange}
-                                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-primary"
+                                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#B76E79] transition cursor-pointer"
                                     placeholder="75000"
                                 />
                             </div>
@@ -590,7 +642,7 @@ const UserProfilePage = () => {
                         <div className="flex gap-3 mt-6">
                             <button
                                 onClick={handleAddAddress}
-                                className="flex-1 cursor-pointer bg-primary text-white py-3 rounded-xl font-medium hover:bg-[#b76e79db] transition"
+                                className="flex-1 cursor-pointer bg-[#B76E79] text-white py-3 rounded-xl font-medium hover:bg-[#B76E79]/90 transition"
                             >
                                 Add Address
                             </button>

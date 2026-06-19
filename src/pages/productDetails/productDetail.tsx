@@ -58,7 +58,6 @@ const ProductDetail: React.FC = () => {
 
   // Handle Add to Cart
   const handleAddToCart = () => {
-    // Add product with selected quantity
     for (let i = 0; i < quantity; i++) {
       addToCart(SingleProduct);
     }
@@ -94,31 +93,36 @@ const ProductDetail: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 py-14 sm:py-12">
 
         {/* Main Product Section */}
-        <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-6 sm:p-8">
+        <div className="bg-white sm:rounded-2xl shadow-lg overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:p-4 sm:p-6 lg:p-8">
             
-            {/* Left Side - Product Images */}
-            <div className="space-y-4">
-              {/* Main Image */}
-              <div className="relative bg-gray-100 rounded-xl overflow-hidden aspect-square">
+            {/* ===== LEFT SIDE - PRODUCT IMAGES ===== */}
+            <div className="sm:space-y-4 space-y-0">
+              
+              {/* Main Image Container - Relative for thumbnails overlay */}
+              <div className="relative bg-gray-100 sm:rounded-xl overflow-hidden aspect-square">
+                
+                {/* Main Image */}
                 <img
                   src={selectedImage}
                   alt={SingleProduct.title}
                   className="w-full h-full object-cover hover:scale-105 transition-transform duration-500 cursor-pointer"
                 />
+                
                 {/* Discount Badge */}
                 {SingleProduct.discount && SingleProduct.discount > 0 && (
-                  <span className="absolute top-4 left-4 bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full">
+                  <span className="absolute top-4 left-4 bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full z-10">
                     -{SingleProduct.discount}% OFF
                   </span>
                 )}
+                
                 {/* Wishlist Button */}
                 <button
                   onClick={handleWishlistToggle}
-                  className="absolute cursor-pointer top-4 right-4 bg-white/90 backdrop-blur-sm p-2.5 rounded-full shadow-md hover:shadow-lg transition-all hover:scale-110"
+                  className="absolute cursor-pointer top-4 right-4 bg-white/90 backdrop-blur-sm p-2.5 rounded-full shadow-md hover:shadow-lg transition-all hover:scale-110 z-10"
                 >
                   {isLiked ? (
                     <FaHeart className="text-red-500 text-xl" />
@@ -126,15 +130,53 @@ const ProductDetail: React.FC = () => {
                     <FaRegHeart className="text-gray-700 text-xl" />
                   )}
                 </button>
+
+                {/* ===== MOBILE: THUMBNAILS ON TOP-RIGHT ===== */}
+                <div className="absolute top-1/2 -translate-y-1/2 right-2 sm:top-4 sm:right-6 flex flex-col gap-2 z-10 sm:hidden">
+                  {/* Main image thumbnail */}
+                  <div
+                    onClick={() => setSelectedImage(SingleProduct.mainImage)}
+                    className={`sm:w-14 sm:h-14 w-10 h-10 rounded-lg overflow-hidden cursor-pointer border-2 transition-all ${
+                      selectedImage === SingleProduct.mainImage
+                        ? 'border-[#B76E79] shadow-md'
+                        : 'border-white/80 hover:border-[#B76E79]/50'
+                    }`}
+                  >
+                    <img
+                      src={SingleProduct.mainImage}
+                      alt="Main"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  
+                  {/* Other thumbnails */}
+                  {SingleProduct.moreImages?.map((image, index) => (
+                    <div
+                      key={index}
+                      onClick={() => setSelectedImage(image)}
+                      className={`sm:w-14 sm:h-14 w-10 h-10 rounded-lg overflow-hidden cursor-pointer border-2 transition-all ${
+                        selectedImage === image
+                          ? 'border-[#B76E79] shadow-md'
+                          : 'border-white/80 hover:border-[#B76E79]/50'
+                      }`}
+                    >
+                      <img
+                        src={image}
+                        alt={`Thumbnail ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
 
-              {/* Thumbnail Images */}
-              <div className="flex gap-3 overflow-x-auto pb-2">
+              {/* ===== DESKTOP: THUMBNAILS AT BOTTOM ===== */}
+              <div className="hidden sm:flex gap-3 overflow-x-auto pb-2">
                 <div
                   onClick={() => setSelectedImage(SingleProduct.mainImage)}
                   className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden cursor-pointer border-2 transition-all ${
                     selectedImage === SingleProduct.mainImage
-                      ? 'border-primary shadow-md'
+                      ? 'border-[#B76E79] shadow-md'
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
@@ -150,7 +192,7 @@ const ProductDetail: React.FC = () => {
                     onClick={() => setSelectedImage(image)}
                     className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden cursor-pointer border-2 transition-all ${
                       selectedImage === image
-                        ? 'border-primary shadow-md'
+                        ? 'border-[#B76E79] shadow-md'
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
@@ -164,8 +206,8 @@ const ProductDetail: React.FC = () => {
               </div>
             </div>
 
-            {/* Right Side - Product Info */}
-            <div className="space-y-6">
+            {/* ===== RIGHT SIDE - PRODUCT INFO ===== */}
+            <div className="sm:space-y-6 space-y-2 px-4">
               {/* Product Title */}
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 leading-tight">
                 {SingleProduct.title}
@@ -187,7 +229,7 @@ const ProductDetail: React.FC = () => {
 
               {/* Price */}
               <div className="flex items-center gap-4">
-                <span className="text-3xl font-bold text-primary">
+                <span className="text-3xl font-bold text-[#B76E79]">
                   Rs. {SingleProduct.price}
                 </span>
                 {SingleProduct.discount && SingleProduct.discount > 0 && (
@@ -207,8 +249,8 @@ const ProductDetail: React.FC = () => {
                 {SingleProduct.details}
               </p>
 
-              {/* Quantity Selector */}
-              <div className="flex items-center gap-4">
+              {/* Quantity Selector - Hidden on mobile (only in fixed bar) */}
+              <div className="hidden sm:flex items-center gap-4">
                 <span className="text-sm font-medium text-gray-700">Quantity:</span>
                 <div className="flex items-center border-2 border-gray-200 rounded-lg overflow-hidden">
                   <button
@@ -229,11 +271,11 @@ const ProductDetail: React.FC = () => {
                 </div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-3 pt-2">
+              {/* Action Buttons - Hidden on mobile (only in fixed bar) */}
+              <div className="hidden sm:flex flex-col sm:flex-row gap-3 pt-2">
                 <button
                   onClick={handleAddToCart}
-                  className="flex-1 bg-primary cursor-pointer text-white py-3.5 px-6 rounded-xl font-semibold hover:bg-primary/90 transition-all hover:shadow-lg flex items-center justify-center gap-2"
+                  className="flex-1 bg-[#B76E79] cursor-pointer text-white py-3.5 px-6 rounded-xl font-semibold hover:bg-[#B76E79]/90 transition-all hover:shadow-lg flex items-center justify-center gap-2"
                 >
                   <FiShoppingCart className="text-lg" />
                   Add to Cart
@@ -249,17 +291,17 @@ const ProductDetail: React.FC = () => {
               {/* Delivery & Service Info */}
               <div className="grid grid-cols-3 gap-3 pt-4 border-t border-gray-100">
                 <div className="text-center p-3 bg-gray-50 rounded-xl">
-                  <TbTruckDelivery className="text-2xl text-primary mx-auto mb-1" />
+                  <TbTruckDelivery className="text-2xl text-[#B76E79] mx-auto mb-1" />
                   <p className="text-xs text-gray-600 font-medium">Free Delivery</p>
                   <p className="text-[10px] text-gray-400">On orders above Rs. 2000</p>
                 </div>
                 <div className="text-center p-3 bg-gray-50 rounded-xl">
-                  <TbRefresh className="text-2xl text-primary mx-auto mb-1" />
+                  <TbRefresh className="text-2xl text-[#B76E79] mx-auto mb-1" />
                   <p className="text-xs text-gray-600 font-medium">Easy Returns</p>
                   <p className="text-[10px] text-gray-400">30 days return policy</p>
                 </div>
                 <div className="text-center p-3 bg-gray-50 rounded-xl">
-                  <TbShieldCheck className="text-2xl text-primary mx-auto mb-1" />
+                  <TbShieldCheck className="text-2xl text-[#B76E79] mx-auto mb-1" />
                   <p className="text-xs text-gray-600 font-medium">Secure Payment</p>
                   <p className="text-[10px] text-gray-400">100% secure checkout</p>
                 </div>
@@ -267,7 +309,7 @@ const ProductDetail: React.FC = () => {
 
               {/* Share & Actions */}
               <div className="flex items-center gap-4 pt-2">
-                <button className="flex items-center gap-2 text-gray-500 hover:text-primary transition text-sm">
+                <button className="flex items-center gap-2 text-gray-500 hover:text-[#B76E79] transition text-sm cursor-pointer">
                   <IoShareSocialOutline className="text-lg" />
                   Share
                 </button>
@@ -281,14 +323,14 @@ const ProductDetail: React.FC = () => {
           {/* Product Details Tabs */}
           <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
             <div className="border-b border-gray-100">
-              <div className="flex overflow-x-auto">
-                <button className="px-6 py-4 text-primary font-semibold border-b-2 border-primary">
+              <div className="flex overflow-x-auto ">
+                <button className="px-6 py-4 text-[#B76E79] font-semibold border-b-2 border-[#B76E79] cursor-pointer">
                   Product Details
                 </button>
-                <button className="px-6 py-4 text-gray-500 font-medium hover:text-gray-700 transition whitespace-nowrap">
+                <button className="px-6 py-4 text-gray-500 font-medium hover:text-gray-700 transition whitespace-nowrap cursor-pointer">
                   Specifications
                 </button>
-                <button className="px-6 py-4 text-gray-500 font-medium hover:text-gray-700 transition whitespace-nowrap">
+                <button className="px-6 py-4 text-gray-500 font-medium hover:text-gray-700 transition whitespace-nowrap cursor-pointer">
                   Reviews ({SingleProduct.review?.length || 0})
                 </button>
               </div>
@@ -298,23 +340,23 @@ const ProductDetail: React.FC = () => {
               <h3 className="text-lg font-bold text-gray-800 mb-4">Product Details</h3>
               <ul className="space-y-2">
                 <li className="flex items-start gap-3 text-gray-600">
-                  <IoCheckmarkCircle className="text-primary text-lg mt-0.5 flex-shrink-0" />
+                  <IoCheckmarkCircle className="text-[#B76E79] text-lg mt-0.5 flex-shrink-0" />
                   Premium quality fabric, soft and comfortable
                 </li>
                 <li className="flex items-start gap-3 text-gray-600">
-                  <IoCheckmarkCircle className="text-primary text-lg mt-0.5 flex-shrink-0" />
+                  <IoCheckmarkCircle className="text-[#B76E79] text-lg mt-0.5 flex-shrink-0" />
                   Available in multiple sizes and colors
                 </li>
                 <li className="flex items-start gap-3 text-gray-600">
-                  <IoCheckmarkCircle className="text-primary text-lg mt-0.5 flex-shrink-0" />
+                  <IoCheckmarkCircle className="text-[#B76E79] text-lg mt-0.5 flex-shrink-0" />
                   Free shipping on orders above Rs. 2000
                 </li>
                 <li className="flex items-start gap-3 text-gray-600">
-                  <IoCheckmarkCircle className="text-primary text-lg mt-0.5 flex-shrink-0" />
+                  <IoCheckmarkCircle className="text-[#B76E79] text-lg mt-0.5 flex-shrink-0" />
                   30-day return policy for hassle-free returns
                 </li>
                 <li className="flex items-start gap-3 text-gray-600">
-                  <IoCheckmarkCircle className="text-primary text-lg mt-0.5 flex-shrink-0" />
+                  <IoCheckmarkCircle className="text-[#B76E79] text-lg mt-0.5 flex-shrink-0" />
                   Cash on delivery available nationwide
                 </li>
               </ul>
@@ -386,10 +428,10 @@ const ProductDetail: React.FC = () => {
             )}
           </button>
 
-          {/* Action Buttons */}
+          {/* Action Buttons - ONLY IN FIXED BAR */}
           <button
             onClick={handleAddToCart}
-            className="cursor-pointer flex-1 bg-primary text-white py-3 rounded-xl font-semibold text-sm hover:bg-[#b76e79de] transition"
+            className="cursor-pointer flex-1 bg-[#B76E79] text-white py-3 rounded-xl font-semibold text-sm hover:bg-[#B76E79]/90 transition"
           >
             Add to Cart
           </button>

@@ -4,8 +4,6 @@ import { useCart } from './context/cartContext';
 import { useAuth } from '../Auth/authContext';
 import { 
   FaUser, 
-  FaEnvelope, 
-  FaPhone, 
   FaMapMarkerAlt, 
   FaBuilding,
   FaHome,
@@ -18,7 +16,7 @@ import {
   FaMobileAlt,
   FaCheckCircle,
   FaPlus,
-  FaEdit
+  FaTimes
 } from 'react-icons/fa';
 import { FiShoppingCart, FiClock } from 'react-icons/fi';
 
@@ -49,6 +47,11 @@ const CheckoutPage = () => {
     return addresses ? JSON.parse(addresses) : [];
   });
 
+  // ✅ Save addresses to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('userAddresses', JSON.stringify(savedAddresses));
+  }, [savedAddresses]);
+
   // Form state
   const [formData, setFormData] = useState({
     name: user?.name || '',
@@ -69,7 +72,15 @@ const CheckoutPage = () => {
   );
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // ✅ State for new address form in checkout
   const [showNewAddressForm, setShowNewAddressForm] = useState(false);
+  const [newAddressData, setNewAddressData] = useState({
+    label: 'Home',
+    address: '',
+    city: '',
+    zipCode: '',
+  });
 
   // Auto-fill form when user is logged in
   useEffect(() => {
@@ -116,6 +127,13 @@ const CheckoutPage = () => {
     });
   };
 
+  const handleNewAddressChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setNewAddressData({
+      ...newAddressData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
   const handleAddressTypeChange = (type: 'saved' | 'new') => {
     setAddressType(type);
     if (type === 'new') {
@@ -125,6 +143,7 @@ const CheckoutPage = () => {
         city: '',
         zipCode: '',
       }));
+      setShowNewAddressForm(true);
     } else if (type === 'saved' && selectedAddressId) {
       const selected = savedAddresses.find(addr => addr.id === selectedAddressId);
       if (selected) {
@@ -135,13 +154,51 @@ const CheckoutPage = () => {
           zipCode: selected.zipCode,
         }));
       }
+      setShowNewAddressForm(false);
     }
+  };
+
+  // ✅ Function to save address from checkout
+  const handleSaveNewAddress = () => {
+    if (!newAddressData.address || !newAddressData.city) {
+      alert('Please fill address and city!');
+      return;
+    }
+
+    const newAddress: AddressType = {
+      id: Date.now(),
+      label: newAddressData.label,
+      address: newAddressData.address,
+      city: newAddressData.city,
+      zipCode: newAddressData.zipCode,
+      isDefault: savedAddresses.length === 0,
+    };
+
+    // ✅ UPDATE savedAddresses using setSavedAddresses
+    setSavedAddresses([...savedAddresses, newAddress]);
+    
+    // Auto-select the new address
+    setSelectedAddressId(newAddress.id);
+    setFormData(prev => ({
+      ...prev,
+      address: newAddress.address,
+      city: newAddress.city,
+      zipCode: newAddress.zipCode,
+    }));
+    
+    setShowNewAddressForm(false);
+    setNewAddressData({ label: 'Home', address: '', city: '', zipCode: '' });
+    alert('Address saved successfully!');
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     
+   setTimeout(() => {
+     window.dispatchEvent(new Event('order-updated'));
+    }, 2000);
+
     setTimeout(() => {
       const newOrder = {
         id: '#' + Date.now().toString().slice(-6),
@@ -192,16 +249,6 @@ const CheckoutPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 sm:py-12">
       <div className="container mx-auto px-4 max-w-6xl mt-[65px]">
-        
-        {/* Page Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-800">
-            {isBuyNow ? 'Buy Now' : 'Checkout'}
-          </h1>
-          <p className="text-gray-500 mt-1">
-            {isBuyNow ? 'Complete your purchase' : 'Review and confirm your order'}
-          </p>
-        </div>
 
         <div className="flex flex-col lg:flex-row gap-8">
           
@@ -256,7 +303,7 @@ const CheckoutPage = () => {
                       required
                       value={formData.name}
                       onChange={handleChange}
-                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#B76E79] focus:ring-2 focus:ring-[#B76E79]/20 transition"
+                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#B76E79] focus:ring-2 focus:ring-[#B76E79]/20 transition cursor-pointer"
                       placeholder="Enter your name"
                     />
                   </div>
@@ -270,7 +317,7 @@ const CheckoutPage = () => {
                       required
                       value={formData.email}
                       onChange={handleChange}
-                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#B76E79] focus:ring-2 focus:ring-[#B76E79]/20 transition"
+                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#B76E79] focus:ring-2 focus:ring-[#B76E79]/20 transition cursor-pointer"
                       placeholder="your@email.com"
                     />
                   </div>
@@ -284,7 +331,7 @@ const CheckoutPage = () => {
                       required
                       value={formData.phone}
                       onChange={handleChange}
-                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#B76E79] focus:ring-2 focus:ring-[#B76E79]/20 transition"
+                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#B76E79] focus:ring-2 focus:ring-[#B76E79]/20 transition cursor-pointer"
                       placeholder="03XX-XXXXXXX"
                     />
                   </div>
@@ -358,10 +405,87 @@ const CheckoutPage = () => {
                         ))}
                       </div>
                     )}
+
+                    {/* ✅ NEW ADDRESS FORM (inside checkout) */}
+                    {addressType === 'new' && showNewAddressForm && (
+                      <div className="mt-4 p-4 border-2 border-[#B76E79]/30 rounded-xl bg-[#B76E79]/5">
+                        <div className="flex justify-between items-center mb-3">
+                          <h4 className="font-semibold text-gray-800">Add New Address</h4>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowNewAddressForm(false);
+                              setAddressType('saved');
+                            }}
+                            className="text-gray-400 hover:text-gray-600 cursor-pointer"
+                          >
+                            <FaTimes />
+                          </button>
+                        </div>
+                        
+                        <div className="space-y-3">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Address Label</label>
+                            <select
+                              name="label"
+                              value={newAddressData.label}
+                              onChange={handleNewAddressChange}
+                              className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#B76E79] cursor-pointer"
+                            >
+                              <option value="Home">🏠 Home</option>
+                              <option value="Office">🏢 Office</option>
+                              <option value="Other">📍 Other</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Address *</label>
+                            <input
+                              type="text"
+                              name="address"
+                              value={newAddressData.address}
+                              onChange={handleNewAddressChange}
+                              className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#B76E79] cursor-pointer"
+                              placeholder="House #, Street, Area"
+                            />
+                          </div>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">City *</label>
+                              <input
+                                type="text"
+                                name="city"
+                                value={newAddressData.city}
+                                onChange={handleNewAddressChange}
+                                className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#B76E79] cursor-pointer"
+                                placeholder="City"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">ZIP Code</label>
+                              <input
+                                type="text"
+                                name="zipCode"
+                                value={newAddressData.zipCode}
+                                onChange={handleNewAddressChange}
+                                className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#B76E79] cursor-pointer"
+                                placeholder="75000"
+                              />
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={handleSaveNewAddress}
+                            className="w-full bg-[#B76E79] text-white py-2.5 rounded-xl font-medium hover:bg-[#B76E79]/90 transition cursor-pointer"
+                          >
+                            Save Address
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ) : null}
 
-                {/* New Address Form */}
+                {/* New Address Form for non-logged in users */}
                 {(addressType === 'new' || (!isLoggedIn || savedAddresses.length === 0)) && (
                   <div className="space-y-4 mt-4">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -375,7 +499,7 @@ const CheckoutPage = () => {
                           required
                           value={formData.address}
                           onChange={handleChange}
-                          className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#B76E79] focus:ring-2 focus:ring-[#B76E79]/20 transition"
+                          className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#B76E79] focus:ring-2 focus:ring-[#B76E79]/20 transition cursor-pointer"
                           placeholder="House #, Street, Area"
                         />
                       </div>
@@ -389,7 +513,7 @@ const CheckoutPage = () => {
                           required
                           value={formData.city}
                           onChange={handleChange}
-                          className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#B76E79] focus:ring-2 focus:ring-[#B76E79]/20 transition"
+                          className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#B76E79] focus:ring-2 focus:ring-[#B76E79]/20 transition cursor-pointer"
                           placeholder="Enter your city"
                         />
                       </div>
@@ -402,7 +526,7 @@ const CheckoutPage = () => {
                           name="zipCode"
                           value={formData.zipCode}
                           onChange={handleChange}
-                          className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#B76E79] focus:ring-2 focus:ring-[#B76E79]/20 transition"
+                          className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#B76E79] focus:ring-2 focus:ring-[#B76E79]/20 transition cursor-pointer"
                           placeholder="75000"
                         />
                       </div>
@@ -432,7 +556,7 @@ const CheckoutPage = () => {
                       value="cod"
                       checked={formData.paymentMethod === 'cod'}
                       onChange={handleChange}
-                      className="w-5 h-5 accent-[#B76E79]"
+                      className="w-5 h-5 accent-[#B76E79] cursor-pointer"
                     />
                     <FaMoneyBillWave className="text-2xl text-green-600" />
                     <div>
@@ -452,7 +576,7 @@ const CheckoutPage = () => {
                       value="credit_card"
                       checked={formData.paymentMethod === 'credit_card'}
                       onChange={handleChange}
-                      className="w-5 h-5 accent-[#B76E79]"
+                      className="w-5 h-5 accent-[#B76E79] cursor-pointer"
                     />
                     <FaCreditCard className="text-2xl text-blue-500" />
                     <div>
@@ -472,7 +596,7 @@ const CheckoutPage = () => {
                       value="jazzcash"
                       checked={formData.paymentMethod === 'jazzcash'}
                       onChange={handleChange}
-                      className="w-5 h-5 accent-[#B76E79]"
+                      className="w-5 h-5 accent-[#B76E79] cursor-pointer"
                     />
                     <FaMobileAlt className="text-2xl text-orange-500" />
                     <div>

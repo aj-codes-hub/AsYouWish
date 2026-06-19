@@ -112,7 +112,8 @@ const hangleLoginModalOpen = () => {
        </Link>
 
         <button  onClick={hangleLoginModalOpen}
-                 className='p-[10px] rounded-full text-[20px] cursor-pointer'>
+                 className={`p-[10px] rounded-full text-[20px] cursor-pointer  
+                            ${window.location.pathname === '/Profile' ? 'bg-[#fef4f0]' : ''}`}>
            <IoPersonOutline />
        </button>
        
