@@ -63,18 +63,18 @@ const AdminLogin = () => {
       <div className="relative w-full max-w-md">
         
         {/* Card with shadow */}
-        <div className="bg-white rounded-3xl shadow-2xl shadow-[#B76E79]/10 border border-[#B76E79]/10 px-6 py-5 scale-[0.9]">
+        <div className="bg-white rounded-3xl shadow-2xl shadow-[#B76E79]/10 border border-[#B76E79]/10 px-6 py-5 md:scale-[0.9]">
           
           {/* ===== HEADER ===== */}
           <div className="text-center mb-8">
 
-          <div className='cursor-pointer md:h-[75px] md:w-[270px] h-[30px] mx-auto w-[110px] relative'
+          <div className='cursor-pointer md:h-[75px] md:w-[270px] h-[60px] mx-auto w-[200px] relative'
                     onClick={() => window.location.pathname='/'}>
                   <img src='/images/Logo.png' alt='LOGO'
                        className='w-full h-full'/>
           </div>
 
-            <p className="text-[#B76E79] text-lg font-medium tracking-wider uppercase mt-0.5">
+            <p className="text-[#B76E79] text-md md:text-lg font-medium tracking-wider uppercase mt-0.5">
               Admin Panel
             </p>
 
@@ -201,7 +201,7 @@ const AdminLogin = () => {
         </div>
 
         {/* Footer */}
-        <div className="text-center mt-6 text-xs text-gray-400/60 tracking-widest">
+        <div className="text-center mt-6 text-xs text-gray-100/90 tracking-widest">
           <span>● AS YOU WISH — Admin Portal ●</span>
         </div>
       </div>
