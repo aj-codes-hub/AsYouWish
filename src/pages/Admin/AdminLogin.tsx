@@ -1,4 +1,3 @@
-// src/pages/Admin/AdminLogin.tsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAdmin } from '../context/AdminContext';
@@ -12,7 +11,7 @@ import {
   FaShieldAlt,
   FaCrown
 } from 'react-icons/fa';
-import { FiShoppingBag } from 'react-icons/fi';
+
 
 const AdminLogin = () => {
   const [email, setEmail] = useState('admin@asyouwish.com');
