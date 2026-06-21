@@ -1,11 +1,11 @@
 
 export type ReviewType = {
-    // id: number;
-    // customerName: string;
-    // message:string;
-    // Rating: number;
-    // mainImage: string;
-    // moreImages: string[];
+    id: number;
+    customerName: string;
+    message:string;
+    Rating: number;
+    mainImage: string;
+    moreImages: string[];
 }
 
 

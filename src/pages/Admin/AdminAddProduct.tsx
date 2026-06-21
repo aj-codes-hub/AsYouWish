@@ -1,4 +1,3 @@
-// src/pages/Admin/AdminAddProduct.tsx
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaArrowLeft, FaUpload, FaTimes, FaImage } from 'react-icons/fa';
@@ -59,7 +58,7 @@ const AdminAddProduct = () => {
 
     // Create a copy of current moreImages
     let updatedMoreImages = [...formData.moreImages];
-    let currentIndex = 0;
+
 
     // Loop through each image file
     imageFiles.forEach((file) => {
@@ -91,58 +90,6 @@ const AdminAddProduct = () => {
     });
   };
 
-  // ✅ Alternative: Better approach with Promise
-  const handleMoreImageUploadBetter = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
-
-    const fileArray = Array.from(files);
-    const imageFiles = fileArray.filter(file => file.type.startsWith('image/'));
-
-    // Read all files as base64
-    const readFile = (file: File): Promise<string> => {
-      return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          resolve(event.target?.result as string);
-        };
-        reader.readAsDataURL(file);
-      });
-    };
-
-    try {
-      const imageUrls = await Promise.all(imageFiles.map(file => readFile(file)));
-      
-      // Limit to 3 images
-      const limitedUrls = imageUrls.slice(0, 3);
-      
-      // Update state
-      setFormData(prev => {
-        let newMoreImages = [...prev.moreImages];
-        let idx = 0;
-        
-        for (let i = 0; i < newMoreImages.length && idx < limitedUrls.length; i++) {
-          if (newMoreImages[i] === '') {
-            newMoreImages[i] = limitedUrls[idx];
-            idx++;
-          }
-        }
-        
-        // Agar abhi bhi images bachi hain aur slots khatam ho gaye
-        while (idx < limitedUrls.length && newMoreImages.length < 3) {
-          newMoreImages.push(limitedUrls[idx]);
-          idx++;
-        }
-        
-        return {
-          ...prev,
-          moreImages: newMoreImages,
-        };
-      });
-    } catch (error) {
-      console.error('Error uploading images:', error);
-    }
-  };
 
   const removeMoreImage = (index: number) => {
     const newImages = [...formData.moreImages];

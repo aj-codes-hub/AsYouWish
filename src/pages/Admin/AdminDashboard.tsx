@@ -1,5 +1,5 @@
 // src/pages/Admin/AdminDashboard.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAdmin } from '../context/AdminContext';
 import { 
@@ -10,7 +10,6 @@ import {
   FaEye,
   FaSignOutAlt,
   FaPlus,
-  FaUserCircle,
   FaChartLine,
   FaClock,
   FaCheckCircle,
@@ -18,11 +17,8 @@ import {
   FaSpinner,
   FaArrowRight,
   FaHome,
-  FaTag,
-  FaUserFriends,
-  FaDollarSign
 } from 'react-icons/fa';
-import { FiShoppingCart, FiPackage, FiTrendingUp, FiUser } from 'react-icons/fi';
+import { FiShoppingCart, FiPackage} from 'react-icons/fi';
 
 const AdminDashboard: React.FC = () => {
   const { admin, isAdminLoggedIn, adminLogout } = useAdmin();

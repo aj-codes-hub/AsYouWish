@@ -1,4 +1,4 @@
-import type { ProductType } from "./productType";
+import type { ProductType } from "./Types/productType";
 
 export const Product: ProductType[] = [
     {
@@ -10,6 +10,16 @@ export const Product: ProductType[] = [
        Rating: 5,
        discount: 50,
        mainImage: "/images/blue-dress.jpg",
+       stock: 10,
+       category: 'shalwar kameez',
+       isFeatured: true,
+       createdAt: 'Gul Ahmed',
+       fabricType: 'lawn',
+       productType: 'shalwar kameez',
+       designType: 'froak',
+       pieces: '3 piese',
+       color: "black",
+       size: "free",
        moreImages:[
         "/images/yellow-dress.jpg",
         "/images/white-dress.jpg",
