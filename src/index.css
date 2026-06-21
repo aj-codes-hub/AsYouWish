@@ -4,6 +4,7 @@
 @import "swiper/css/pagination";
 @import "swiper/css/scrollbar";
 
+
 h1{
   font-family: 'Times New Roman', Times, serif;
 }
@@ -414,3 +415,34 @@ h1{
 .animate-scale-up {
     animation: scale-up 0.3s ease-out;
 }
+
+/* src/index.css */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.animate-slideDown {
+  animation: slideDown 0.3s ease-out;
+}
+
+

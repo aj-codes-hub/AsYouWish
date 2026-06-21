@@ -57,7 +57,7 @@ const handlePorductClick = () => {
     <>
     <div
          className={`sm:h-[380px] h-[290px] w-[100%] overflow-hidden hover:rounded-xl hover:shadow-2xl hover:scale-[1.01] transition-all duration-500 cursor-pointer group ${className}`}>
-        <div className='h-[75%] w-full overflow-hidden relative'>
+        <div className='h-[75%] w-full overflow-hidden relative bg-gradient-to-bl from-[#B0AEA2] to-[#CFCDC1]'>
            <img onClick={handlePorductClick} src={Image} className='group-hover:scale-[1.08] transition-all duration-500'/>
            
            <div  onClick={handleWishClick}

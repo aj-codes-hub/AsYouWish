@@ -209,7 +209,7 @@ const ProductDetail: React.FC = () => {
                   className="absolute cursor-pointer top-4 right-4 bg-white/90 backdrop-blur-sm p-2.5 rounded-full shadow-md hover:shadow-lg transition-all hover:scale-110 z-10"
                 >
                   {isLiked ? (
-                    <FaHeart className="text-red-500 text-xl" />
+                    <FaHeart className="text-primary text-xl" />
                   ) : (
                     <FaRegHeart className="text-gray-700 text-xl" />
                   )}
@@ -473,7 +473,7 @@ const ProductDetail: React.FC = () => {
             className="p-3 bg-gray-100 rounded-xl flex-shrink-0 cursor-pointer"
           >
             {isLiked ? (
-              <FaHeart className="text-red-500 text-xl" />
+              <FaHeart className="text-primary text-xl" />
             ) : (
               <FaRegHeart className="text-gray-700 text-xl" />
             )}

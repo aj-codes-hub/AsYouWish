@@ -4,14 +4,15 @@ import { Swiper, SwiperSlide } from 'swiper/react'
 import { Pagination , Navigation , Autoplay } from 'swiper/modules'
 import { Product } from '../../../data/productCard/product'
 import { FaAngleLeft , FaAngleRight } from "react-icons/fa6";
+import { useNavigate } from 'react-router-dom'
 
 const NewArrivals:React.FC = () => {
-  
+  const navigate = useNavigate()
      const swiperRef = useRef<any>(null);
 
 
   return (
-     <div className='max-w-[1100px] mx-auto w-full py-[60px] bg-white'>
+     <div id='NewArrivals' className='max-w-[1100px] mx-auto w-full py-[60px] bg-white'>
         
         <div className='relative w-full px-[30px] xl:px-[0px]'>
 
@@ -23,7 +24,8 @@ const NewArrivals:React.FC = () => {
             Fresh styles just for you
         </p>
 
-         <button className='py-[10px] sm:text-[12px] text-[10px] bg-transparent border-[B76E79] border-2 px-[24px] font-semibold text-primary rounded-full mx-auto flex items-center gap-2 
+         <button onClick={() => navigate('/Collection')}
+                 className='py-[10px] sm:text-[12px] text-[10px] bg-transparent border-[B76E79] border-2 px-[24px] font-semibold text-primary rounded-full mx-auto flex items-center gap-2 
                             absolute top-1/2 -translate-y-1/2 right-[30px] xl:right-[0px] cursor-pointer hover:scale-[1.05] transition duration-500 group'>
                 View All        
         </button>

@@ -1,11 +1,12 @@
 import React from 'react'
 import { FaArrowRight } from "react-icons/fa";
-
-
+import { smoothScrollTo } from '../../../Utils/scrollUtils'
+ 
 
 
 
 const HeroSection:React.FC = () => {
+
   return (
     <div className='sm:h-[600px] h-[620px] w-full fixed sm:relative z-[-20] sm:z-[1] top-0'> 
          
@@ -23,7 +24,8 @@ const HeroSection:React.FC = () => {
           Discover timeless elegance with our curated collection of premium women's fashion
        </p>
 
-       <button className='mt-[20px] py-[12px] text-[14px] bg-primary px-[18px] text-white rounded-full mx-auto flex items-center gap-2 
+       <button  onClick={() => smoothScrollTo('FeatureCollection', 45, 1000)}
+               className='mt-[20px] py-[12px] text-[14px] bg-primary px-[18px] text-white rounded-full mx-auto flex items-center gap-2 
                           cursor-pointer hover:scale-[1.05] transition duration-500 group'>
         Shop now
         <FaArrowRight className='mt-[3px] font-thin group-hover:ml-[5px] transition-all duration-500'/> 

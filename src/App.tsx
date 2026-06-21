@@ -18,6 +18,18 @@ import OrderSuccessPage from "./pages/OrderSuccessPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import { AuthProvider } from "./Auth/authContext";
 import UserProfilePage from "./pages/UserProfile/UserProfilePage";
+import Collection from "./pages/Collection";
+import AboutPage from "./pages/About";
+import AdminRoute from "./components/AdminRoute";
+import AdminDashboard from "./pages/Admin/AdminDashboard";
+import AdminLogin from "./pages/Admin/AdminLogin";
+import { AdminProvider } from "./pages/context/AdminContext";
+import AdminProducts from "./pages/Admin/AdminProducts";
+import AdminAddProduct from "./pages/Admin/AdminAddProduct";
+import AdminEditProduct from "./pages/Admin/AdminEditProduct";
+// ✅ ProductProvider IMPORT KARO
+import { ProductProvider } from "./pages/context/ProductContext";
+import NotFoundPage from "./pages/NotFoundPage";
 
 function AppContent() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -39,13 +51,37 @@ function AppContent() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/profile" element={<UserProfilePage />} /> 
+          <Route path="/about" element={<AboutPage />} />
           <Route path="/product-detail/:id" element={<ProductDetail />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/favurite-product" element={<LikeProduct />} />
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/order-success" element={<OrderSuccessPage />} />
+          <Route path="/collection" element={<Collection />} />
+          <Route path="/1st-admin/a-y-w/login" element={<AdminLogin />} />
+          <Route path="/admin/dashboard" element={
+            <AdminRoute>
+              <AdminDashboard />
+            </AdminRoute>
+          } />
+          <Route path="/admin/products" element={
+            <AdminRoute>
+              <AdminProducts />
+            </AdminRoute>
+          } />
+          <Route path="/admin/products/add" element={
+            <AdminRoute>
+              <AdminAddProduct />
+            </AdminRoute>
+          } />
+          <Route path="/admin/products/edit/:id" element={
+            <AdminRoute>
+              <AdminEditProduct />
+            </AdminRoute> 
+          } />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
-        <Footer />
+        <Footer /> 
       </BrowserRouter>
     </>
   );
@@ -53,13 +89,17 @@ function AppContent() {
 
 function App() {
   return (
-    <AuthProvider>
-    <WishlistProvider>
-    <CartProvider>
-      <AppContent />
-    </CartProvider>
-    </WishlistProvider>
-    </AuthProvider>
+    <AdminProvider> 
+      <AuthProvider>
+        <WishlistProvider>
+          <CartProvider>
+            <ProductProvider>
+              <AppContent />
+            </ProductProvider>
+          </CartProvider>
+        </WishlistProvider>
+      </AuthProvider>
+    </AdminProvider>
   );
 }
 
