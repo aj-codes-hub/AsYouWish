@@ -1,44 +1,57 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { FaStar, FaRegStar, FaStarHalfAlt } from "react-icons/fa";
-import { FaRegHeart, FaHeart } from "react-icons/fa";
+import { FaRegHeart } from "react-icons/fa";
+import { IoHeart } from "react-icons/io5";
 import { IoShareSocialOutline } from "react-icons/io5";
 import { FiMinus, FiPlus, FiShoppingCart } from "react-icons/fi";
 import { IoCheckmarkCircle } from "react-icons/io5";
 import { TbTruckDelivery, TbRefresh, TbShieldCheck } from "react-icons/tb";
 import ProductReview from './Component/productReview';
-import { Product } from '../../data/productCard/product'
 import { useNavigate, useParams } from 'react-router-dom';
 import { useCart } from '../context/cartContext';
 import { useWishlist } from '../context/wishlistContext';
+import { getProductById } from '../../services/productService';
 
 const ProductDetail: React.FC = () => {
   const navigate = useNavigate();
   const { addToCart, setBuyNowProduct } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const { id } = useParams();
-  const SingleProduct = Product.find(item => item.id === Number(id));
+  
+  // ✅ State for product from backend
+  const [product, setProduct] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   // State for quantity
   const [quantity, setQuantity] = useState(1);
 
   // State for selected image
-  const [selectedImage, setSelectedImage] = useState(SingleProduct?.mainImage || '');
+  const [selectedImage, setSelectedImage] = useState('');
 
   // Check if product is in wishlist
-  const isLiked = SingleProduct ? isInWishlist(SingleProduct.id) : false;
+  const isLiked = product ? isInWishlist(product._id || product.id) : false;
 
   // ✅ Swipe state
   const [touchStartX, setTouchStartX] = useState(0);
   const [touchEndX, setTouchEndX] = useState(0);
   const imageContainerRef = useRef<HTMLDivElement>(null);
 
-  if (!SingleProduct) {
-    return (
-      <div className='text-center py-20'>
-        <h1 className='text-2xl text-red-500'>Product not found!</h1>
-      </div>
-    );
-  }
+  // ✅ Fetch product from backend
+  useEffect(() => {
+    const fetchProduct = async () => {
+        try {
+            const data = await getProductById(id!);
+            setProduct(data);
+            setSelectedImage(data.mainImage);
+        } catch (err: any) {
+            setError(err.message || 'Product not found');
+        } finally {
+            setLoading(false);
+        }
+    };
+    fetchProduct();
+}, [id]);
 
   // Handle quantity change
   const handleQuantityChange = (type: 'increment' | 'decrement') => {
@@ -51,32 +64,38 @@ const ProductDetail: React.FC = () => {
 
   // Handle Buy Now
   const handleBuyNow = () => {
-    setBuyNowProduct({
-      id: SingleProduct.id,
-      title: SingleProduct.title,
-      price: SingleProduct.price,
-      quantity: quantity,
-      mainImage: SingleProduct.mainImage
-    });
-    navigate('/checkout');
+    if (product) {
+      setBuyNowProduct({
+        id: product._id || product.id,
+        title: product.title,
+        price: product.price,
+        quantity: quantity,
+        mainImage: product.mainImage
+      });
+      navigate('/checkout');
+    }
   };
 
   // Handle Add to Cart
   const handleAddToCart = () => {
-    for (let i = 0; i < quantity; i++) {
-      addToCart(SingleProduct);
+    if (product) {
+      for (let i = 0; i < quantity; i++) {
+        addToCart(product);
+      }
     }
   };
 
-  // Handle Wishlist toggle
-  const handleWishlistToggle = () => {
-    if (isLiked) {
-      removeFromWishlist(SingleProduct.id);
+ const handleWishlistToggle = () => {
+  if (product) {
+    const productId = product._id || product.id;
+    
+    if (isInWishlist(productId)) {
+      removeFromWishlist(productId);
     } else {
-      addToWishlist(SingleProduct);
+      addToWishlist(product);
     }
-  };
-
+  }
+};
   // Generate star rating
   const renderStars = (rating: number) => {
     const stars = [];
@@ -96,32 +115,31 @@ const ProductDetail: React.FC = () => {
     return stars;
   };
 
-  // ✅ Get all images array (main + moreImages)
+  // Get all images array (main + moreImages)
   const getAllImages = () => {
-    const images = [SingleProduct.mainImage];
-    if (SingleProduct.moreImages) {
-      images.push(...SingleProduct.moreImages);
+    if (!product) return [];
+    const images = [product.mainImage];
+    if (product.moreImages) {
+      images.push(...product.moreImages);
     }
     return images;
   };
 
   const allImages = getAllImages();
 
-  // ✅ Handle image change on swipe
+  // Handle image change on swipe
   const handleImageChange = (direction: 'left' | 'right') => {
     const currentIndex = allImages.indexOf(selectedImage);
     if (direction === 'left') {
-      // Next image
       const nextIndex = (currentIndex + 1) % allImages.length;
       setSelectedImage(allImages[nextIndex]);
     } else {
-      // Previous image
       const prevIndex = (currentIndex - 1 + allImages.length) % allImages.length;
       setSelectedImage(allImages[prevIndex]);
     }
   };
 
-  // ✅ Touch handlers for mobile swipe
+  // Touch handlers for mobile swipe
   const handleTouchStart = (e: React.TouchEvent) => {
     setTouchStartX(e.targetTouches[0].clientX);
   };
@@ -134,22 +152,38 @@ const ProductDetail: React.FC = () => {
     if (!touchStartX || !touchEndX) return;
     
     const diff = touchStartX - touchEndX;
-    const threshold = 50; // Minimum swipe distance
+    const threshold = 50;
     
     if (Math.abs(diff) > threshold) {
       if (diff > 0) {
-        // Swiped left - Next image
         handleImageChange('left');
       } else {
-        // Swiped right - Previous image
         handleImageChange('right');
       }
     }
     
-    // Reset
     setTouchStartX(0);
     setTouchEndX(0);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#B76E79] border-t-transparent"></div>
+      </div>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <div className='text-center py-20'>
+        <h1 className='text-2xl text-red-500'>{error || 'Product not found!'}</h1>
+        <button onClick={() => navigate(-1)} className="mt-4 bg-[#B76E79] text-white px-4 py-2 rounded">
+          Go Back
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -162,7 +196,7 @@ const ProductDetail: React.FC = () => {
             {/* ===== LEFT SIDE - PRODUCT IMAGES ===== */}
             <div className="sm:space-y-4 space-y-0">
               
-              {/* Main Image Container - with swipe support */}
+              {/* Main Image Container */}
               <div 
                 ref={imageContainerRef}
                 className="relative bg-gray-100 sm:rounded-xl overflow-hidden aspect-square"
@@ -170,14 +204,13 @@ const ProductDetail: React.FC = () => {
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
               >
-                {/* Main Image */}
                 <img
                   src={selectedImage}
-                  alt={SingleProduct.title}
+                  alt={product.title}
                   className="w-full h-full object-cover hover:scale-105 transition-transform duration-500 cursor-pointer"
                 />
                 
-                {/* ✅ Swipe Indicator - Left/Right arrows on mobile */}
+                {/* Swipe Indicator */}
                 <div className="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-2 pointer-events-none sm:hidden">
                   <div className="pointer-events-auto bg-black/30 text-white p-1 rounded-full opacity-60">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -191,31 +224,32 @@ const ProductDetail: React.FC = () => {
                   </div>
                 </div>
 
-                {/* ✅ Image counter on mobile */}
+                {/* Image counter on mobile */}
                 <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/60 text-white text-xs px-3 py-1 rounded-full sm:hidden">
                   {allImages.indexOf(selectedImage) + 1} / {allImages.length}
                 </div>
                 
                 {/* Discount Badge */}
-                {SingleProduct.discount && SingleProduct.discount > 0 && (
+                {product.discount && product.discount > 0 && (
                   <span className="absolute top-4 left-4 bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full z-10">
-                    -{SingleProduct.discount}% OFF
+                    -{product.discount}% OFF
                   </span>
                 )}
                 
                 {/* Wishlist Button */}
                 <button
                   onClick={handleWishlistToggle}
-                  className="absolute cursor-pointer top-4 right-4 bg-white/90 backdrop-blur-sm p-2.5 rounded-full shadow-md hover:shadow-lg transition-all hover:scale-110 z-10"
+                  className="absolute cursor-pointer top-4 right-4 bg-white/50 backdrop-blur-sm p-2.5 rounded-full shadow-md hover:shadow-lg transition-all hover:scale-110 z-10"
                 >
                   {isLiked ? (
-                    <FaHeart className="text-primary text-xl" />
+                    <IoHeart className="text-primary text-xl" />
                   ) : (
-                    <FaRegHeart className="text-gray-700 text-xl" />
+                    <FaRegHeart className="text-black text-xl" />
                   )}
                 </button>
+                
 
-                {/* ===== MOBILE: THUMBNAILS ON TOP-RIGHT ===== */}
+                {/* Mobile Thumbnails */}
                 <div className="absolute sm:top-4 sm:right-16 top-1/2 -translate-y-1/2 right-6 flex flex-col gap-2 z-10 sm:hidden">
                   {allImages.map((img, index) => (
                     <div
@@ -237,7 +271,7 @@ const ProductDetail: React.FC = () => {
                 </div>
               </div>
 
-              {/* ===== DESKTOP: THUMBNAILS AT BOTTOM ===== */}
+              {/* Desktop Thumbnails */}
               <div className="hidden sm:flex gap-3 overflow-x-auto pb-2">
                 {allImages.map((img, index) => (
                   <div
@@ -263,35 +297,35 @@ const ProductDetail: React.FC = () => {
             <div className="sm:space-y-6 space-y-1 p-4">
               {/* Product Title */}
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 leading-tight">
-                {SingleProduct.title}
+                {product.title}
               </h1>
 
               {/* Rating */}
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-1">
-                  {renderStars(SingleProduct.Rating || 5)}
+                  {renderStars(product.Rating || 5)}
                 </div>
                 <span className="text-sm text-gray-500">
-                  ({SingleProduct.Rating || 5}.0)
+                  ({product.Rating || 5}.0)
                 </span>
                 <span className="text-sm text-gray-400">|</span>
                 <span className="text-sm text-gray-500">
-                  {SingleProduct.review?.length || 0} Reviews
+                  {product.review?.length || 0} Reviews
                 </span>
               </div>
 
               {/* Price */}
               <div className="flex items-center gap-4">
                 <span className="text-3xl font-bold text-[#B76E79]">
-                  Rs. {SingleProduct.price}
+                  Rs. {product.price}
                 </span>
-                {SingleProduct.discount && SingleProduct.discount > 0 && (
+                {product.discount && product.discount > 0 && (
                   <>
                     <span className="text-lg text-gray-400 line-through">
-                      Rs. {Math.round(SingleProduct.price / (1 - SingleProduct.discount / 100))}
+                      Rs. {Math.round(product.price * product.discount / 100)}
                     </span>
                     <span className="bg-green-100 text-green-700 text-sm font-semibold px-3 py-1 rounded-full">
-                      {SingleProduct.discount}% OFF
+                      {product.discount}% OFF
                     </span>
                   </>
                 )}
@@ -299,7 +333,7 @@ const ProductDetail: React.FC = () => {
 
               {/* Description */}
               <p className="text-gray-600 leading-relaxed">
-                {SingleProduct.details}
+                {product.details}
               </p>
 
               {/* Quantity Selector - Hidden on mobile */}
@@ -384,7 +418,7 @@ const ProductDetail: React.FC = () => {
                   Specifications
                 </button>
                 <button className="px-6 py-4 text-gray-500 font-medium hover:text-gray-700 transition whitespace-nowrap cursor-pointer">
-                  Reviews ({SingleProduct.review?.length || 0})
+                  Reviews ({product.review?.length || 0})
                 </button>
               </div>
             </div>
@@ -421,13 +455,13 @@ const ProductDetail: React.FC = () => {
             <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
               <span>Customer Reviews</span>
               <span className="text-sm font-normal text-gray-400">
-                ({SingleProduct.review?.length || 0} reviews)
+                ({product.review?.length || 0} reviews)
               </span>
             </h3>
 
-            {SingleProduct.review && SingleProduct.review.length > 0 ? (
+            {product.review && product.review.length > 0 ? (
               <div className="space-y-4">
-                {SingleProduct.review.map((item) => (
+                {product.review.map((item: any) => (
                   <ProductReview
                     key={item.id}
                     customerName={item.customerName}
@@ -473,7 +507,7 @@ const ProductDetail: React.FC = () => {
             className="p-3 bg-gray-100 rounded-xl flex-shrink-0 cursor-pointer"
           >
             {isLiked ? (
-              <FaHeart className="text-primary text-xl" />
+              <IoHeart className="text-primary text-xl" />
             ) : (
               <FaRegHeart className="text-gray-700 text-xl" />
             )}

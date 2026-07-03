@@ -1,14 +1,55 @@
-import React, { useRef } from 'react' 
+import React, { useEffect, useRef, useState } from 'react' 
 import ProductCard from '../../../components/productCard'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Pagination , Navigation , Autoplay } from 'swiper/modules'
-import { Product } from '../../../data/productCard/product'
 import { FaAngleLeft , FaAngleRight } from "react-icons/fa6";
 import { useNavigate } from 'react-router-dom'
+import { getProducts } from '../../../services'
+
+
+
+interface ProductType {
+  _id?: string;
+  id?: number;
+  title: string;
+  price: number;
+  mainImage: string;
+  isFeatured?: boolean;
+  discount: number;
+  details?: string;
+}
 
 const NewArrivals:React.FC = () => {
   const navigate = useNavigate()
      const swiperRef = useRef<any>(null);
+
+      // ✅ State ka type sahi karo
+       const [products, setProducts] = useState<ProductType[]>([]);
+       const [loading, setLoading] = useState(true);
+     
+       useEffect(() => {
+         const fetchProducts = async () => {
+           try {
+             const data = await getProducts();
+             setProducts(data);
+           } catch (error) {
+             console.error('Error fetching products:', error);
+           } finally {
+             setLoading(false);
+           }
+         };
+         fetchProducts();
+       }, []);
+    
+     
+       if (loading) {
+         return (
+           <div className="w-full bg-[#FFF8F5] py-[60px] flex justify-center items-center min-h-[300px]">
+             <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#B76E79] border-t-transparent"></div>
+           </div>
+         );
+       }
+     
 
 
   return (
@@ -73,12 +114,15 @@ const NewArrivals:React.FC = () => {
     
       >
        
-       {Product.map((item,index)=>(
+       {products.map((item,index)=>(
         <SwiperSlide key={index}>
-            <ProductCard id={item.id}
-                         Image={item.mainImage}
-                         price={item.price}
-                         title={item.title}
+            <ProductCard  key={item._id || item.id || Math.random().toString()}
+                          id={item._id as any || item.id as any}
+                          Image={item.mainImage}
+                          price={item.price}
+                          title={item.title}
+                          discount={item.discount}
+                          DiscountPrice={Math.round((item.price) - item.price * item.discount / 100)}
                          />
         </SwiperSlide>
        ))}

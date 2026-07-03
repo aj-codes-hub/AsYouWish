@@ -3,17 +3,18 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { FaArrowLeft, FaUpload, FaTimes, FaImage } from 'react-icons/fa';
 import { useProducts } from '../context/ProductContext';
+import { getProductById, updateProduct } from '../../services/productService';
 
 const AdminEditProduct = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { getProduct, updateProduct } = useProducts();
+  const { updateProduct: localUpdateProduct } = useProducts();
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
 
   const mainImageInputRef = useRef<HTMLInputElement>(null);
   const moreImageInputRef = useRef<HTMLInputElement>(null);
-
-  const product = getProduct(Number(id));
 
   const [formData, setFormData] = useState({
     title: '',
@@ -25,7 +26,6 @@ const AdminEditProduct = () => {
     category: '',
     stock: '10',
     isFeatured: false,
-    // ✅ NEW FIELDS
     fabricType: '',
     productType: '',
     designType: '',
@@ -34,35 +34,51 @@ const AdminEditProduct = () => {
     size: '',
   });
 
+  // ✅ Fetch product from backend
   useEffect(() => {
-    if (product) {
-      setFormData({
-        title: product.title,
-        price: String(product.price),
-        discount: String(product.discount || 0),
-        details: product.details,
-        mainImage: product.mainImage,
-        moreImages: product.moreImages && product.moreImages.length > 0 
-          ? [...product.moreImages, '', '', ''] 
-          : ['', '', ''],
-        category: product.category || 'Uncategorized',
-        stock: String(product.stock || 10),
-        isFeatured: product.isFeatured || false,
-        // ✅ NEW FIELDS
-        fabricType: product.fabricType || '',
-        productType: product.productType || '',
-        designType: product.designType || '',
-        pieces: product.pieces || '',
-        color: product.color || '',
-        size: product.size || '',
-      });
-    }
-  }, [product]);
+    const fetchProduct = async () => {
+      try {
+        const data = await getProductById(id!);
+        setFormData({
+          title: data.title,
+          price: String(data.price),
+          discount: String(data.discount || 0),
+          details: data.details,
+          mainImage: data.mainImage,
+          moreImages: data.moreImages && data.moreImages.length > 0 
+            ? [...data.moreImages, '', '', ''] 
+            : ['', '', ''],
+          category: data.category || 'Uncategorized',
+          stock: String(data.stock || 10),
+          isFeatured: data.isFeatured || false,
+          fabricType: data.fabricType || '',
+          productType: data.productType || '',
+          designType: data.designType || '',
+          pieces: data.pieces || '',
+          color: data.color || '',
+          size: data.size || '',
+        });
+      } catch (err: any) {
+        setError(err.message || 'Failed to load product');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProduct();
+  }, [id]);
 
-  if (!product) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-red-500">Product not found!</p>
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#B76E79] border-t-transparent"></div>
+      </div>
+    );
+  }
+
+  if (error && !formData.title) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-red-500">{error}</p>
       </div>
     );
   }
@@ -75,7 +91,7 @@ const AdminEditProduct = () => {
     });
   };
 
-  // ✅ Main Image Upload
+  // Main Image Upload
   const handleMainImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -92,7 +108,7 @@ const AdminEditProduct = () => {
     }
   };
 
-  // ✅ More Images Upload
+  // More Images Upload
   const handleMoreImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
@@ -140,7 +156,7 @@ const AdminEditProduct = () => {
     }
   };
 
-  // ✅ Remove More Image
+  // Remove More Image
   const removeMoreImage = (index: number) => {
     const newImages = [...formData.moreImages];
     newImages[index] = '';
@@ -150,34 +166,43 @@ const AdminEditProduct = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // ✅ Submit with backend API
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError('');
 
-    const updateData = {
-      title: formData.title,
-      price: Number(formData.price),
-      discount: Number(formData.discount),
-      details: formData.details,
-      mainImage: formData.mainImage || 'https://via.placeholder.com/400x500?text=Product',
-      moreImages: formData.moreImages.filter(img => img.trim() !== ''),
-      category: formData.category,
-      stock: Number(formData.stock),
-      isFeatured: formData.isFeatured,
-      // ✅ NEW FIELDS
-      fabricType: formData.fabricType,
-      productType: formData.productType,
-      designType: formData.designType,
-      pieces: formData.pieces,
-      color: formData.color,
-      size: formData.size,
-    };
+    try {
+      const updateData = {
+        title: formData.title,
+        price: Number(formData.price),
+        discount: Number(formData.discount),
+        details: formData.details,
+        mainImage: formData.mainImage || 'https://via.placeholder.com/400x500?text=Product',
+        moreImages: formData.moreImages.filter(img => img.trim() !== ''),
+        category: formData.category,
+        stock: Number(formData.stock),
+        isFeatured: formData.isFeatured,
+        fabricType: formData.fabricType,
+        productType: formData.productType,
+        designType: formData.designType,
+        pieces: formData.pieces,
+        color: formData.color,
+        size: formData.size,
+      };
 
-    setTimeout(() => {
-      updateProduct(Number(id), updateData);
-      setIsLoading(false);
+      // ✅ API call to backend
+      await updateProduct(id!, updateData);
+      
+      // Also update local context
+      localUpdateProduct(Number(id), updateData);
+      
       navigate('/admin/products');
-    }, 1000);
+    } catch (err: any) {
+      setError(err.message || 'Failed to update product');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -194,6 +219,12 @@ const AdminEditProduct = () => {
 
         <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8">
           <h1 className="text-2xl font-bold text-gray-800 mb-6">Edit Product</h1>
+
+          {error && (
+            <div className="bg-red-50 text-red-600 px-4 py-3 rounded-xl mb-4">
+              {error}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             
@@ -333,8 +364,7 @@ const AdminEditProduct = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Design Type
-                  </label>
+                    Design Type                  </label>
                   <select
                     name="designType"
                     value={formData.designType}
@@ -402,7 +432,6 @@ const AdminEditProduct = () => {
             <div className="border-t border-gray-200 pt-6">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">Product Images</h3>
               
-              {/* Main Image Upload */}
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Main Image
@@ -453,7 +482,6 @@ const AdminEditProduct = () => {
                 </div>
               </div>
 
-              {/* More Images Upload */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   More Images (Max 3)
@@ -482,7 +510,6 @@ const AdminEditProduct = () => {
                   </span>
                 </div>
 
-                {/* More Images Preview */}
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
                   {formData.moreImages.map((img, index) => (
                     img ? (

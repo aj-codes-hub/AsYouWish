@@ -2,11 +2,13 @@ import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaArrowLeft, FaUpload, FaTimes, FaImage } from 'react-icons/fa';
 import { useProducts } from '../context/ProductContext';
+import { createProduct } from '../../services/productService';
 
 const AdminAddProduct = () => {
   const navigate = useNavigate();
-  const { addProduct } = useProducts();
+  const { addProduct: localAddProduct } = useProducts();
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   
   const mainImageInputRef = useRef<HTMLInputElement>(null);
   const moreImageInputRef = useRef<HTMLInputElement>(null);
@@ -29,67 +31,85 @@ const AdminAddProduct = () => {
     size: '',
   });
 
-  const handleMainImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
+  // ✅ Image Compression Function
+  const compressImage = (file: File, maxWidth: number = 800, quality: number = 0.7): Promise<string> => {
+    return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          setFormData(prev => ({
-            ...prev,
-            mainImage: event.target?.result as string,
-          }));
-        }
-      };
       reader.readAsDataURL(file);
-    }
-  };
-
-  // ✅ FIXED: Multiple images upload
-  const handleMoreImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
-
-    // Convert FileList to array
-    const fileArray = Array.from(files);
-    
-    // Filter only image files
-    const imageFiles = fileArray.filter(file => file.type.startsWith('image/'));
-
-    // Create a copy of current moreImages
-    let updatedMoreImages = [...formData.moreImages];
-
-
-    // Loop through each image file
-    imageFiles.forEach((file) => {
-      const reader = new FileReader();
-      
       reader.onload = (event) => {
-        if (event.target?.result) {
-          // Find first empty slot
-          const emptyIndex = updatedMoreImages.findIndex(img => img === '');
+        const img = new Image();
+        img.src = event.target?.result as string;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
           
-          if (emptyIndex !== -1) {
-            updatedMoreImages[emptyIndex] = event.target?.result as string;
-          } else {
-            // Agar sab slots fill hain to add karo (max 3 ke liye check)
-            if (updatedMoreImages.length < 3) {
-              updatedMoreImages.push(event.target?.result as string);
-            }
+          if (width > maxWidth) {
+            height = (height * maxWidth) / width;
+            width = maxWidth;
           }
           
-          // Update state with latest changes
-          setFormData(prev => ({
-            ...prev,
-            moreImages: updatedMoreImages,
-          }));
-        }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+          
+          // ✅ Compress to JPEG
+          const compressed = canvas.toDataURL('image/jpeg', quality);
+          resolve(compressed);
+        };
+        img.onerror = reject;
       };
-      
-      reader.readAsDataURL(file);
+      reader.onerror = reject;
     });
   };
 
+  // ✅ Handle Main Image Upload with Compression
+  const handleMainImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      try {
+        // ✅ Compress image
+        const compressedImage = await compressImage(file, 800, 0.7);
+        setFormData(prev => ({
+          ...prev,
+          mainImage: compressedImage,
+        }));
+      } catch (error) {
+        console.error('Error compressing image:', error);
+      }
+    }
+  };
+
+  // ✅ Handle More Images Upload with Compression
+  const handleMoreImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    const fileArray = Array.from(files);
+    const imageFiles = fileArray.filter(file => file.type.startsWith('image/'));
+    let updatedMoreImages = [...formData.moreImages];
+
+    for (const file of imageFiles) {
+      try {
+        const compressedImage = await compressImage(file, 800, 0.7);
+        const emptyIndex = updatedMoreImages.findIndex(img => img === '');
+        if (emptyIndex !== -1) {
+          updatedMoreImages[emptyIndex] = compressedImage;
+        } else {
+          if (updatedMoreImages.length < 3) {
+            updatedMoreImages.push(compressedImage);
+          }
+        }
+        setFormData(prev => ({
+          ...prev,
+          moreImages: updatedMoreImages,
+        }));
+      } catch (error) {
+        console.error('Error compressing image:', error);
+      }
+    }
+  };
 
   const removeMoreImage = (index: number) => {
     const newImages = [...formData.moreImages];
@@ -108,38 +128,51 @@ const AdminAddProduct = () => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // ✅ Submit with backend API
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError('');
 
-    const productData = {
-      title: formData.title,
-      price: Number(formData.price),
-      discount: Number(formData.discount),
-      details: formData.details,
-      mainImage: formData.mainImage || 'https://via.placeholder.com/400x500?text=Product',
-      moreImages: formData.moreImages.filter(img => img.trim() !== ''),
-      category: formData.category || 'Uncategorized',
-      stock: Number(formData.stock),
-      isFeatured: formData.isFeatured,
-      Event: formData.category || 'Uncategorized',
-      Rating: 0,
-      review: [],
-      fabricType: formData.fabricType,
-      productType: formData.productType,
-      designType: formData.designType,
-      pieces: formData.pieces,
-      color: formData.color,
-      size: formData.size,
-    };
+    try {
+      const productData = {
+        title: formData.title,
+        price: Number(formData.price),
+        discount: Number(formData.discount),
+        details: formData.details,
+        mainImage: formData.mainImage || 'https://via.placeholder.com/400x500?text=Product',
+        moreImages: formData.moreImages.filter(img => img.trim() !== ''),
+        category: formData.category || 'Uncategorized',
+        stock: Number(formData.stock),
+        isFeatured: formData.isFeatured,
+        fabricType: formData.fabricType,
+        productType: formData.productType,
+        designType: formData.designType,
+        pieces: formData.pieces,
+        color: formData.color,
+        size: formData.size,
+      };
 
-    setTimeout(() => {
-      addProduct(productData);
-      setIsLoading(false);
+      // ✅ API call to backend
+      await createProduct(productData);
+      
+      // Also update local context
+      localAddProduct({
+        ...productData,
+        Event: formData.category || 'Uncategorized',
+        Rating: 0,
+        review: [],
+      });
+      
       navigate('/admin/products');
-    }, 1000);
+    } catch (err: any) {
+      setError(err.message || 'Failed to add product');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
+  
   return (
     <div className="min-h-screen bg-gray-50 pt-[65px]">
       <div className="container mx-auto px-4 max-w-4xl py-8">
@@ -154,6 +187,13 @@ const AdminAddProduct = () => {
 
         <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8">
           <h1 className="text-2xl font-bold text-gray-800 mb-6">Add New Product</h1>
+
+          {/* Error Message */}
+          {error && (
+            <div className="bg-red-50 text-red-600 px-4 py-3 rounded-xl mb-4">
+              {error}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             
@@ -349,7 +389,6 @@ const AdminAddProduct = () => {
             <div className="border-t border-gray-200 pt-6">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">Product Images</h3>
               
-              {/* Main Image Upload */}
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Main Image
@@ -392,7 +431,6 @@ const AdminAddProduct = () => {
                 </div>
               </div>
 
-              {/* More Images Upload */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   More Images (Max 3)
@@ -421,7 +459,6 @@ const AdminAddProduct = () => {
                   </span>
                 </div>
 
-                {/* More Images Preview */}
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
                   {formData.moreImages.map((img, index) => (
                     img ? (

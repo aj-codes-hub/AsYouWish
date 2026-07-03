@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useProducts } from '../context/ProductContext';
+import { getProducts, deleteProduct } from '../../services/productService';
 import { 
   FaPlus, 
   FaEdit, 
@@ -10,33 +10,59 @@ import {
   FaRegStar,
   FaEye
 } from 'react-icons/fa';
+// import { useProducts } from '../context/ProductContext';
 
-
-const AdminProducts:React.FC = () => {
-  const { products, deleteProduct, toggleFeatured, updateStock, searchProducts } = useProducts();
+const AdminProducts: React.FC = () => {
+  // const { products: localProducts, deleteProduct: localDeleteProduct, toggleFeatured, updateStock, searchProducts } = useProducts();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [loading, setLoading] = useState(true);
+  const [products, setProducts] = useState<any[]>([]);
 
-  const filteredProducts = searchProducts(searchQuery);
-  
-  const categories = ['all', ...new Set(products.map(p => p.category))];
+  // ✅ Fetch products from backend
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const data = await getProducts();
+        setProducts(data);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
 
-  const finalProducts = selectedCategory === 'all' 
-    ? filteredProducts 
-    : filteredProducts.filter(p => p.category === selectedCategory);
-
-  const handleDelete = (id: number) => {
+  // ✅ Handle delete with backend
+  const handleDelete = async (id: number) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
-      deleteProduct(id);
+      try {
+        await deleteProduct(id.toString());
+        setProducts(products.filter((p: any) => p._id !== id && p.id !== id));
+      } catch (error) {
+        alert('Failed to delete product');
+      }
     }
   };
 
-  const handleStockUpdate = (id: number, currentStock: number) => {
-    const newStock = prompt('Enter new stock quantity:', String(currentStock));
-    if (newStock !== null && !isNaN(Number(newStock))) {
-      updateStock(id, Number(newStock));
-    }
-  };
+  // Filter products
+  const filteredProducts = products.filter((product: any) => {
+    const matchesSearch = product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         product.details?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
+
+  const categories = ['all', ...new Set(products.map((p: any) => p.category))];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#B76E79] border-t-transparent"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 pt-[65px] max-w-[1150px] mx-auto">
@@ -99,8 +125,8 @@ const AdminProducts:React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {finalProducts.map((product) => (
-                  <tr key={product.id} className="hover:bg-gray-50 transition">
+                {filteredProducts.map((product: any) => (
+                  <tr key={product._id || product.id} className="hover:bg-gray-50 transition">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         <img 
@@ -122,10 +148,15 @@ const AdminProducts:React.FC = () => {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <span className={`font-medium ${product.stock > 10 ? 'text-green-600' : product.stock > 0 ? 'text-yellow-600' : 'text-red-600'}`}>
-                          {product.stock}
+                          {product.stock || 0}
                         </span>
                         <button
-                          onClick={() => handleStockUpdate(product.id, product.stock)}
+                          onClick={() => {
+                            const newStock = prompt('Enter new stock quantity:', String(product.stock || 0));
+                            if (newStock !== null && !isNaN(Number(newStock))) {
+                              // updateStock(product._id || product.id, Number(newStock));
+                            }
+                          }}
                           className="text-xs bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded cursor-pointer"
                         >
                           Update
@@ -139,7 +170,7 @@ const AdminProducts:React.FC = () => {
                     </td>
                     <td className="px-4 py-3">
                       <button
-                        onClick={() => toggleFeatured(product.id)}
+                        // onClick={() => toggleFeatured(product._id || product.id)}
                         className="text-xl cursor-pointer hover:scale-110 transition"
                       >
                         {product.isFeatured ? (
@@ -152,19 +183,19 @@ const AdminProducts:React.FC = () => {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <Link 
-                          to={`/admin/products/edit/${product.id}`}
+                          to={`/admin/products/edit/${product._id || product.id}`}
                           className="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition cursor-pointer"
                         >
                           <FaEdit />
                         </Link>
                         <button
-                          onClick={() => handleDelete(product.id)}
+                          onClick={() => handleDelete(product._id || product.id)}
                           className="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition cursor-pointer"
                         >
                           <FaTrash />
                         </button>
                         <Link 
-                          to={`/product-detail/${product.id}`}
+                          to={`/product-detail/${product._id || product.id}`}
                           target="_blank"
                           className="p-2 bg-gray-50 text-gray-600 rounded-lg hover:bg-gray-100 transition cursor-pointer"
                         >
@@ -178,7 +209,7 @@ const AdminProducts:React.FC = () => {
             </table>
           </div>
           
-          {finalProducts.length === 0 && (
+          {filteredProducts.length === 0 && (
             <div className="text-center py-12">
               <p className="text-gray-500">No products found</p>
             </div>

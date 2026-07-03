@@ -8,7 +8,6 @@ import ClientSays from './sections/clientSays'
 import Subscribe from './sections/subscribe'
 
 
-
 const Home:React.FC = () => {
 
   return (

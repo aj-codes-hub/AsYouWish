@@ -297,7 +297,6 @@ h1{
 
   .login-entry {
     animation:loginEntry .3s ease-in;
-    height: 420px;
     overflow: hidden;
 }
 
@@ -326,7 +325,6 @@ h1{
 
   .login-entry {
     animation:loginEntry .4s ease-in;
-    height: 500px;
     overflow: hidden;
 }
 

@@ -24,7 +24,7 @@ type NavbarProps = {
 
 const Navbar: React.FC<NavbarProps> = ({ setIsMenuOpen, isOpenLogiModal }) => {
 
-   const { isLoggedIn } = useAuth();
+   const { isLoggedIn , user } = useAuth();
    const { totalItems } = useCart();  
    const { totalWishlistItems } = useWishlist()
    const { isAdminLoggedIn } = useAdmin()
@@ -43,15 +43,11 @@ const Navbar: React.FC<NavbarProps> = ({ setIsMenuOpen, isOpenLogiModal }) => {
        
       switch(true){
          
-         case isLoggedIn && !isAdminLoggedIn:
+         case isLoggedIn && user?.role === "user":
             navigation('/profile')
          break;
 
-         case isAdminLoggedIn && !isLoggedIn:
-            navigation('/admin/dashboard')
-         break;
-
-         case isLoggedIn && isAdminLoggedIn:
+         case isLoggedIn && user?.role === "admin":
             navigation('/admin/dashboard')
          break;
 

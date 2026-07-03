@@ -10,30 +10,34 @@ import { useWishlist } from '../pages/context/wishlistContext';
 
 
 interface ProductCardPrpos {
-    id: number;
+    id?: any;
     Image?: string;
     price?: number;
     className?:string;
     title?:string;
+    discount?:number;
+    DiscountPrice?: number;
 }
 
-const ProductCard:React.FC<ProductCardPrpos> = ({Image,price,className,id,title}) => {
+const ProductCard:React.FC<ProductCardPrpos> = ({Image,price,className,id,title,discount,DiscountPrice}) => {
 
 
  const { addToWishlist , removeFromWishlist , isInWishlist } = useWishlist();   
 
 
-const liked = isInWishlist(id);
+const handleWishlistToggle = (e: React.MouseEvent) => {
+  e.stopPropagation();
+  const product = { id, _id: id, title, price, mainImage: Image };
+  
+  if (isInWishlist(id)) {
+    removeFromWishlist(id);
+  } else {
+    addToWishlist(product);
+  }
+};
 
-const handleWishClick = () => {
-
-if(liked){
-   removeFromWishlist(id);
-}else {
-      const product = { id, title, price, mainImage: Image };
-      addToWishlist(product);
-    }
-}
+// ✅ Update isLiked
+const isLiked = isInWishlist(id)
 
 const navigate = useNavigate();
 const {addToCart} = useCart();
@@ -58,11 +62,11 @@ const handlePorductClick = () => {
     <div
          className={`sm:h-[380px] h-[290px] w-[100%] overflow-hidden hover:rounded-xl hover:shadow-2xl hover:scale-[1.01] transition-all duration-500 cursor-pointer group ${className}`}>
         <div className='h-[75%] w-full overflow-hidden relative bg-gradient-to-bl from-[#B0AEA2] to-[#CFCDC1]'>
-           <img onClick={handlePorductClick} src={Image} className='group-hover:scale-[1.08] transition-all duration-500'/>
+           <img loading="lazy" onClick={handlePorductClick} src={Image} className='group-hover:scale-[1.08] transition-all duration-500'/>
            
-           <div  onClick={handleWishClick}
+           <div  onClick={handleWishlistToggle}
                  className='rounded-full md:text-[18px] text-[16px] md:p-[10px] p-[9px] bg-white/60 absolute top-[10px] right-[10px]'>
-            {liked ? <IoHeart className='text-[19px] text-[#B76E79] '/> 
+            {isLiked ? <IoHeart className='text-[19px] text-[#B76E79] '/> 
                    : <FaRegHeart /> }
            </div>
 
@@ -94,13 +98,13 @@ const handlePorductClick = () => {
             <div className='flex justify-between items-center h-full flex sm:mx-[12px]'>
 
             <h2 className='text-primary font-semibold leading-[15px] sm:text-[18px] text-[17px] flex flex-col'>
-                PKR. {price} 
+                PKR. {DiscountPrice} 
                 <span className='line-through text-left sm:text-[12.5px] text-[10px] tracking-[2px] text-gray-400 font-semibold ml-[6px]'>
-                    Rs. 464
+                   Rs. {price}
                 </span>
             </h2>    
              <span className='sm:text-[11.5px] text-[8px] inline-block text-whit bg-[yellow] rounded-full px-[6px] py-[1px] ml-[6px]'>
-                        50% OFF
+                        {discount}% OFF
             </span>
             </div>
         </div>

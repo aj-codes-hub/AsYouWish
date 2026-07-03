@@ -1,9 +1,11 @@
-import React, { useState } from 'react'
-import Input from '../components/input'
+// Auth/signupModal.tsx
+import React, { useState } from 'react';
+import Input from '../components/input';
 import { FcGoogle } from "react-icons/fc";
 import { FaFacebook } from "react-icons/fa";
 import { RxCross1 } from "react-icons/rx";
 import { useAuth } from './authContext';
+import { register } from '../services/authService'; // ✅ IMPORT API SERVICE
 
 interface SignupModalProps {
     hideSignUpModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -13,29 +15,54 @@ interface SignupModalProps {
 
 const SignupModal: React.FC<SignupModalProps> = ({ hideSignUpModal, isOpenSignUPModal, showLoginModal }) => {
 
-    const { signup } = useAuth();
+    const { signup: signupContext } = useAuth(); // ✅ Rename to avoid conflict
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [phone, setPhone] = useState('');
+    const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
-    const handleSignup = (e: React.FormEvent) => {
+    const handleSignup = async (e: React.FormEvent) => {
         e.preventDefault();
+        setIsLoading(true);
+        setError('');
 
+        // ✅ Password match check
         if (password !== confirmPassword) {
-            alert("Passwords don't match!");
+            setError("Passwords don't match!");
+            setIsLoading(false);
             return;
         }
 
-        const fullName = `${firstName} ${lastName}`.trim();
-
-        const success = signup(fullName, email, password);
-        
-        if (success) {
+        try {
+            const fullName = `${firstName} ${lastName}`.trim();
+            
+            // ✅ Backend API call
+            const data = await register({
+                name: fullName,
+                email,
+                password,
+                phone,
+            });
+            
+            // ✅ Save token & user data in localStorage
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(data));
+            
+            // ✅ Update context (optional - if you have it)
+            signupContext(fullName, email, password);
+            
+            // ✅ Close signup modal and open login modal
             hideSignUpModal(false);
             showLoginModal(true);
+            
+        } catch (err: any) {
+            setError(err.message || 'Registration failed. Please try again.');
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -122,6 +149,13 @@ const SignupModal: React.FC<SignupModalProps> = ({ hideSignUpModal, isOpenSignUP
                             />
                         </div>
 
+                        {/* ✅ Error Message */}
+                        {error && (
+                            <div className='bg-red-50 text-red-600 text-sm px-4 py-2 rounded-lg mt-3'>
+                                {error}
+                            </div>
+                        )}
+
                         <div className='flex my-[12px]'>
                             <input type="checkbox" className='cursor-pointer' />
                             <p className='ml-[5px] text-[12px] font-semibold text-black'>Sign Up for Newsletter</p>
@@ -129,9 +163,10 @@ const SignupModal: React.FC<SignupModalProps> = ({ hideSignUpModal, isOpenSignUP
 
                         <button
                             type='submit'
-                            className='mt-[8px] bg-primary w-full cursor-pointer rounded-full text-white font-semibold text-[14px] h-[40px] hover:bg-primary/90 transition'
+                            disabled={isLoading}
+                            className='mt-[8px] bg-primary w-full cursor-pointer rounded-full text-white font-semibold text-[14px] h-[40px] hover:bg-primary/90 transition disabled:opacity-50 disabled:cursor-not-allowed'
                         >
-                            SIGN UP
+                            {isLoading ? 'Signing up...' : 'SIGN UP'}
                         </button>
 
                         <p className='my-[10px] text-black/70 text-[10px] text-center'>

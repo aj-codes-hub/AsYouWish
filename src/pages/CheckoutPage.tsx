@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from './context/cartContext';
 import { useAuth } from '../Auth/authContext';
+import { createOrder } from '../services/orderService';
 import { 
   FaUser, 
   FaMapMarkerAlt, 
@@ -47,7 +48,7 @@ const CheckoutPage = () => {
     return addresses ? JSON.parse(addresses) : [];
   });
 
-  // ✅ Save addresses to localStorage whenever they change
+  // Save addresses to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem('userAddresses', JSON.stringify(savedAddresses));
   }, [savedAddresses]);
@@ -72,8 +73,9 @@ const CheckoutPage = () => {
   );
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [orderError, setOrderError] = useState('');
   
-  // ✅ State for new address form in checkout
+  // State for new address form in checkout
   const [showNewAddressForm, setShowNewAddressForm] = useState(false);
   const [newAddressData, setNewAddressData] = useState({
     label: 'Home',
@@ -158,7 +160,7 @@ const CheckoutPage = () => {
     }
   };
 
-  // ✅ Function to save address from checkout
+  // Function to save address from checkout
   const handleSaveNewAddress = () => {
     if (!newAddressData.address || !newAddressData.city) {
       alert('Please fill address and city!');
@@ -174,10 +176,7 @@ const CheckoutPage = () => {
       isDefault: savedAddresses.length === 0,
     };
 
-    // ✅ UPDATE savedAddresses using setSavedAddresses
     setSavedAddresses([...savedAddresses, newAddress]);
-    
-    // Auto-select the new address
     setSelectedAddressId(newAddress.id);
     setFormData(prev => ({
       ...prev,
@@ -185,49 +184,45 @@ const CheckoutPage = () => {
       city: newAddress.city,
       zipCode: newAddress.zipCode,
     }));
-    
     setShowNewAddressForm(false);
     setNewAddressData({ label: 'Home', address: '', city: '', zipCode: '' });
     alert('Address saved successfully!');
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // ✅ Handle order submission with backend API
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-   setTimeout(() => {
-     window.dispatchEvent(new Event('order-updated'));
-    }, 2000);
+    setOrderError('');
 
-    setTimeout(() => {
-      const newOrder = {
-        id: '#' + Date.now().toString().slice(-6),
-        date: new Date().toLocaleDateString('en-US', { 
-          day: '2-digit', 
-          month: 'short', 
-          year: 'numeric' 
-        }),
-        total: checkoutTotal + 200,
-        items: checkoutProducts.length,
-        status: 'processing',
+    try {
+      const orderData = {
         products: checkoutProducts.map((item: any) => ({
-          id: item.id,
+          productId: item._id || item.id,
           title: item.title,
           price: item.price,
           quantity: item.quantity || 1,
           mainImage: item.mainImage
         })),
-        shippingAddress: `${formData.address}, ${formData.city}`,
+        totalAmount: checkoutTotal + 200,
+        shippingAddress: {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          address: formData.address,
+          city: formData.city,
+          zipCode: formData.zipCode,
+        },
         paymentMethod: formData.paymentMethod,
-        customerName: formData.name,
-        customerEmail: formData.email,
-        customerPhone: formData.phone,
       };
 
-      const existingOrders = JSON.parse(localStorage.getItem('userOrders') || '[]');
-      existingOrders.unshift(newOrder);
-      localStorage.setItem('userOrders', JSON.stringify(existingOrders));
+      // ✅ API call to backend
+      await createOrder(orderData);
 
+      // Dispatch event for profile page
+      window.dispatchEvent(new Event('order-updated'));
+
+      // Clear cart
       if (isBuyNow) {
         clearBuyNow();
       } else {
@@ -235,7 +230,11 @@ const CheckoutPage = () => {
       }
       
       navigate('/order-success');
-    }, 2000);
+      
+    } catch (error: any) {
+      setOrderError(error.message || 'Order failed. Please try again.');
+      setIsSubmitting(false);
+    }
   };
 
   const getLabelIcon = (label: string) => {
@@ -379,7 +378,7 @@ const CheckoutPage = () => {
                       </div>
                     )}
 
-                    {/* ✅ NEW ADDRESS FORM (inside checkout) */}
+                    {/* NEW ADDRESS FORM (inside checkout) */}
                     {addressType === 'new' && showNewAddressForm && (
                       <div className="mt-4 p-4 border-2 border-[#B76E79]/30 rounded-xl bg-[#B76E79]/5">
                         <div className="flex justify-between items-center mb-3">
@@ -579,6 +578,13 @@ const CheckoutPage = () => {
                   </label>
                 </div>
               </div>
+
+              {/* Error Message */}
+              {orderError && (
+                <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-xl text-sm">
+                  {orderError}
+                </div>
+              )}
 
               {/* ===== PLACE ORDER BUTTON ===== */}
               <button

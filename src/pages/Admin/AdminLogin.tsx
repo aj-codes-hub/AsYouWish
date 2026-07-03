@@ -14,7 +14,7 @@ import {
 
 
 const AdminLogin = () => {
-  const [email, setEmail] = useState('admin@asyouwish.com');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');

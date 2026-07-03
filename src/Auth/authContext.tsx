@@ -1,4 +1,6 @@
+// src/Auth/authContext.tsx
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import { login as apiLogin, register as apiRegister } from '../services/authService';
 
 interface UserType {
     id: number;
@@ -9,111 +11,135 @@ interface UserType {
     address?: string;
     city?: string;
     zipCode?: string;
+    role?: string;
+}
+
+interface AuthResponse {
+    _id: string;
+    name: string;
+    email: string;
+    phone?: string;
+    role?: string;
+    token: string;
 }
 
 interface AuthContextType {
     user: UserType | null;
     isLoggedIn: boolean;
-    login: (email: string, password: string) => boolean;
-    signup: (name: string, email: string, password: string) => boolean;
+    login: (email: string, password: string) => Promise<boolean>;
+    signup: (name: string, email: string, password: string, phone?: string) => Promise<boolean>;
     logout: () => void;
+    updateUser: (data: Partial<UserType>) => Promise<void>;
     users: UserType[];
-    updateUser: (data: Partial<UserType>) => void; 
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-    
-    // ✅ Users list localStorage se load karo
-    const [users, setUsers] = useState<UserType[]>(() => {
-        const savedUsers = localStorage.getItem('users');
-        return savedUsers ? JSON.parse(savedUsers) : [];
-    });
+    const [users, setUsers] = useState<UserType[]>([]);
+    const [user, setUser] = useState<UserType | null>(null);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-    // ✅ Current user localStorage se load karo
-    const [user, setUser] = useState<UserType | null>(() => {
+    // Load user from localStorage on mount
+    useEffect(() => {
         const savedUser = localStorage.getItem('currentUser');
-        return savedUser ? JSON.parse(savedUser) : null;
-    });
-
-    // ✅ Jab users change ho localStorage update karo
-    useEffect(() => {
-        localStorage.setItem('users', JSON.stringify(users));
-    }, [users]);
-
-
-    useEffect(() => {
-        if (user) {
-            localStorage.setItem('currentUser', JSON.stringify(user));
-        } else {
-            localStorage.removeItem('currentUser');
+        if (savedUser) {
+            try {
+                const parsedUser = JSON.parse(savedUser);
+                setUser(parsedUser);
+                setIsLoggedIn(true);
+            } catch {
+                localStorage.removeItem('currentUser');
+            }
         }
-    }, [user]);
+    }, []);
 
-  const signup = (name: string, email: string, password: string, phone: string = ''): boolean => {
-    const existingUser = users.find(u => u.email === email);
-    if (existingUser) {
-        alert('Email already registered!');
-        return false;
-    }
-
-    const newUser: UserType = {
-        id: Date.now(),
-        name,
-        email,
-        password,
-        phone,           
-        address: '',     
-        city: '',       
-        zipCode: '',     
-    };
-
-    setUsers([...users, newUser]);
-    alert('Signup successful! Please login.');
-    return true;
-};
-
-    // ✅ Login Function
-    const login = (email: string, password: string): boolean => {
-        const foundUser = users.find(u => u.email === email && u.password === password);
-        
-        if (foundUser) {
-            setUser(foundUser);
-            alert('Login successful!');
+    // ✅ LOGIN - Backend API use karega
+    const login = async (email: string, password: string): Promise<boolean> => {
+        try {
+            const data: AuthResponse = await apiLogin({ email, password });
+            
+            const userData: UserType = {
+                id: Number(data._id), // ✅ _id ko number mein convert karo
+                name: data.name,
+                email: data.email,
+                phone: data.phone || '',
+                role: data.role || 'user',
+            };
+            
+            setUser(userData);
+            setIsLoggedIn(true);
+            localStorage.setItem('currentUser', JSON.stringify(userData));
+            localStorage.setItem('token', data.token);
+            
             return true;
-        } else {
-            alert('Invalid email or password!');
+        } catch (error: any) {
+            console.error('Login error:', error);
             return false;
         }
     };
 
-    // ✅ Logout Function
-    const logout = () => {
-        setUser(null);
-        localStorage.removeItem('currentUser');
-        alert('Logged out successfully!');
+    // ✅ SIGNUP - Backend API use karega
+    const signup = async (name: string, email: string, password: string, phone: string = ''): Promise<boolean> => {
+        try {
+            const data: AuthResponse = await apiRegister({ name, email, password, phone });
+            
+            const userData: UserType = {
+                id: Number(data._id), // ✅ _id ko number mein convert karo
+                name: data.name,
+                email: data.email,
+                phone: data.phone || '',
+                role: data.role || 'user',
+            };
+            
+            setUser(userData);
+            setIsLoggedIn(true);
+            localStorage.setItem('currentUser', JSON.stringify(userData));
+            localStorage.setItem('token', data.token);
+            
+            return true;
+        } catch (error: any) {
+            console.error('Signup error:', error);
+            return false;
+        }
     };
 
-    const updateUser = (data: Partial<UserType>) => {
-    if (user) {
-        const updatedUser = { ...user, ...data };
-        setUser(updatedUser);
-        localStorage.setItem('currentUser', JSON.stringify(updatedUser));
-        
+    // ✅ UPDATE USER - Backend API use karega
+    const updateUser = async (data: Partial<UserType>): Promise<void> => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch('http://localhost:5000/api/auth/profile', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify(data),
+            });
 
-        const updatedUsers = users.map(u => 
-            u.id === user.id ? { ...u, ...data } : u
-        );
-        setUsers(updatedUsers);
-        localStorage.setItem('users', JSON.stringify(updatedUsers));
-        
-        alert('Profile updated successfully!');
-    }
-};
+            if (!response.ok) {
+                throw new Error('Failed to update profile');
+            }
 
+            const updatedUser = await response.json();
+            
+            const newUserData = { ...user, ...data } as UserType;
+            setUser(newUserData);
+            localStorage.setItem('currentUser', JSON.stringify(newUserData));
+            
+        } catch (error) {
+            console.error('Update error:', error);
+            throw error;
+        }
+    };
 
-    const isLoggedIn = user !== null;
+    // ✅ LOGOUT
+    const logout = () => {
+        setUser(null);
+        setIsLoggedIn(false);
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('token');
+    };
 
     return (
         <AuthContext.Provider value={{
@@ -122,8 +148,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             login,
             signup,
             logout,
+            updateUser,
             users,
-            updateUser
         }}>
             {children}
         </AuthContext.Provider>

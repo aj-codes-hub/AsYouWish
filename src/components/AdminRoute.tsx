@@ -1,6 +1,7 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAdmin } from '../pages/context/AdminContext';
+import { useAuth } from '../Auth/authContext';
+
 
 
 interface AdminRouteProps {
@@ -8,13 +9,13 @@ interface AdminRouteProps {
 }
 
 const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
-  const { isAdminLoggedIn } = useAdmin();
+  const { isLoggedIn } = useAuth();
 
-  if (!isAdminLoggedIn) {
-    return <Navigate to="/admin/login" replace />;
+  if (!isLoggedIn) {
+    return <Navigate to="/" replace />;
   }
 
-  return <>{children}</>;
-};
+  return<>{children}</>;
+}
 
 export default AdminRoute;
