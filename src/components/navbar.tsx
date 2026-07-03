@@ -15,7 +15,6 @@ import { CiMenuBurger } from "react-icons/ci";
 import { useWishlist } from '../pages/context/wishlistContext';
 import { useAuth } from '../Auth/authContext';
 import SearchModal from './SearchModal';
-import { useAdmin } from '../pages/context/AdminContext';
 
 type NavbarProps = {
    setIsMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -27,7 +26,6 @@ const Navbar: React.FC<NavbarProps> = ({ setIsMenuOpen, isOpenLogiModal }) => {
    const { isLoggedIn , user } = useAuth();
    const { totalItems } = useCart();  
    const { totalWishlistItems } = useWishlist()
-   const { isAdminLoggedIn } = useAdmin()
    const navigation = useNavigate();
 
    const [isOpen, setIsOpen] = useState(false);

@@ -36,7 +36,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-    const [users, setUsers] = useState<UserType[]>([]);
+    const [users] = useState<UserType[]>([]);
     const [user, setUser] = useState<UserType | null>(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -121,7 +121,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 throw new Error('Failed to update profile');
             }
 
-            const updatedUser = await response.json();
             
             const newUserData = { ...user, ...data } as UserType;
             setUser(newUserData);
