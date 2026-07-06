@@ -71,7 +71,7 @@ const Navbar: React.FC<NavbarProps> = ({ setIsMenuOpen, isOpenLogiModal }) => {
          {/* ===== SEARCH MODAL ===== */}
          <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
 
-         <div className='bg-[#fdfdfd] h-[65px] w-full justify-between fixed sm:top-0 bottom-0 z-[999] flex items-center shadow-sm sm:px-[15px] xl:px-[0]'>
+         <div className='h-[65px] w-full justify-between fixed sm:top-0 bottom-0 z-[999] flex items-center shadow-sm sm:px-[15px] xl:px-[0]'>
             <div className='max-w-[1100px] h-full mx-auto w-full justify-between sm:flex items-center hidden'>
          
                <div className='cursor-pointer md:h-[45px] md:w-[160px] h-[30px] w-[110px] relative'
@@ -84,14 +84,14 @@ const Navbar: React.FC<NavbarProps> = ({ setIsMenuOpen, isOpenLogiModal }) => {
                   {MenuList.map((item, index) => (
                      <Link key={index}
                            to={item.Path}
-                           className={`cursor-pointer transition-colors duration-150 hover:text-[#B76E79] hover:font-semibold p-[10px] capitalize 
-                              ${Location.pathname === item.Path ? 'text-[#B76E79] font-semibold' : ''}`}>
+                           className={`cursor-pointer  transition-colors duration-150 hover:text-[#B76E79] hover:font-semibold p-[10px] capitalize 
+                              ${Location.pathname === item.Path ? 'text-[#B76E79] font-semibold' : 'text-white'}`}>
                         {item.Name}
                      </Link>
                   ))}
                </nav>
 
-               <div className='flex items-center text-[16px]'>
+               <div className='flex items-center text-[16px] text-white'>
 
                   {/* ✅ SEARCH BUTTON - Opens Search Modal */}
                   <button 

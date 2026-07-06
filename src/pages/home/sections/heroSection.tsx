@@ -1,6 +1,8 @@
 import React from 'react'
 import { FaArrowRight } from "react-icons/fa";
 import { smoothScrollTo } from '../../../Utils/scrollUtils'
+import { IoBagHandleOutline } from "react-icons/io5";
+import { FiClock } from "react-icons/fi";
  
 
 
@@ -8,29 +10,45 @@ import { smoothScrollTo } from '../../../Utils/scrollUtils'
 const HeroSection:React.FC = () => {
 
   return (
-    <div className='sm:h-[600px] h-[620px] w-full fixed sm:relative z-[-20] sm:z-[1] top-0'> 
+    <div className='sm:h-[600px] h-[620px] w-full fixed sm:relative z-[-20] sm:z-[1] top-0 overflow-hidden'> 
          
-      <img src="./images/hero-image.jpg"
-           className='absolute z-10 w-full h-full'/>   
+      <img src="./images/just.jpg"
+           className='absolute z-10 w-full -translate-y-1/2 top-1/2'/>   
       
-      <div className='flex justify-center items-center w-full h-full sm:text-black text-white sm:bg-white/60 bg-white/20 absolute z-20 px-[30px]'>
+      <div className='flex justify-center items-center w-full h-full text-white/80 bg-black/60 absolute z-20 px-[30px] '>
 
-      <div className='text-center sm:max-w-[500px] sm:bg-white/2 bg-black/10 backdrop-blur-[1.5px] p-4 w-full max-w-[340px]'>
+      <div className='text-center sm:max-w-[550px] sm:bg-white/2 bg-black/10 backdrop-blur-[1.5px] p-4 w-full max-w-[340px]'>
        
-       <h1 className='font-[500] text-[61px]'> 
+       <h1 className='font-[500] sm:text-[51px] text-[41px] font-bold'> 
          Elevate Your Style
        </h1>
-       <p className='sm:text-[20px] text-[16px]'>
+       <h1 className='font-[500] sm:text-[61px] text-[41px] flex flex-col-reverse sm:flex-row items-center gap-3'> 
+        
+          <button className='lg:mx-0 mx-auto py-[5px] sm:text-[12px] text-[8px]  bg-[#E8B4B8] rounded-full px-[14px] text-black flex items-center gap-2 '>
+            Limited Time Offer <FiClock />
+        </button>  
+       
+        Up to 40% Off
+       </h1>
+       <p className='sm:text-[20px] text-[16px] sm:mt-0 mt-[10px]'>
           Discover timeless elegance with our curated collection of premium women's fashion
        </p>
-
+       
+       <div className='flex gap-5 items-center justify-center'>
        <button  onClick={() => smoothScrollTo('FeatureCollection', 45, 1000)}
-               className='mt-[20px] py-[12px] text-[14px] bg-primary px-[18px] text-white rounded-full mx-auto flex items-center gap-2 
+               className='mt-[20px] py-[12px] sm:text-[14px] text-[10px] bg-primary px-[18px] text-white rounded-full flex items-center gap-2 
                           cursor-pointer hover:scale-[1.05] transition duration-500 group'>
-        Shop now
+        Featured Collection
         <FaArrowRight className='mt-[3px] font-thin group-hover:ml-[5px] transition-all duration-500'/> 
        </button>
-
+       
+       <button  onClick={() => smoothScrollTo('FeatureCollection', 45, 1000)}
+               className='mt-[20px] py-[12px] sm:text-[14px] text-[10px] border px-[18px] text-white rounded-full flex items-center gap-2 
+                          cursor-pointer hover:scale-[1.05] transition duration-500 group'>
+        New Arrivals
+        <IoBagHandleOutline className='group-hover:ml-[5px] transition-all duration-500 text-[18px]'/> 
+       </button>
+       </div>
    
       </div>
 
