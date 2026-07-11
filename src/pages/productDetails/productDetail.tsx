@@ -11,6 +11,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useCart } from '../context/cartContext';
 import { useWishlist } from '../context/wishlistContext';
 import { getProductById } from '../../services/productService';
+import AddReviewModal from './Component/AddReviewModal';
 
 const ProductDetail: React.FC = () => {
   const navigate = useNavigate();
@@ -22,6 +23,8 @@ const ProductDetail: React.FC = () => {
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [reviews, setReviews] = useState<any[]>(product?.review || []);
 
   // State for quantity
   const [quantity, setQuantity] = useState(1);
@@ -85,14 +88,26 @@ const ProductDetail: React.FC = () => {
     }
   };
 
- const handleWishlistToggle = () => {
+const handleWishlistToggle = () => {
   if (product) {
     const productId = product._id || product.id;
     
     if (isInWishlist(productId)) {
       removeFromWishlist(productId);
     } else {
-      addToWishlist(product);
+      // ✅ Pass all product data
+      addToWishlist({
+        id: product._id || product.id,
+        _id: product._id || product.id,
+        title: product.title,
+        price: product.price,
+        mainImage: product.mainImage,
+        discount: product.discount || 0,
+        DiscountPrice: product.discount ? 
+          Math.round(product.price - (product.price * product.discount / 100)) : 
+          product.price,
+        moreImages: product.moreImages || [],
+      });
     }
   }
 };
@@ -184,6 +199,26 @@ const ProductDetail: React.FC = () => {
       </div>
     );
   }
+
+  const handleAddReview = (newReview: { customerName: string; message: string; Rating: number }) => {
+  const reviewWithId = {
+    id: Date.now(),
+    ...newReview,
+    date: new Date().toLocaleDateString(),
+  };
+  
+  const updatedReviews = [reviewWithId, ...reviews];
+  setReviews(updatedReviews);
+  
+  // ✅ Update product reviews
+  setProduct((prev: any) => ({
+    ...prev,
+    review: updatedReviews,
+  }));
+  
+  // ✅ Optionally: Send to backend API
+  // await addReview(product._id, newReview);
+};
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -451,33 +486,47 @@ const ProductDetail: React.FC = () => {
           </div>
 
           {/* Customer Reviews */}
-          <div className="bg-white rounded-2xl shadow-lg overflow-hidden p-6">
-            <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-              <span>Customer Reviews</span>
-              <span className="text-sm font-normal text-gray-400">
-                ({product.review?.length || 0} reviews)
-              </span>
-            </h3>
+<div className="bg-white rounded-2xl shadow-lg overflow-hidden p-6">
+  <div className="flex items-center justify-between mb-6">
+    <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+      <span>Customer Reviews</span>
+      <span className="text-sm font-normal text-gray-400">
+        ({reviews.length || 0} reviews)
+      </span>
+    </h3>
+    <button
+      onClick={() => setIsReviewModalOpen(true)}
+      className="bg-[#B76E79] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#B76E79]/90 transition cursor-pointer"
+    >
+      Write a Review
+    </button>
+  </div>
 
-            {product.review && product.review.length > 0 ? (
-              <div className="space-y-4">
-                {product.review.map((item: any) => (
-                  <ProductReview
-                    key={item.id}
-                    customerName={item.customerName}
-                    message={item.message}
-                    mainImage={item.mainImage}
-                    moreImages={item.moreImages}
-                    Rating={item.Rating}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-gray-400">No reviews yet. Be the first to review!</p>
-              </div>
-            )}
-          </div>
+  {reviews && reviews.length > 0 ? (
+    <div className="space-y-4">
+      {reviews.map((item: any) => (
+        <ProductReview
+          key={item.id || item._id}
+          customerName={item.customerName}
+          message={item.message}
+          Rating={item.Rating}
+          date={item.date}
+        />
+      ))}
+    </div>
+  ) : (
+    <div className="text-center py-8">
+      <p className="text-gray-400">No reviews yet. Be the first to review!</p>
+    </div>
+  )}
+</div>
+
+ <AddReviewModal
+  isOpen={isReviewModalOpen}
+  onClose={() => setIsReviewModalOpen(false)}
+  onSubmit={handleAddReview}
+/>
+
         </div>
       </div>
 

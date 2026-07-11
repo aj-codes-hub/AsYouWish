@@ -40,7 +40,7 @@ const Footer:React.FC  = () => {
           <h1>Quick Links</h1>
           
           <div className='flex flex-col text-[12px] mt-[12px] gap-2'>
-            <a href="#">About us</a>
+            <a href="/about">About us</a>
             <a href="#">Contact</a>
             <a href="#">Shoping info</a>
             <a href="#">Returns</a>
@@ -64,9 +64,9 @@ const Footer:React.FC  = () => {
           <h1>Get in Touch</h1>
           
           <div className='flex flex-col text-[12px] mt-[12px] gap-2'>
-            <a href="#"><SlEnvolope className='inline-block text-primary mr-2 text-[16px]'/>hello@luxefemme.com</a>
-            <a href="#"><LuPhone className='inline-block text-primary mr-2 text-[16px]'/>+1 (555) 123-4567</a>
-            <a href="#"><IoLocationOutline className='inline-block text-primary mr-2 text-[16px]'/>123 Fashion Ave, New York, NY 10001</a>
+            <a href="#"><SlEnvolope className='inline-block text-primary mr-2 text-[16px]'/>aalijjaan@gmail.com</a>
+            <a href="#"><LuPhone className='inline-block text-primary mr-2 text-[16px]'/>+92 322 2855707</a>
+            <a href="#"><IoLocationOutline className='inline-block text-primary mr-2 text-[16px]'/>AsYouWish is an online shoping platForm for now.</a>
           </div>
 
         </div>

@@ -1,12 +1,14 @@
-// src/context/wishlistContext.tsx
 import React, { createContext, useState, useContext, useEffect } from 'react';
 
 interface WishlistItemType {
   id: number | string;
+  _id?: string;
   title: string;
   price: number;
   mainImage: string;
-  _id?: string;
+  discount?: number;
+  DiscountPrice?: number;
+  moreImages?: string[];
 }
 
 interface WishlistContextType {
@@ -32,30 +34,35 @@ export const WishlistProvider = ({ children }: { children: React.ReactNode }) =>
     localStorage.setItem('wishlist', JSON.stringify(wishlist));
   }, [wishlist]);
 
-  // ✅ FIXED: Duplicate check with both id and _id
   const addToWishlist = (product: any) => {
     const productId = product._id || product.id;
     
-    // ✅ Check if product already exists
     const exists = wishlist.some(item => {
       const itemId = item._id || item.id;
       return itemId === productId;
     });
     
     if (exists) {
-      // ✅ If already exists, remove it (toggle)
       removeFromWishlist(productId);
       return;
     }
     
     setIsAnimatingWishlist(true);
     
-    const newItem = {
+    // ✅ Calculate discount price
+    const discountPrice = product.DiscountPrice || 
+      (product.discount ? Math.round(product.price - (product.price * product.discount / 100)) : product.price);
+    
+    // ✅ Save ALL properties
+    const newItem: WishlistItemType = {
       id: product.id || product._id,
       _id: product._id || product.id,
       title: product.title,
       price: product.price,
-      mainImage: product.mainImage
+      mainImage: product.mainImage,
+      discount: product.discount || 0,
+      DiscountPrice: discountPrice,
+      moreImages: product.moreImages || [],
     };
     
     setWishlist([...wishlist, newItem]);
@@ -65,7 +72,6 @@ export const WishlistProvider = ({ children }: { children: React.ReactNode }) =>
     }, 1000);
   };
 
-  // ✅ FIXED: Remove by id or _id
   const removeFromWishlist = (id: number | string) => {
     setWishlist(wishlist.filter(item => {
       const itemId = item._id || item.id;
@@ -73,7 +79,6 @@ export const WishlistProvider = ({ children }: { children: React.ReactNode }) =>
     }));
   };
 
-  // ✅ FIXED: Check by id or _id
   const isInWishlist = (id: number | string) => {
     return wishlist.some(item => {
       const itemId = item._id || item.id;
@@ -90,7 +95,7 @@ export const WishlistProvider = ({ children }: { children: React.ReactNode }) =>
       removeFromWishlist,
       isInWishlist,
       totalWishlistItems,
-      isAnimatingwishlist
+      isAnimatingwishlist,
     }}>
       {children}
     </WishlistContext.Provider>

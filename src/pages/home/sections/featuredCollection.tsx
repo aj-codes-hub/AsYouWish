@@ -11,6 +11,7 @@ interface ProductType {
   isFeatured?: boolean;
   discount: number;
   details?: string;
+  moreImages: string[];
 }
 
 const FeaturedCollection: React.FC = () => {
@@ -68,6 +69,7 @@ const FeaturedCollection: React.FC = () => {
               key={item._id || item.id || Math.random().toString()}
               id={item._id as any || item.id as any}
               Image={item.mainImage}
+              HoverImg={item.moreImages}
               price={item.price}
               title={item.title}
               discount={item.discount}

@@ -11,6 +11,7 @@ interface ProductType {
   Event?: string;
   discount: number;
   details?: string;
+  moreImages: string[];
 }
 
 const BestSellers: React.FC = () => {
@@ -105,6 +106,7 @@ const BestSellers: React.FC = () => {
               Image={item.mainImage}
               price={item.price}
               title={item.title}
+              HoverImg={item.moreImages}
               discount={item.discount}
               DiscountPrice={Math.round((item.price) - item.price * item.discount / 100)}
               className="h-[500px]"

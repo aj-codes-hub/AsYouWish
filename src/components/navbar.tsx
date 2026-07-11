@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { CiSearch } from "react-icons/ci";
 import { FaRegHeart } from "react-icons/fa";
 import { PiShoppingCartSimpleThin } from "react-icons/pi";
@@ -27,9 +27,26 @@ const Navbar: React.FC<NavbarProps> = ({ setIsMenuOpen, isOpenLogiModal }) => {
    const { totalItems } = useCart();  
    const { totalWishlistItems } = useWishlist()
    const navigation = useNavigate();
-
    const [isOpen, setIsOpen] = useState(false);
    const [isSearchOpen, setIsSearchOpen] = useState(false);
+   const [isScrolled, setIsScrolled] = useState(false);
+
+    useEffect(() => {
+    const handleScroll = () => {
+    if(window.scrollY >= 50){
+        setIsScrolled(true);
+     }
+     else{
+      setIsScrolled(false);
+     };
+   };
+     window.addEventListener("scroll",handleScroll);
+      handleScroll();
+     return() => {
+       window.removeEventListener("scroll",handleScroll);
+     };
+  
+    },[]);
 
    const OpenMenu = () => {
       setIsMenuOpen(true);
@@ -71,7 +88,11 @@ const Navbar: React.FC<NavbarProps> = ({ setIsMenuOpen, isOpenLogiModal }) => {
          {/* ===== SEARCH MODAL ===== */}
          <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
 
-         <div className='h-[65px] w-full justify-between fixed sm:top-0 bottom-0 z-[999] flex items-center shadow-sm sm:px-[15px] xl:px-[0]'>
+         <div className={`h-[65px] transform-all duration-500 sm:taxt-white text-black bg-[rgb(255,255,255)] w-full justify-between fixed sm:top-0 bottom-0 z-[999] flex items-center shadow-sm sm:px-[15px] xl:px-[0] 
+                         ${isScrolled && window.location.pathname === "/" ? "sm:backdrop-blur-sm sm:bg-black/30" : "sm:bg-black/0"}
+                         ${window.location.pathname !== "/" ? "sm:backdrop-blur-sm sm:bg-black/30" : "sm:bg-black/0"}
+                         `}>
+
             <div className='max-w-[1100px] h-full mx-auto w-full justify-between sm:flex items-center hidden'>
          
                <div className='cursor-pointer md:h-[45px] md:w-[160px] h-[30px] w-[110px] relative'
@@ -91,19 +112,19 @@ const Navbar: React.FC<NavbarProps> = ({ setIsMenuOpen, isOpenLogiModal }) => {
                   ))}
                </nav>
 
-               <div className='flex items-center text-[16px] text-white'>
+               <div className='flex items-center gap-1 text-[16px] text-white'>
 
                   {/* ✅ SEARCH BUTTON - Opens Search Modal */}
                   <button 
                      onClick={() => setIsSearchOpen(true)}
-                     className='p-[10px] rounded-full hover:bg-[#fef4f0] transition cursor-pointer'
+                     className='p-[10px] rounded-full hover:bg-[#000000] transition cursor-pointer'
                   >
                      <LuSearch />
                   </button>
 
                   <Link to={'/favurite-product'}
                         className={`p-[10px] rounded-full transform-all duration-300 relative
-                           ${window.location.pathname === '/favurite-product' ? 'bg-[#fef4f0]' : ''}`}>
+                           ${window.location.pathname === '/favurite-product' ? 'bg-[#000000]' : ''}`}>
                      {window.location.pathname === '/favurite-product' 
                         ? <IoHeart className='text-[19px] text-[#B76E79] '/> 
                         : <FaRegHeart />}
@@ -117,13 +138,13 @@ const Navbar: React.FC<NavbarProps> = ({ setIsMenuOpen, isOpenLogiModal }) => {
 
                   <button onClick={hangleLoginModalOpen}
                           className={`p-[10px] rounded-full text-[20px] cursor-pointer 
-                             ${window.location.pathname === '/Profile' ? 'bg-[#fef4f0]' : ''}`}>
+                             ${window.location.pathname === '/profile' ? 'bg-[#000000] text-white' : ''}`}>
                      <IoPersonOutline />
                   </button>
                   
                   <Link to="/cart"
                         className={`cursor-pointer h-[40px] w-[40px] flex items-center justify-center rounded-full relative 
-                           ${window.location.pathname === '/cart' ? 'bg-[#fef4f0]' : ''}`}>
+                           ${window.location.pathname === '/cart' ? 'bg-[#000000] text-white' : ''}`}>
                      {totalItems > 0 && (
                         <div className='rounded-full w-[13px] h-[13px] flex items-center justify-center overflow-hidden bg-[#B76E79] text-white absolute text-[9.5px] font-semibold top-[14%] right-[6%]'>
                            <h2>{totalItems}</h2>
@@ -133,7 +154,7 @@ const Navbar: React.FC<NavbarProps> = ({ setIsMenuOpen, isOpenLogiModal }) => {
                   </Link>
                </div>
 
-               <button onClick={OpenMenu} className='md:hidden block text-[24px]'>
+               <button onClick={OpenMenu} className='md:hidden block text-[24px] text-white'>
                   <LuMenu />         
                </button>
             </div>

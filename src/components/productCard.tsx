@@ -1,25 +1,26 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { FiShoppingCart } from "react-icons/fi";
 import { FaRegHeart } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../pages/context/cartContext';
 import { IoHeart } from "react-icons/io5";
 import { useWishlist } from '../pages/context/wishlistContext';
-
+import { FaStar } from "react-icons/fa6";
 
 
 
 interface ProductCardPrpos {
     id?: any;
     Image?: string;
-    price?: number;
+    price?: any;
     className?:string;
     title?:string;
     discount?:number;
     DiscountPrice?: number;
+    HoverImg?: any;
 }
 
-const ProductCard:React.FC<ProductCardPrpos> = ({Image,price,className,id,title,discount,DiscountPrice}) => {
+const ProductCard:React.FC<ProductCardPrpos> = ({Image,price,className,id,title,discount,DiscountPrice,HoverImg}) => {
 
 
  const { addToWishlist , removeFromWishlist , isInWishlist } = useWishlist();   
@@ -27,7 +28,20 @@ const ProductCard:React.FC<ProductCardPrpos> = ({Image,price,className,id,title,
 
 const handleWishlistToggle = (e: React.MouseEvent) => {
   e.stopPropagation();
-  const product = { id, _id: id, title, price, mainImage: Image };
+  
+  const discountPrice = DiscountPrice || 
+    (discount ? Math.round(price - (price * discount / 100)) : price);
+  
+  const product = {
+    id: id,
+    _id: id,
+    title: title,
+    price: price,
+    mainImage: Image,
+    discount: discount || 0,
+    DiscountPrice: discountPrice,
+    moreImages: HoverImg || [],
+  };
   
   if (isInWishlist(id)) {
     removeFromWishlist(id);
@@ -35,7 +49,6 @@ const handleWishlistToggle = (e: React.MouseEvent) => {
     addToWishlist(product);
   }
 };
-
 // ✅ Update isLiked
 const isLiked = isInWishlist(id)
 
@@ -57,18 +70,28 @@ const handlePorductClick = () => {
      navigate(`/product-detail/${id}`)
 }
 
+const [isMouse, setIsMouse] = useState(false); 
+
+
   return (
     <>
-    <div
-         className={`sm:h-[380px] h-[290px] w-[100%] overflow-hidden hover:rounded-xl hover:shadow-2xl hover:scale-[1.01] transition-all duration-500 cursor-pointer group ${className}`}>
-        <div className='h-[75%] w-full overflow-hidden relative bg-gradient-to-bl from-[#B0AEA2] to-[#CFCDC1]'>
-           <img loading="lazy" onClick={handlePorductClick} src={Image} className='group-hover:scale-[1.08] transition-all duration-500'/>
+    <div className={`sm:h-[380px] h-[290px] w-[100%] overflow-hidden hover:rounded-xl hover:shadow-2xl hover:scale-[1.01] transition-all duration-500 cursor-pointer group ${className}`}>
+         <div className='h-[75%] w-full overflow-hidden relative bg-gradient-to-bl from-[#B0AEA2] to-[#CFCDC1]'>
+           <img  onClick={handlePorductClick} 
+                 src={isMouse ? HoverImg[0] : Image}
+                 onMouseEnter={() => setIsMouse(true)}
+                 onMouseOut={() => setIsMouse(false)} 
+                 className='group-hover:scale-[1.08] transition-all duration-500 ease-in-out'/>
            
            <div  onClick={handleWishlistToggle}
                  className='rounded-full md:text-[18px] text-[16px] md:p-[10px] p-[9px] bg-white/60 absolute top-[10px] right-[10px]'>
             {isLiked ? <IoHeart className='text-[19px] text-[#B76E79] '/> 
                    : <FaRegHeart /> }
            </div>
+
+           <span className='sm:text-[11.5px] text-[8px] inline-block bg-[#f6ea01] px-[6px] py-[1px] ml-[6px] absolute top-[15px]'>
+                        {discount}% OFF
+            </span>
 
            <button  onClick={handleAddToCart}
                      className='rounded-r-full px-[10px] gap-1 py-[6px] text-[12px] bg-white/60 absolute bottom-[10px] left-[0px] flex items-center justify-center sm:hidden'> 
@@ -86,7 +109,7 @@ const handlePorductClick = () => {
                                group-hover:h-[40px] lg:h-[0px] h-[35px] cursor-pointer overflow-hidden transition-all duration-300'>
                 <FiShoppingCart />Add to cart 
             </button>
-             
+            <div onClick={handlePorductClick} className='h-full'>
              <h2 className='text-[12px] sm:text-[14px] tracking-wider leading-2 font-semibold sm:font-normal text-[#30303071] sm:mt-[6px] sm:ml-[12px]'>
                 Embroidered | Lawn
              </h2>
@@ -103,9 +126,17 @@ const handlePorductClick = () => {
                    Rs. {price}
                 </span>
             </h2>    
-             <span className='sm:text-[11.5px] text-[8px] inline-block text-whit bg-[yellow] rounded-full px-[6px] py-[1px] ml-[6px]'>
-                        {discount}% OFF
+
+            <span className='flex gap-1 text-primary'>
+              <FaStar />
+              <FaStar />
+              <FaStar />
+              <FaStar />
+              <FaStar />
+              
             </span>
+
+            </div>
             </div>
         </div>
 

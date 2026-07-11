@@ -17,6 +17,7 @@ interface ProductType {
   isFeatured?: boolean;
   discount: number;
   details?: string;
+  moreImages: string[];
 }
 
 const NewArrivals:React.FC = () => {
@@ -121,6 +122,7 @@ const NewArrivals:React.FC = () => {
                           Image={item.mainImage}
                           price={item.price}
                           title={item.title}
+                          HoverImg={item.moreImages}
                           discount={item.discount}
                           DiscountPrice={Math.round((item.price) - item.price * item.discount / 100)}
                          />
@@ -131,11 +133,11 @@ const NewArrivals:React.FC = () => {
       </Swiper>
 
       <div className='absolute xl:w-[105%] w-[100%] left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 md:flex justify-between items-center text-[22px] hidden'>  
-        <button onClick={() => swiperRef.current?.slideNext()}
+        <button onClick={() => swiperRef.current?.slidePrev()}
                 className='p-[5px] cursor-pointer hover:scale-[1.2] transform duration-300'>
             <FaAngleLeft />
         </button>
-         <button onClick={() => swiperRef.current?.slidePrev()}
+         <button onClick={() => swiperRef.current?.slideNext()}
                 className='p-[5px] cursor-pointer hover:scale-[1.2] transform duration-300'>
             <FaAngleRight />
         </button>

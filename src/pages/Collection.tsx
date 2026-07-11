@@ -68,6 +68,9 @@ const Collection: React.FC = () => {
                 Image={item.mainImage}
                 price={item.price}
                 title={item.title}
+                HoverImg={item.moreImages}
+                discount={item.discount}
+                DiscountPrice={Math.round((item.price) - item.price * item.discount / 100)}
               />
             ))}
           </div>

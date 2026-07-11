@@ -1,13 +1,10 @@
-import React from 'react'
+import React from 'react';
 import { useCart } from '../context/cartContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from 'lucide-react';
 
-
 const CartPage: React.FC = () => {
-
   const { cart, removeFromCart, updateQuantity, totalItems, totalPrice, clearBuyNow } = useCart();
-
   const navigate = useNavigate();
 
   const handleCheckout = () => {
@@ -15,11 +12,13 @@ const CartPage: React.FC = () => {
       alert('Your cart is empty!');
       return;
     }
-
-    // Checking out from cart, so clear any pending buy-now product
     clearBuyNow();
-
     navigate('/checkout');
+  };
+
+  // ✅ FIXED: Product click handler with id parameter
+  const handleProductClick = (id: number | string) => {
+    navigate(`/product-detail/${id}`);
   };
 
   if (cart.length === 0) {
@@ -46,12 +45,13 @@ const CartPage: React.FC = () => {
         </div>
       </div>
     );
-  };
+  }
 
   return (
     <div className='container mx-auto p-4 sm:p-6 min-h-[80vh] bg-gray-50/50'>
       <div className='flex items-center justify-between mb-6 mt-[40px] sm:mb-8'>
         <div>
+          <h2 className='text-2xl font-bold text-gray-900'>Your Cart</h2>
           <p className='text-gray-500 text-sm mt-1'>{totalItems} {totalItems === 1 ? 'item' : 'items'} in your cart</p>
         </div>
       </div>
@@ -64,14 +64,22 @@ const CartPage: React.FC = () => {
               key={item.id}
               className='flex gap-4 bg-white border border-gray-100 rounded-xl p-4 shadow-sm hover:shadow-md hover:border-[#B76E79]/20 transition-all duration-200'
             >
+              {/* ✅ FIXED: Pass item.id to handleProductClick */}
               <img
                 src={item.mainImage}
                 alt={item.title}
-                className='w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg flex-shrink-0'
+                onClick={() => handleProductClick(item.id)}
+                className='w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg flex-shrink-0 cursor-pointer hover:scale-[1.08] transition-transform duration-300'
               />
 
               <div className='flex-1 min-w-0'>
-                <h3 className='font-semibold text-gray-900 truncate'>{item.title}</h3>
+                {/* ✅ Click on title also navigates to product detail */}
+                <h3
+                  onClick={() => handleProductClick(item.id)}
+                  className='font-semibold text-gray-900 truncate cursor-pointer hover:text-[#B76E79] transition-colors duration-200'
+                >
+                  {item.title}
+                </h3>
                 <p className='text-[#B76E79] font-bold mt-0.5'>Rs. {item.price}</p>
 
                 {/* Quantity buttons */}
@@ -153,7 +161,6 @@ const CartPage: React.FC = () => {
       </div>
     </div>
   );
+};
 
-}
-
-export default CartPage
+export default CartPage;
