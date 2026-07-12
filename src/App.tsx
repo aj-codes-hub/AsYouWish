@@ -31,6 +31,7 @@ import AdminEditProduct from "./pages/Admin/AdminEditProduct";
 import { ProductProvider } from "./pages/context/ProductContext";
 import NotFoundPage from "./pages/NotFoundPage";
 import NotificationDetail from "./pages/Admin/NotificationDetail";
+import NotificationHistory from "./pages/Admin/NotificationHistory";
 
 function AppContent() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -83,6 +84,11 @@ function AppContent() {
           <Route path="/admin/notifications/:id" element={
           <AdminRoute>
             <NotificationDetail />
+          </AdminRoute>
+        } />
+        <Route path="/admin/notifications/history" element={
+          <AdminRoute>
+            <NotificationHistory />
           </AdminRoute>
         } />
           <Route path="*" element={<NotFoundPage />} />

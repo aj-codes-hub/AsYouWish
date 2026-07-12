@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { FaBell, FaCheck} from 'react-icons/fa';
 import { IoNotificationsOutline } from "react-icons/io5";
 import { useAuth } from '../Auth/authContext';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -169,6 +169,10 @@ const handleNotificationClick = (notification: NotificationType) => {
         <div className="absolute right-0 mt-2 w-80 md:w-96 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 max-h-[450px] overflow-hidden">
           <div className="flex items-center justify-between p-4 border-b border-gray-100">
             <h3 className="font-bold text-gray-800">Notifications</h3>
+            <Link to="/admin/notifications/history"
+                  className="text-xs text-[#B76E79] hover:underline cursor-pointer">
+                View All History →
+           </Link>
             {unreadCount > 0 && (
               <button
                 onClick={markAllAsRead}
