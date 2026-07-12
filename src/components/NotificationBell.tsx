@@ -1,6 +1,6 @@
 // src/components/NotificationBell.tsx
 import React, { useState, useEffect, useRef } from 'react';
-import { FaBell, FaCheck} from 'react-icons/fa';
+import { FaBell, FaCheck } from 'react-icons/fa';
 import { IoNotificationsOutline } from "react-icons/io5";
 import { useAuth } from '../Auth/authContext';
 import { Link, useNavigate } from 'react-router-dom';
@@ -22,11 +22,18 @@ const NotificationBell: React.FC = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [audio] = useState(new Audio('/sounds/notification.mp3'));
   const { isLoggedIn } = useAuth();
   const navigate = useNavigate();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const prevUnreadCount = useRef(0);
+
+  // ✅ Audio — Properly initialized
+  const [audio] = useState(() => {
+    const audioElement = new Audio('/sounds/notification.mp3');
+    audioElement.volume = 0.5;
+    audioElement.load();
+    return audioElement;
+  });
 
   // ✅ Fetch notifications
   useEffect(() => {
@@ -48,13 +55,20 @@ const NotificationBell: React.FC = () => {
 
         const data = await response.json();
         
-        setNotifications(data.notifications || []);
-        setUnreadCount(data.unreadCount || 0);
+        // ✅ Debug logs
+        console.log('🔔 Unread count:', data.unreadCount);
+        console.log('🔔 Notifications:', data.notifications);
         
-        if (data.unreadCount > prevUnreadCount.current) {
-          audio.play().catch(() => {});
+        const newUnreadCount = data.unreadCount || 0;
+        
+        setNotifications(data.notifications || []);
+        setUnreadCount(newUnreadCount);
+        
+        // ✅ Play sound only if new unread notifications arrive
+        if (newUnreadCount > prevUnreadCount.current) {
+          audio.play().catch(() => console.log('Audio play failed'));
         }
-        prevUnreadCount.current = data.unreadCount;
+        prevUnreadCount.current = newUnreadCount;
         
       } catch (error) {
         console.error('❌ Error fetching notifications:', error);
@@ -141,11 +155,10 @@ const NotificationBell: React.FC = () => {
     }
   };
 
-  
-const handleNotificationClick = (notification: NotificationType) => {
-  navigate(`/admin/notifications/${notification._id}`);
-  setIsOpen(false);
-};
+  const handleNotificationClick = (notification: NotificationType) => {
+    navigate(`/admin/notifications/${notification._id}`);
+    setIsOpen(false);
+  };
 
   if (!isLoggedIn) return null;
 
@@ -153,34 +166,43 @@ const handleNotificationClick = (notification: NotificationType) => {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`relative p-2 rounded-full hover:bg-black transition cursor-pointer 
-                   ${isOpen ? "bg-black" : ""}`}>
-
-        {isOpen ? <FaBell className="text-xl text-white"/> : <IoNotificationsOutline className="text-xl text-white" /> }
+        className={`relative p-2 rounded-full hover:bg-black transition cursor-pointer ${
+          isOpen ? "bg-black" : ""
+        }`}
+      >
+        {isOpen ? (
+          <FaBell className={`text-xl text-white ${unreadCount > 0 ? 'animate-wiggle' : ''}`} />
+        ) : (
+          <IoNotificationsOutline className="text-xl text-white" />
+        )}
         
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 bg-[#B76E79] text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
-            {unreadCount}
+          <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse-badge">
+             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 md:w-96 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 max-h-[450px] overflow-hidden">
+        <div className="absolute right-0 mt-2 w-80 md:w-96 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 max-h-[450px] overflow-hidden animate-slide-down">
           <div className="flex items-center justify-between p-4 border-b border-gray-100">
             <h3 className="font-bold text-gray-800">Notifications</h3>
-            <Link to="/admin/notifications/history"
-                  className="text-xs text-[#B76E79] hover:underline cursor-pointer">
-                View All History →
-           </Link>
-            {unreadCount > 0 && (
-              <button
-                onClick={markAllAsRead}
-                className="text-xs text-[#B76E79] hover:underline cursor-pointer"
+            <div className="flex items-center gap-3">
+              {unreadCount > 0 && (
+                <button
+                  onClick={markAllAsRead}
+                  className="text-xs text-[#B76E79] hover:underline cursor-pointer"
+                >
+                  Mark all read
+                </button>
+              )}
+              <Link
+                to="/admin/notifications/history"
+                className="text-xs text-gray-500 hover:text-[#B76E79] cursor-pointer"
               >
-                Mark all as read
-              </button>
-            )}
+                View All →
+              </Link>
+            </div>
           </div>
 
           <div className="overflow-y-auto max-h-[350px]">

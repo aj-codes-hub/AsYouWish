@@ -155,7 +155,7 @@ const Navbar: React.FC<NavbarProps> = ({ setIsMenuOpen, isOpenLogiModal }) => {
                      <FiShoppingCart />
                   </Link>
 
-                  {user?.role === "admin" ? <NotificationBell/> : ""}
+                  {user?.role === "admin" ? <NotificationBell /> : ""}
                   
                </div>
 
