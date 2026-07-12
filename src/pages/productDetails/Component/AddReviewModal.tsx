@@ -19,7 +19,6 @@ const AddReviewModal: React.FC<AddReviewModalProps> = ({
   isOpen,
   onClose,
   onSubmit,
-  productId,
 }) => {
   const { user, isLoggedIn } = useAuth();
   const [customerName, setCustomerName] = useState(user?.name || '');
