@@ -4,6 +4,8 @@ import { FaBell, FaCheck } from 'react-icons/fa';
 import { useAuth } from '../Auth/authContext';
 import { useNavigate } from 'react-router-dom';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
 interface NotificationType {
   _id: string;
   title: string;
@@ -19,18 +21,11 @@ const NotificationBell: React.FC = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
+  const [audio] = useState(new Audio('/sounds/notification.mp3'));
   const { isLoggedIn } = useAuth();
   const navigate = useNavigate();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const prevUnreadCount = useRef(0);
-
-  // ✅ Load audio
-  useEffect(() => {
-    const audioElement = new Audio('/sounds/notification.mp3');
-    audioElement.volume = 0.5;
-    setAudio(audioElement);
-  }, []);
 
   // ✅ Fetch notifications
   useEffect(() => {
@@ -39,23 +34,35 @@ const NotificationBell: React.FC = () => {
     const fetchNotifications = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch('/api/admin/notifications', {
+        console.log('🔑 Token:', token); // Debug
+        console.log('📡 API_URL:', API_URL); // Debug
+
+        const response = await fetch(`${API_URL}/admin/notifications`, {
           headers: {
             'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
           },
         });
+
+        console.log('📡 Response status:', response.status); // Debug
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
         const data = await response.json();
+        console.log('✅ Notifications:', data); // Debug
+
         setNotifications(data.notifications || []);
         setUnreadCount(data.unreadCount || 0);
         
-        // ✅ Play sound for new notifications
         if (data.unreadCount > prevUnreadCount.current) {
-          audio?.play().catch(() => {});
+          audio.play().catch(() => {});
         }
         prevUnreadCount.current = data.unreadCount;
         
       } catch (error) {
-        console.error('Error fetching notifications:', error);
+        console.error('❌ Error fetching notifications:', error);
       } finally {
         setLoading(false);
       }
@@ -65,17 +72,6 @@ const NotificationBell: React.FC = () => {
     const interval = setInterval(fetchNotifications, 30000);
     return () => clearInterval(interval);
   }, [isLoggedIn, audio]);
-
-  // ✅ Click outside to close dropdown
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   // ✅ Mark as read
   const markAsRead = async (id: string) => {
@@ -123,7 +119,6 @@ const NotificationBell: React.FC = () => {
   if (!isLoggedIn) return null;
 
   return (
-    <>
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
@@ -161,46 +156,7 @@ const NotificationBell: React.FC = () => {
                 <p>No notifications</p>
               </div>
             ) : (
-              notifications.map((notification) => (
-                <div
-                  key={notification._id}
-                  onClick={() => handleNotificationClick(notification)}
-                  className={`p-4 border-b border-gray-50 cursor-pointer hover:bg-gray-50 transition ${
-                    !notification.read ? 'bg-[#B76E79]/5 border-l-4 border-l-[#B76E79]' : ''
-                  }`}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-800 truncate">
-                        {notification.title}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-0.5 truncate">
-                        {notification.message}
-                      </p>
-                      <p className="text-xs text-gray-400 mt-1">
-                        {new Date(notification.createdAt).toLocaleDateString()} {new Date(notification.createdAt).toLocaleTimeString()}
-                      </p>
-                    </div>
-                    {!notification.read && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          markAsRead(notification._id);
-                        }}
-                        className="ml-2 text-xs text-[#B76E79] hover:underline flex-shrink-0 cursor-pointer"
-                      >
-                        <FaCheck />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-    {notifications.map((notification) => (
+            notifications.map((notification) => (
         <div
             key={notification._id}
             onClick={() => handleNotificationClick(notification)}
@@ -233,9 +189,14 @@ const NotificationBell: React.FC = () => {
             )}
             </div>
         </div>
-        ))}
-</>
+        ))
+            )}
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 
 export default NotificationBell;
+
