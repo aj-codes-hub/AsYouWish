@@ -89,7 +89,7 @@ const Navbar: React.FC<NavbarProps> = ({ setIsMenuOpen, isOpenLogiModal }) => {
          {/* ===== SEARCH MODAL ===== */}
          <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
 
-         <div className={`h-[65px] transform-all duration-500 sm:taxt-white text-black bg-[rgb(255,255,255)] w-full justify-between fixed sm:top-0 bottom-0 z-[999] flex items-center shadow-sm sm:px-[15px] xl:px-[0] 
+         <div className={`h-[65px] transform-all duration-500 sm:taxt-white text-black bg-[rgb(255,255,255)] w-full justify-between fixed sm:top-0 bottom-0 z-[999] flex items-center  sm:px-[15px] xl:px-[0] 
                          ${isScrolled && window.location.pathname === "/" ? "sm:backdrop-blur-sm sm:bg-black/30" : "sm:bg-black/0"}
                          ${window.location.pathname !== "/" ? "sm:backdrop-blur-sm sm:bg-black/30" : "sm:bg-black/0"}
                          `}>
