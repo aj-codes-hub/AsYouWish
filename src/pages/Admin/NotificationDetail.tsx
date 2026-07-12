@@ -1,7 +1,7 @@
 // src/pages/Admin/NotificationDetail.tsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { FaArrowLeft, FaBell, FaCheckCircle, FaClock, FaUser, FaShoppingBag } from 'react-icons/fa';
+import { FaArrowLeft, FaBell, FaCheckCircle, FaClock, FaShoppingBag } from 'react-icons/fa';
 
 interface NotificationType {
   _id: string;
