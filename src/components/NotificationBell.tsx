@@ -1,6 +1,7 @@
 // src/components/NotificationBell.tsx
 import React, { useState, useEffect, useRef } from 'react';
-import { FaBell, FaCheck } from 'react-icons/fa';
+import { FaBell, FaCheck} from 'react-icons/fa';
+import { IoNotificationsOutline } from "react-icons/io5";
 import { useAuth } from '../Auth/authContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -34,9 +35,6 @@ const NotificationBell: React.FC = () => {
     const fetchNotifications = async () => {
       try {
         const token = localStorage.getItem('token');
-        console.log('🔑 Token:', token); // Debug
-        console.log('📡 API_URL:', API_URL); // Debug
-
         const response = await fetch(`${API_URL}/admin/notifications`, {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -44,15 +42,12 @@ const NotificationBell: React.FC = () => {
           },
         });
 
-        console.log('📡 Response status:', response.status); // Debug
-
         if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          throw new Error(`HTTP ${response.status}`);
         }
 
         const data = await response.json();
-        console.log('✅ Notifications:', data); // Debug
-
+        
         setNotifications(data.notifications || []);
         setUnreadCount(data.unreadCount || 0);
         
@@ -73,21 +68,52 @@ const NotificationBell: React.FC = () => {
     return () => clearInterval(interval);
   }, [isLoggedIn, audio]);
 
+  // ✅ Click outside + Escape key to close
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsOpen(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, []);
+
   // ✅ Mark as read
   const markAsRead = async (id: string) => {
     try {
       const token = localStorage.getItem('token');
-      await fetch(`/api/admin/notifications/${id}/read`, {
+      const response = await fetch(`${API_URL}/admin/notifications/${id}/read`, {
         method: 'PUT',
-        headers: { 'Authorization': `Bearer ${token}` },
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
       });
-      
+
+      if (!response.ok) {
+        throw new Error('Failed to mark as read');
+      }
+
       setNotifications(prev => 
         prev.map(n => n._id === id ? { ...n, read: true } : n)
       );
       setUnreadCount(prev => Math.max(0, prev - 1));
+      
     } catch (error) {
-      console.error('Error marking as read:', error);
+      console.error('❌ Error marking as read:', error);
     }
   };
 
@@ -95,15 +121,23 @@ const NotificationBell: React.FC = () => {
   const markAllAsRead = async () => {
     try {
       const token = localStorage.getItem('token');
-      await fetch('/api/admin/notifications/read-all', {
+      const response = await fetch(`${API_URL}/admin/notifications/read-all`, {
         method: 'PUT',
-        headers: { 'Authorization': `Bearer ${token}` },
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
       });
-      
+
+      if (!response.ok) {
+        throw new Error('Failed to mark all as read');
+      }
+
       setNotifications(prev => prev.map(n => ({ ...n, read: true })));
       setUnreadCount(0);
+      
     } catch (error) {
-      console.error('Error marking all as read:', error);
+      console.error('❌ Error marking all as read:', error);
     }
   };
 
@@ -122,9 +156,11 @@ const NotificationBell: React.FC = () => {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 rounded-full hover:bg-gray-100 transition cursor-pointer"
-      >
-        <FaBell className="text-xl text-gray-700" />
+        className={`relative p-2 rounded-full hover:bg-black transition cursor-pointer 
+                   ${isOpen ? "bg-black" : ""}`}>
+
+        {isOpen ? <FaBell className="text-xl text-white"/> : <IoNotificationsOutline className="text-xl text-white" /> }
+        
         {unreadCount > 0 && (
           <span className="absolute -top-0.5 -right-0.5 bg-[#B76E79] text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
             {unreadCount}
@@ -156,40 +192,40 @@ const NotificationBell: React.FC = () => {
                 <p>No notifications</p>
               </div>
             ) : (
-            notifications.map((notification) => (
-        <div
-            key={notification._id}
-            onClick={() => handleNotificationClick(notification)}
-            className={`p-4 border-b border-gray-50 cursor-pointer hover:bg-gray-50 transition ${
-            !notification?.read ? 'bg-[#B76E79]/5 border-l-4 border-l-[#B76E79]' : ''
-            }`}
-        >
-            <div className="flex items-start justify-between">
-            <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-800 truncate">
-                {notification?.title || 'Notification'}
-                </p>
-                <p className="text-xs text-gray-500 mt-0.5 truncate">
-                {notification?.message || 'New notification'}
-                </p>
-                <p className="text-xs text-gray-400 mt-1">
-                {notification?.createdAt ? new Date(notification.createdAt).toLocaleDateString() : ''}
-                </p>
-            </div>
-            {!notification?.read && (
-                <button
-                onClick={(e) => {
-                    e.stopPropagation();
-                    markAsRead(notification._id);
-                }}
-                className="ml-2 text-xs text-[#B76E79] hover:underline flex-shrink-0 cursor-pointer"
+              notifications.map((notification) => (
+                <div
+                  key={notification._id}
+                  onClick={() => handleNotificationClick(notification)}
+                  className={`p-4 border-b border-gray-50 cursor-pointer hover:bg-gray-50 transition ${
+                    !notification.read ? 'bg-[#B76E79]/5 border-l-4 border-l-[#B76E79]' : ''
+                  }`}
                 >
-                <FaCheck />
-                </button>
-            )}
-            </div>
-        </div>
-        ))
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-800 truncate">
+                        {notification.title}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-0.5 truncate">
+                        {notification.message}
+                      </p>
+                      <p className="text-xs text-gray-400 mt-1">
+                        {new Date(notification.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                    {!notification.read && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          markAsRead(notification._id);
+                        }}
+                        className="ml-2 text-xs text-[#B76E79] hover:underline flex-shrink-0 cursor-pointer"
+                      >
+                        <FaCheck />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))
             )}
           </div>
         </div>
@@ -199,4 +235,3 @@ const NotificationBell: React.FC = () => {
 };
 
 export default NotificationBell;
-

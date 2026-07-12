@@ -143,6 +143,7 @@ const Navbar: React.FC<NavbarProps> = ({ setIsMenuOpen, isOpenLogiModal }) => {
                      <IoPersonOutline />
                   </button>
                   
+                  
                   <Link to="/cart"
                         className={`cursor-pointer h-[40px] w-[40px] flex items-center justify-center rounded-full relative 
                            ${window.location.pathname === '/cart' ? 'bg-[#000000] text-white' : ''}`}>
@@ -153,6 +154,9 @@ const Navbar: React.FC<NavbarProps> = ({ setIsMenuOpen, isOpenLogiModal }) => {
                      )}
                      <FiShoppingCart />
                   </Link>
+
+                  {user?.role === "admin" ? <NotificationBell/> : ""}
+                  
                </div>
 
                <button onClick={OpenMenu} className='md:hidden block text-[24px] text-white'>
@@ -164,6 +168,10 @@ const Navbar: React.FC<NavbarProps> = ({ setIsMenuOpen, isOpenLogiModal }) => {
             <h1 className='fixed text-primary top-[12px] left-1/2 -translate-x-1/2 font-bold text-[30px] sm:hidden'>
                <img src="/images/Logo.png" className='h-[35px] w-[150px]' alt="logo" />
             </h1>
+            
+            <div className='fixed sm:hidden top-[14px] right-[20px] bg-black/30 backdrop-blur-sm rounded-full'>
+               {user?.role === "admin" ? <NotificationBell/> : ""}
+            </div>
 
             <div className='grid grid-cols-5 h-full w-full sm:hidden'>
 
@@ -211,7 +219,6 @@ const Navbar: React.FC<NavbarProps> = ({ setIsMenuOpen, isOpenLogiModal }) => {
                </div>
             </div>
             <div className="flex items-center gap-4">
-          <NotificationBell/>
           </div>
          </div>
       </>
