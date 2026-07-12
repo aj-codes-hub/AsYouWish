@@ -13,6 +13,7 @@ import { useWishlist } from '../context/wishlistContext';
 import { getProductById } from '../../services/productService';
 import AddReviewModal from './Component/AddReviewModal';
 
+
 const ProductDetail: React.FC = () => {
   const navigate = useNavigate();
   const { addToCart, setBuyNowProduct } = useCart();
@@ -24,7 +25,9 @@ const ProductDetail: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-  const [reviews, setReviews] = useState<any[]>(product?.review || []);
+  
+  // ✅ FIX 1: Initialize reviews as empty array
+  const [reviews, setReviews] = useState<any[]>([]);
 
   // State for quantity
   const [quantity, setQuantity] = useState(1);
@@ -42,18 +45,20 @@ const ProductDetail: React.FC = () => {
 
   // ✅ Fetch product from backend
   useEffect(() => {
-    const fetchProduct = async () => {
-        try {
-            const data = await getProductById(id!);
-            setProduct(data);
-            setSelectedImage(data.mainImage);
-        } catch (err: any) {
-            setError(err.message || 'Product not found');
-        } finally {
-            setLoading(false);
-        }
-    };
-    fetchProduct();
+  const fetchProduct = async () => {
+    try {
+      const data = await getProductById(id!);
+      setProduct(data);
+      setSelectedImage(data.mainImage);
+      // ✅ Redline fix - use any
+      setReviews((data as any).review || []);
+    } catch (err: any) {
+      setError(err.message || 'Product not found');
+    } finally {
+      setLoading(false);
+    }
+  };
+  fetchProduct();
 }, [id]);
 
   // Handle quantity change
@@ -73,7 +78,7 @@ const ProductDetail: React.FC = () => {
         title: product.title,
         price: product.price,
         quantity: quantity,
-        mainImage: product.mainImage
+        mainImage: product.mainImage,
       });
       navigate('/checkout');
     }
@@ -88,29 +93,28 @@ const ProductDetail: React.FC = () => {
     }
   };
 
-const handleWishlistToggle = () => {
-  if (product) {
-    const productId = product._id || product.id;
-    
-    if (isInWishlist(productId)) {
-      removeFromWishlist(productId);
-    } else {
-      // ✅ Pass all product data
-      addToWishlist({
-        id: product._id || product.id,
-        _id: product._id || product.id,
-        title: product.title,
-        price: product.price,
-        mainImage: product.mainImage,
-        discount: product.discount || 0,
-        DiscountPrice: product.discount ? 
-          Math.round(product.price - (product.price * product.discount / 100)) : 
-          product.price,
-        moreImages: product.moreImages || [],
-      });
+  const handleWishlistToggle = () => {
+    if (product) {
+      const productId = product._id || product.id;
+      if (isInWishlist(productId)) {
+        removeFromWishlist(productId);
+      } else {
+        addToWishlist({
+          id: product._id || product.id,
+          _id: product._id || product.id,
+          title: product.title,
+          price: product.price,
+          mainImage: product.mainImage,
+          discount: product.discount || 0,
+          DiscountPrice: product.discount
+            ? Math.round(product.price - (product.price * product.discount / 100))
+            : product.price,
+          moreImages: product.moreImages || [],
+        });
+      }
     }
-  }
-};
+  };
+
   // Generate star rating
   const renderStars = (rating: number) => {
     const stars = [];
@@ -165,10 +169,10 @@ const handleWishlistToggle = () => {
 
   const handleTouchEnd = () => {
     if (!touchStartX || !touchEndX) return;
-    
+
     const diff = touchStartX - touchEndX;
     const threshold = 50;
-    
+
     if (Math.abs(diff) > threshold) {
       if (diff > 0) {
         handleImageChange('left');
@@ -176,9 +180,48 @@ const handleWishlistToggle = () => {
         handleImageChange('right');
       }
     }
-    
+
     setTouchStartX(0);
     setTouchEndX(0);
+  };
+
+  // ✅ FIX 3: Handle Add Review
+  const handleAddReview = async (reviewData: any) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('Please login to submit a review');
+        return;
+      }
+
+      const response = await fetch(`http://localhost:5000/api/products/${product._id}/reviews`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(reviewData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit review');
+      }
+
+      const updatedReviews = await response.json();
+
+      // ✅ Update product and reviews state
+      setProduct((prev: any) => ({
+        ...prev,
+        review: updatedReviews,
+      }));
+      setReviews(updatedReviews);
+
+      alert('Review submitted successfully!');
+      setIsReviewModalOpen(false);
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      alert('Failed to submit review. Please try again.');
+    }
   };
 
   if (loading) {
@@ -191,8 +234,8 @@ const handleWishlistToggle = () => {
 
   if (error || !product) {
     return (
-      <div className='text-center py-20'>
-        <h1 className='text-2xl text-red-500'>{error || 'Product not found!'}</h1>
+      <div className="text-center py-20">
+        <h1 className="text-2xl text-red-500">{error || 'Product not found!'}</h1>
         <button onClick={() => navigate(-1)} className="mt-4 bg-[#B76E79] text-white px-4 py-2 rounded">
           Go Back
         </button>
@@ -200,39 +243,15 @@ const handleWishlistToggle = () => {
     );
   }
 
-  const handleAddReview = (newReview: { customerName: string; message: string; Rating: number }) => {
-  const reviewWithId = {
-    id: Date.now(),
-    ...newReview,
-    date: new Date().toLocaleDateString(),
-  };
-  
-  const updatedReviews = [reviewWithId, ...reviews];
-  setReviews(updatedReviews);
-  
-  // ✅ Update product reviews
-  setProduct((prev: any) => ({
-    ...prev,
-    review: updatedReviews,
-  }));
-  
-  // ✅ Optionally: Send to backend API
-  // await addReview(product._id, newReview);
-};
-
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 py-12 sm:py-12">
-
         {/* Main Product Section */}
         <div className="bg-white sm:rounded-2xl shadow-lg overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:p-4 sm:p-6 lg:p-8">
-            
             {/* ===== LEFT SIDE - PRODUCT IMAGES ===== */}
             <div className="sm:space-y-4 space-y-0">
-              
-              {/* Main Image Container */}
-              <div 
+              <div
                 ref={imageContainerRef}
                 className="relative bg-gray-100 sm:rounded-xl overflow-hidden aspect-square"
                 onTouchStart={handleTouchStart}
@@ -244,8 +263,6 @@ const handleWishlistToggle = () => {
                   alt={product.title}
                   className="w-full h-full object-cover hover:scale-105 transition-transform duration-500 cursor-pointer"
                 />
-                
-                {/* Swipe Indicator */}
                 <div className="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-2 pointer-events-none sm:hidden">
                   <div className="pointer-events-auto bg-black/30 text-white p-1 rounded-full opacity-60">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -258,71 +275,44 @@ const handleWishlistToggle = () => {
                     </svg>
                   </div>
                 </div>
-
-                {/* Image counter on mobile */}
                 <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/60 text-white text-xs px-3 py-1 rounded-full sm:hidden">
                   {allImages.indexOf(selectedImage) + 1} / {allImages.length}
                 </div>
-                
-                {/* Discount Badge */}
                 {product.discount && product.discount > 0 && (
                   <span className="absolute top-4 left-4 bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full z-10">
                     -{product.discount}% OFF
                   </span>
                 )}
-                
-                {/* Wishlist Button */}
                 <button
                   onClick={handleWishlistToggle}
                   className="absolute cursor-pointer top-4 right-4 bg-white/50 backdrop-blur-sm p-2.5 rounded-full shadow-md hover:shadow-lg transition-all hover:scale-110 z-10"
                 >
-                  {isLiked ? (
-                    <IoHeart className="text-primary text-xl" />
-                  ) : (
-                    <FaRegHeart className="text-black text-xl" />
-                  )}
+                  {isLiked ? <IoHeart className="text-primary text-xl" /> : <FaRegHeart className="text-black text-xl" />}
                 </button>
-                
-
-                {/* Mobile Thumbnails */}
                 <div className="absolute sm:top-4 sm:right-16 top-1/2 -translate-y-1/2 right-6 flex flex-col gap-2 z-10 sm:hidden">
                   {allImages.map((img, index) => (
                     <div
                       key={index}
                       onClick={() => setSelectedImage(img)}
                       className={`w-12 h-12 rounded-lg overflow-hidden cursor-pointer border-2 transition-all ${
-                        selectedImage === img
-                          ? 'border-[#B76E79] shadow-md'
-                          : 'border-white/80 hover:border-[#B76E79]/50'
+                        selectedImage === img ? 'border-[#B76E79] shadow-md' : 'border-white/80 hover:border-[#B76E79]/50'
                       }`}
                     >
-                      <img
-                        src={img}
-                        alt={`Thumbnail ${index + 1}`}
-                        className="w-full h-full object-cover"
-                      />
+                      <img src={img} alt={`Thumbnail ${index + 1}`} className="w-full h-full object-cover" />
                     </div>
                   ))}
                 </div>
               </div>
-
-              {/* Desktop Thumbnails */}
               <div className="hidden sm:flex gap-3 overflow-x-auto pb-2">
                 {allImages.map((img, index) => (
                   <div
                     key={index}
                     onClick={() => setSelectedImage(img)}
                     className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden cursor-pointer border-2 transition-all ${
-                      selectedImage === img
-                        ? 'border-[#B76E79] shadow-md'
-                        : 'border-gray-200 hover:border-gray-300'
+                      selectedImage === img ? 'border-[#B76E79] shadow-md' : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
-                    <img
-                      src={img}
-                      alt={`Thumbnail ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
+                    <img src={img} alt={`Thumbnail ${index + 1}`} className="w-full h-full object-cover" />
                   </div>
                 ))}
               </div>
@@ -330,30 +320,15 @@ const handleWishlistToggle = () => {
 
             {/* ===== RIGHT SIDE - PRODUCT INFO ===== */}
             <div className="sm:space-y-6 space-y-1 p-4">
-              {/* Product Title */}
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 leading-tight">
-                {product.title}
-              </h1>
-
-              {/* Rating */}
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 leading-tight">{product.title}</h1>
               <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1">
-                  {renderStars(product.Rating || 5)}
-                </div>
-                <span className="text-sm text-gray-500">
-                  ({product.Rating || 5}.0)
-                </span>
+                <div className="flex items-center gap-1">{renderStars(product.Rating || 5)}</div>
+                <span className="text-sm text-gray-500">({product.Rating || 5}.0)</span>
                 <span className="text-sm text-gray-400">|</span>
-                <span className="text-sm text-gray-500">
-                  {product.review?.length || 0} Reviews
-                </span>
+                <span className="text-sm text-gray-500">{product.review?.length || 0} Reviews</span>
               </div>
-
-              {/* Price */}
               <div className="flex items-center gap-4">
-                <span className="text-3xl font-bold text-[#B76E79]">
-                  Rs. {product.price}
-                </span>
+                <span className="text-3xl font-bold text-[#B76E79]">Rs. {product.price}</span>
                 {product.discount && product.discount > 0 && (
                   <>
                     <span className="text-lg text-gray-400 line-through">
@@ -365,13 +340,7 @@ const handleWishlistToggle = () => {
                   </>
                 )}
               </div>
-
-              {/* Description */}
-              <p className="text-gray-600 leading-relaxed">
-                {product.details}
-              </p>
-
-              {/* Quantity Selector - Hidden on mobile */}
+              <p className="text-gray-600 leading-relaxed">{product.details}</p>
               <div className="hidden sm:flex items-center gap-4">
                 <span className="text-sm font-medium text-gray-700">Quantity:</span>
                 <div className="flex items-center border-2 border-gray-200 rounded-lg overflow-hidden">
@@ -381,9 +350,7 @@ const handleWishlistToggle = () => {
                   >
                     <FiMinus />
                   </button>
-                  <span className="w-12 text-center font-semibold text-gray-800">
-                    {quantity}
-                  </span>
+                  <span className="w-12 text-center font-semibold text-gray-800">{quantity}</span>
                   <button
                     onClick={() => handleQuantityChange('increment')}
                     className="px-4 py-2 hover:bg-gray-50 transition cursor-pointer text-gray-600 hover:text-primary"
@@ -392,15 +359,12 @@ const handleWishlistToggle = () => {
                   </button>
                 </div>
               </div>
-
-              {/* Action Buttons - Hidden on mobile */}
               <div className="hidden sm:flex flex-col sm:flex-row gap-3 pt-2">
                 <button
                   onClick={handleAddToCart}
                   className="flex-1 bg-[#B76E79] cursor-pointer text-white py-3.5 px-6 rounded-xl font-semibold hover:bg-[#B76E79]/90 transition-all hover:shadow-lg flex items-center justify-center gap-2"
                 >
-                  <FiShoppingCart className="text-lg" />
-                  Add to Cart
+                  <FiShoppingCart className="text-lg" /> Add to Cart
                 </button>
                 <button
                   onClick={handleBuyNow}
@@ -409,8 +373,6 @@ const handleWishlistToggle = () => {
                   Buy Now
                 </button>
               </div>
-
-              {/* Delivery & Service Info */}
               <div className="grid grid-cols-3 gap-3 pt-4 border-t border-gray-100">
                 <div className="text-center p-3 bg-gray-50 rounded-xl">
                   <TbTruckDelivery className="text-2xl text-[#B76E79] mx-auto mb-1" />
@@ -428,12 +390,9 @@ const handleWishlistToggle = () => {
                   <p className="text-[10px] text-gray-400">100% secure checkout</p>
                 </div>
               </div>
-
-              {/* Share & Actions */}
               <div className="flex items-center gap-4 pt-2">
                 <button className="flex items-center gap-2 text-gray-500 hover:text-[#B76E79] transition text-sm cursor-pointer">
-                  <IoShareSocialOutline className="text-lg" />
-                  Share
+                  <IoShareSocialOutline className="text-lg" /> Share
                 </button>
               </div>
             </div>
@@ -453,11 +412,10 @@ const handleWishlistToggle = () => {
                   Specifications
                 </button>
                 <button className="px-6 py-4 text-gray-500 font-medium hover:text-gray-700 transition whitespace-nowrap cursor-pointer">
-                  Reviews ({product.review?.length || 0})
+                  Reviews ({reviews.length || 0})
                 </button>
               </div>
             </div>
-
             <div className="p-6">
               <h3 className="text-lg font-bold text-gray-800 mb-4">Product Details</h3>
               <ul className="space-y-2">
@@ -486,47 +444,50 @@ const handleWishlistToggle = () => {
           </div>
 
           {/* Customer Reviews */}
-<div className="bg-white rounded-2xl shadow-lg overflow-hidden p-6">
-  <div className="flex items-center justify-between mb-6">
-    <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-      <span>Customer Reviews</span>
-      <span className="text-sm font-normal text-gray-400">
-        ({reviews.length || 0} reviews)
-      </span>
-    </h3>
-    <button
-      onClick={() => setIsReviewModalOpen(true)}
-      className="bg-[#B76E79] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#B76E79]/90 transition cursor-pointer"
-    >
-      Write a Review
-    </button>
-  </div>
+          <div className="bg-white rounded-2xl shadow-lg overflow-hidden p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                <span>Customer Reviews</span>
+                <span className="text-sm font-normal text-gray-400">
+                  ({reviews.length || 0} reviews)
+                </span>
+              </h3>
+              <button
+                onClick={() => setIsReviewModalOpen(true)}
+                className="bg-[#B76E79] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#B76E79]/90 transition cursor-pointer"
+              >
+                Write a Review
+              </button>
+            </div>
 
-  {reviews && reviews.length > 0 ? (
-    <div className="space-y-4">
-      {reviews.map((item: any) => (
-        <ProductReview
-          key={item.id || item._id}
-          customerName={item.customerName}
-          message={item.message}
-          Rating={item.Rating}
-          date={item.date}
-        />
-      ))}
-    </div>
-  ) : (
-    <div className="text-center py-8">
-      <p className="text-gray-400">No reviews yet. Be the first to review!</p>
-    </div>
-  )}
-</div>
+            {reviews && reviews.length > 0 ? (
+              <div className="space-y-4">
+                {reviews.map((item: any) => (
+                  <ProductReview
+                    key={item.id || item._id}
+                    customerName={item.customerName}
+                    message={item.message}
+                    Rating={item.Rating}
+                    date={item.date}
+                    mainImage={item.mainImage}
+                    moreImages={item.moreImages}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-400">No reviews yet. Be the first to review!</p>
+              </div>
+            )}
+          </div>
 
- <AddReviewModal
-  isOpen={isReviewModalOpen}
-  onClose={() => setIsReviewModalOpen(false)}
-  onSubmit={handleAddReview}
-/>
-
+          {/* ✅ FIX 4: Pass productId to AddReviewModal */}
+          <AddReviewModal
+            isOpen={isReviewModalOpen}
+            onClose={() => setIsReviewModalOpen(false)}
+            onSubmit={handleAddReview}
+            productId={product._id}
+          />
         </div>
       </div>
 
@@ -540,9 +501,7 @@ const handleWishlistToggle = () => {
             >
               <FiMinus className="text-sm" />
             </button>
-            <span className="w-8 text-center font-semibold text-gray-800 text-sm">
-              {quantity}
-            </span>
+            <span className="w-8 text-center font-semibold text-gray-800 text-sm">{quantity}</span>
             <button
               onClick={() => handleQuantityChange('increment')}
               className="px-3 py-2 hover:bg-gray-50 transition text-gray-600 cursor-pointer"
@@ -555,11 +514,7 @@ const handleWishlistToggle = () => {
             onClick={handleWishlistToggle}
             className="p-3 bg-gray-100 rounded-xl flex-shrink-0 cursor-pointer"
           >
-            {isLiked ? (
-              <IoHeart className="text-primary text-xl" />
-            ) : (
-              <FaRegHeart className="text-gray-700 text-xl" />
-            )}
+            {isLiked ? <IoHeart className="text-primary text-xl" /> : <FaRegHeart className="text-gray-700 text-xl" />}
           </button>
 
           <button

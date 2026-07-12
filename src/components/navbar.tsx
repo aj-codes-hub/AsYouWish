@@ -15,6 +15,7 @@ import { CiMenuBurger } from "react-icons/ci";
 import { useWishlist } from '../pages/context/wishlistContext';
 import { useAuth } from '../Auth/authContext';
 import SearchModal from './SearchModal';
+import NotificationBell from './NotificationBell';
 
 type NavbarProps = {
    setIsMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -210,7 +211,10 @@ const Navbar: React.FC<NavbarProps> = ({ setIsMenuOpen, isOpenLogiModal }) => {
                </div>
             </div>
          </div>
-
+       
+       <div className="flex items-center gap-4">
+          <NotificationBell/>
+          </div>
       </>
    )
 }
