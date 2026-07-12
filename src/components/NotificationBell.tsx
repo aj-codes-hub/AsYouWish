@@ -141,14 +141,11 @@ const NotificationBell: React.FC = () => {
     }
   };
 
-  // ✅ Navigate to order
-  const handleNotificationClick = (notification: NotificationType) => {
-    if (notification.data?.orderId) {
-      navigate(`/admin/orders/${notification.data.orderId}`);
-    }
-    markAsRead(notification._id);
-    setIsOpen(false);
-  };
+  
+const handleNotificationClick = (notification: NotificationType) => {
+  navigate(`/admin/notifications/${notification._id}`);
+  setIsOpen(false);
+};
 
   if (!isLoggedIn) return null;
 

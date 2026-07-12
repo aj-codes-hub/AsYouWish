@@ -30,6 +30,7 @@ import AdminEditProduct from "./pages/Admin/AdminEditProduct";
 // ✅ ProductProvider IMPORT KARO
 import { ProductProvider } from "./pages/context/ProductContext";
 import NotFoundPage from "./pages/NotFoundPage";
+import NotificationDetail from "./pages/Admin/NotificationDetail";
 
 function AppContent() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -79,6 +80,11 @@ function AppContent() {
               <AdminEditProduct />
             </AdminRoute> 
           } />
+          <Route path="/admin/notifications/:id" element={
+          <AdminRoute>
+            <NotificationDetail />
+          </AdminRoute>
+        } />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
         <Footer /> 
