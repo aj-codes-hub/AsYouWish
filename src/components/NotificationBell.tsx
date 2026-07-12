@@ -123,6 +123,7 @@ const NotificationBell: React.FC = () => {
   if (!isLoggedIn) return null;
 
   return (
+    <>
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
@@ -199,6 +200,41 @@ const NotificationBell: React.FC = () => {
         </div>
       )}
     </div>
+    {notifications.map((notification) => (
+        <div
+            key={notification._id}
+            onClick={() => handleNotificationClick(notification)}
+            className={`p-4 border-b border-gray-50 cursor-pointer hover:bg-gray-50 transition ${
+            !notification?.read ? 'bg-[#B76E79]/5 border-l-4 border-l-[#B76E79]' : ''
+            }`}
+        >
+            <div className="flex items-start justify-between">
+            <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-800 truncate">
+                {notification?.title || 'Notification'}
+                </p>
+                <p className="text-xs text-gray-500 mt-0.5 truncate">
+                {notification?.message || 'New notification'}
+                </p>
+                <p className="text-xs text-gray-400 mt-1">
+                {notification?.createdAt ? new Date(notification.createdAt).toLocaleDateString() : ''}
+                </p>
+            </div>
+            {!notification?.read && (
+                <button
+                onClick={(e) => {
+                    e.stopPropagation();
+                    markAsRead(notification._id);
+                }}
+                className="ml-2 text-xs text-[#B76E79] hover:underline flex-shrink-0 cursor-pointer"
+                >
+                <FaCheck />
+                </button>
+            )}
+            </div>
+        </div>
+        ))}
+</>
   );
 };
 

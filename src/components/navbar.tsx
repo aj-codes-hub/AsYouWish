@@ -210,11 +210,10 @@ const Navbar: React.FC<NavbarProps> = ({ setIsMenuOpen, isOpenLogiModal }) => {
                   <h2 className='text-[11px]'>Account</h2>
                </div>
             </div>
-         </div>
-       
-       <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4">
           <NotificationBell/>
           </div>
+         </div>
       </>
    )
 }
