@@ -118,16 +118,17 @@ const Navbar: React.FC<NavbarProps> = ({ setIsMenuOpen, isOpenLogiModal }) => {
                   {/* ✅ SEARCH BUTTON - Opens Search Modal */}
                   <button 
                      onClick={() => setIsSearchOpen(true)}
-                     className='p-[10px] rounded-full hover:bg-[#000000] transition cursor-pointer'
+                     className={`p-[10px] rounded-full  cursor-pointer transition-all duration-300 hover:bg-[#B76E79] 
+                                 ${isSearchOpen ? "bg-[#B76E79]" : ""}`}
                   >
                      <LuSearch />
                   </button>
 
                   <Link to={'/favurite-product'}
-                        className={`p-[10px] rounded-full transform-all duration-300 relative
-                           ${window.location.pathname === '/favurite-product' ? 'bg-[#000000]' : ''}`}>
+                        className={`p-[10px] rounded-full transform-all duration-300 relative transition-all duration-300 hover:bg-[#B76E79]
+                           ${window.location.pathname === '/favurite-product' ? 'bg-[#B76E79]' : ''}`}>
                      {window.location.pathname === '/favurite-product' 
-                        ? <IoHeart className='text-[19px] text-[#B76E79] '/> 
+                        ? <IoHeart className='text-[19px] text-[white] '/> 
                         : <FaRegHeart />}
 
                      {totalWishlistItems > 0 && (
@@ -138,15 +139,18 @@ const Navbar: React.FC<NavbarProps> = ({ setIsMenuOpen, isOpenLogiModal }) => {
                   </Link>
 
                   <button onClick={hangleLoginModalOpen}
-                          className={`p-[10px] rounded-full text-[20px] cursor-pointer 
-                             ${window.location.pathname === '/profile' ? 'bg-[#000000] text-white' : ''}`}>
+                          className={`p-[10px] rounded-full text-[20px] cursor-pointer transition-all duration-300 hover:bg-[#B76E79]
+                             ${window.location.pathname === '/profile' && user?.role === 'user'
+                              || 
+                              window.location.pathname === '/admin/dashboard' && user?.role === 'admin'
+                             ? 'bg-primary text-white' : ''}`}>
                      <IoPersonOutline />
                   </button>
                   
                   
                   <Link to="/cart"
-                        className={`cursor-pointer h-[40px] w-[40px] flex items-center justify-center rounded-full relative 
-                           ${window.location.pathname === '/cart' ? 'bg-[#000000] text-white' : ''}`}>
+                        className={`cursor-pointer h-[40px] w-[40px] flex items-center justify-center rounded-full relative transition-all duration-300 hover:bg-[#B76E79]
+                           ${window.location.pathname === '/cart' ? 'bg-[#B76E79] text-white' : ''}`}>
                      {totalItems > 0 && (
                         <div className='rounded-full w-[13px] h-[13px] flex items-center justify-center overflow-hidden bg-[#B76E79] text-white absolute text-[9.5px] font-semibold top-[14%] right-[6%]'>
                            <h2>{totalItems}</h2>
@@ -155,7 +159,7 @@ const Navbar: React.FC<NavbarProps> = ({ setIsMenuOpen, isOpenLogiModal }) => {
                      <FiShoppingCart />
                   </Link>
 
-                  {user?.role === "admin" ? <NotificationBell /> : ""}
+                  {user?.role === "admin" ? <NotificationBell/> : ""}
                   
                </div>
 
@@ -213,7 +217,9 @@ const Navbar: React.FC<NavbarProps> = ({ setIsMenuOpen, isOpenLogiModal }) => {
                </Link>
 
                <div onClick={hangleLoginModalOpen} className={`flex flex-col items-center justify-center text-[26px] rounded-[30%] 
-                                                   ${window.location.pathname === "/Profile" ? 'm-1 bg-black text-white' : ''}`}>
+                                                   ${window.location.pathname === '/profile' && user?.role === 'user'
+                                                     || 
+                                                     window.location.pathname === '/admin/dashboard' && user?.role === 'admin' ? 'm-1 bg-black text-white' : ''}`}>
                   <IoPersonOutline />
                   <h2 className='text-[11px]'>Account</h2>
                </div>
