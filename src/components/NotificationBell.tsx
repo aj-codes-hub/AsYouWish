@@ -177,7 +177,7 @@ const NotificationBell: React.FC = () => {
         )}
         
         {unreadCount > 0 && (
-          <span className="absolute -top-[1.5px] right-[1.5px] bg-primary text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center animate-pulse-badge">
+          <span className="absolute -top-[1.5px] right-[1.5px] bg-[#bc4c5d] text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center animate-pulse-badge">
              {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}

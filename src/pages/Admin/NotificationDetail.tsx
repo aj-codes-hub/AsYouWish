@@ -1,7 +1,22 @@
 // src/pages/Admin/NotificationDetail.tsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { FaArrowLeft, FaBell, FaCheckCircle, FaClock, FaShoppingBag } from 'react-icons/fa';
+import { 
+  FaArrowLeft, 
+  FaBell, 
+  FaCheckCircle, 
+  FaClock, 
+  FaShoppingBag,
+  FaUser,
+  FaBox,
+} from 'react-icons/fa';
+
+interface ProductType {
+  title: string;
+  price: number;
+  quantity: number;
+  mainImage: string;
+}
 
 interface NotificationType {
   _id: string;
@@ -9,7 +24,22 @@ interface NotificationType {
   message: string;
   type: string;
   read: boolean;
-  data: any;
+  data: {
+    orderId?: string;
+    customerName?: string;
+    customerEmail?: string;
+    customerPhone?: string;
+    shippingAddress?: {
+      address: string;
+      city: string;
+      zipCode: string;
+    };
+    total?: number;
+    items?: number;
+    products?: ProductType[];
+    paymentMethod?: string;   // ✅ ADDED
+    orderStatus?: string;     // ✅ ADDED
+  };
   createdAt: string;
 }
 
@@ -63,7 +93,6 @@ const NotificationDetail: React.FC = () => {
     }
   }, [id]);
 
-  // ✅ Get icon based on type
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'order':
@@ -77,7 +106,6 @@ const NotificationDetail: React.FC = () => {
     }
   };
 
-  // ✅ Get type color
   const getTypeColor = (type: string) => {
     switch (type) {
       case 'order':
@@ -91,10 +119,23 @@ const NotificationDetail: React.FC = () => {
     }
   };
 
+  const getPaymentMethodLabel = (method: string) => {
+    switch (method) {
+      case 'cod':
+        return 'Cash on Delivery';
+      case 'credit_card':
+        return 'Credit Card';
+      case 'jazzcash':
+        return 'JazzCash / EasyPaisa';
+      default:
+        return method || 'N/A';
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#B76E79] border-t-transparent"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#B76E79] border-t-transparent" />
       </div>
     );
   }
@@ -160,37 +201,114 @@ const NotificationDetail: React.FC = () => {
           </div>
 
           {/* Body */}
-          <div className="p-6 space-y-4">
+          <div className="p-6 space-y-6">
+            
             {/* Message */}
             <div>
               <h3 className="text-sm font-medium text-gray-500 mb-2">Message</h3>
               <p className="text-gray-800 leading-relaxed">{notification.message}</p>
             </div>
 
-            {/* Details (if any) */}
-            {notification.data && (
-              <div>
-                <h3 className="text-sm font-medium text-gray-500 mb-2">Details</h3>
-                <div className="bg-gray-50 rounded-xl p-4 space-y-2 text-sm">
-                  {notification.data.orderId && (
+            {/* ✅ Full Order Details */}
+            {notification.data && notification.data.orderId && (
+              <div className="border-t border-gray-100 pt-4">
+                <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                  <FaShoppingBag className="text-[#B76E79]" />
+                  Order Details
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Order Info */}
+                  <div className="bg-gray-50 rounded-xl p-4 space-y-2 text-sm">
+                    <h4 className="font-medium text-gray-700 mb-2">Order Information</h4>
                     <div className="flex justify-between">
                       <span className="text-gray-500">Order ID</span>
                       <span className="font-medium text-gray-800">#{notification.data.orderId}</span>
                     </div>
-                  )}
-                  {notification.data.customerName && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">Customer</span>
-                      <span className="font-medium text-gray-800">{notification.data.customerName}</span>
-                    </div>
-                  )}
-                  {notification.data.total && (
                     <div className="flex justify-between">
                       <span className="text-gray-500">Total</span>
-                      <span className="font-medium text-[#B76E79]">Rs. {notification.data.total}</span>
+                      <span className="font-bold text-[#B76E79]">Rs. {notification.data.total || 0}</span>
                     </div>
-                  )}
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Items</span>
+                      <span className="font-medium text-gray-800">{notification.data.items || 0}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Payment</span>
+                     <span className="font-medium text-gray-800">{getPaymentMethodLabel(notification.data?.paymentMethod || '')}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Status</span>
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                        notification.data.orderStatus === 'delivered' ? 'bg-green-100 text-green-700' :
+                        notification.data.orderStatus === 'shipped' ? 'bg-blue-100 text-blue-700' :
+                        notification.data.orderStatus === 'processing' ? 'bg-yellow-100 text-yellow-700' :
+                        'bg-gray-100 text-gray-700'
+                      }`}>
+                        {notification.data.orderStatus || 'Pending'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Customer Info */}
+                  <div className="bg-gray-50 rounded-xl p-4 space-y-2 text-sm">
+                    <h4 className="font-medium text-gray-700 mb-2 flex items-center gap-2">
+                      <FaUser className="text-[#B76E79]" />
+                      Customer Information
+                    </h4>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Name</span>
+                      <span className="font-medium text-gray-800">{notification.data.customerName || 'N/A'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Email</span>
+                      <span className="font-medium text-gray-800">{notification.data.customerEmail || 'N/A'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Phone</span>
+                      <span className="font-medium text-gray-800">{notification.data.customerPhone || 'N/A'}</span>
+                    </div>
+                    {notification.data.shippingAddress && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Address</span>
+                        <span className="font-medium text-gray-800 text-right">
+                          {notification.data.shippingAddress.address}<br />
+                          {notification.data.shippingAddress.city}, {notification.data.shippingAddress.zipCode}
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
+
+                {/* Products List */}
+                {notification.data.products && notification.data.products.length > 0 && (
+                  <div className="mt-4 bg-gray-50 rounded-xl p-4">
+                    <h4 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+                      <FaBox className="text-[#B76E79]" />
+                      Products ({notification.data.products.length})
+                    </h4>
+                    <div className="space-y-2">
+                      {notification.data.products.map((product, idx) => (
+                        <div key={idx} className="flex items-center justify-between border-b border-gray-200 pb-2 last:border-0">
+                          <div className="flex items-center gap-3">
+                            <img
+                              src={product.mainImage || '/images/placeholder.jpg'}
+                              alt={product.title}
+                              className="w-10 h-10 object-cover rounded"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = '/images/placeholder.jpg';
+                              }}
+                            />
+                            <span className="text-sm">{product.title}</span>
+                          </div>
+                          <span className="text-sm font-medium">
+                            Rs. {product.price} x {product.quantity}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -202,22 +320,20 @@ const NotificationDetail: React.FC = () => {
             </div>
           </div>
 
-          {/* Actions */}
+          {/* ✅ Actions — Only Back and Navigate to Dashboard */}
           <div className="p-6 bg-gray-50 border-t border-gray-100 flex gap-3">
             <button
               onClick={() => navigate(-1)}
-              className="flex-1 bg-[#B76E79] text-white py-2 rounded-xl font-medium hover:bg-[#B76E79]/90 transition cursor-pointer"
+              className="flex-1 bg-[#B76E79] text-white py-2.5 rounded-xl font-medium hover:bg-[#B76E79]/90 transition cursor-pointer"
             >
               Back
             </button>
-            {notification.data?.orderId && (
-              <button
-                onClick={() => navigate(`/admin/orders/${notification.data.orderId}`)}
-                className="flex-1 border border-[#B76E79] text-[#B76E79] py-2 rounded-xl font-medium hover:bg-[#B76E79]/10 transition cursor-pointer"
-              >
-                View Order
-              </button>
-            )}
+            <button
+              onClick={() => navigate('/admin/dashboard')}
+              className="flex-1 border border-[#B76E79] text-[#B76E79] py-2.5 rounded-xl font-medium hover:bg-[#B76E79]/10 transition cursor-pointer"
+            >
+              Navigate to Dashboard
+            </button>
           </div>
         </div>
       </div>
