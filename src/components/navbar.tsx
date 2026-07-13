@@ -180,13 +180,13 @@ const Navbar: React.FC<NavbarProps> = ({ setIsMenuOpen, isOpenLogiModal }) => {
             <div className='grid grid-cols-5 h-full w-full sm:hidden'>
 
                <div onClick={() => setIsSearchOpen(true)} 
-                    className='flex flex-col items-center justify-center text-[26px]'>
+                    className='flex flex-col items-center justify-center text-[26px] transition-all duration-300'>
                     <CiSearch className='absolute bg-white rounded-full ml-4 mb-2 text-[22px]'/>
                     <CiMenuBurger />
                     <h2 className='text-[11px]'>menu</h2>
                 </div>
 
-               <Link to="/cart" className={`flex flex-col items-center justify-center text-[26px] rounded-[30%] relative
+               <Link to="/cart" className={`flex flex-col items-center justify-center text-[26px] rounded-[30%] relative transition-all duration-300
                                           ${window.location.pathname === "/cart" ? 'm-1 bg-black text-white' : ''}`}>
                   <PiShoppingCartSimpleThin />
                   <h2 className='text-[11px]'>Cart</h2>
@@ -198,13 +198,13 @@ const Navbar: React.FC<NavbarProps> = ({ setIsMenuOpen, isOpenLogiModal }) => {
                   )}
                </Link>
 
-               <Link to='/' className={`flex flex-col items-center justify-center text-[26px] rounded-[30%] 
+               <Link to='/' className={`flex flex-col items-center justify-center text-[26px] rounded-[30%] transition-all duration-300
                                        ${window.location.pathname === "/" ? 'm-1 bg-black text-white' : ''}`}>
                   <CiHome />
                   <h2 className='text-[11px]'>Home</h2>
                </Link>
 
-               <Link to={'/favurite-product'} className={`flex flex-col items-center justify-center text-[26px] rounded-[30%] relative
+               <Link to={'/favurite-product'} className={` flex flex-col items-center justify-center text-[26px] rounded-[30%] relative transition-all duration-300
                                              ${window.location.pathname === "/favurite-product" ? 'm-1 bg-black text-white' : ''}`}>
                   <CiHeart />
                   <h2 className='text-[11px]'>Favurite</h2>
@@ -216,7 +216,7 @@ const Navbar: React.FC<NavbarProps> = ({ setIsMenuOpen, isOpenLogiModal }) => {
                   )}
                </Link>
 
-               <div onClick={hangleLoginModalOpen} className={`flex flex-col items-center justify-center text-[26px] rounded-[30%] 
+               <div onClick={hangleLoginModalOpen} className={`flex flex-col items-center justify-center text-[26px] rounded-[30%] transition-all duration-300
                                                    ${window.location.pathname === '/profile' && user?.role === 'user'
                                                      || 
                                                      window.location.pathname === '/admin/dashboard' && user?.role === 'admin' ? 'm-1 bg-black text-white' : ''}`}>
