@@ -24,7 +24,7 @@ const CartPage: React.FC = () => {
   if (cart.length === 0) {
     return (
       <div className='flex items-center justify-center w-full sm:h-screen h-[80vh] relative bg-[#0000003f]'>
-        <img src="/images/empty-closet.jpg" alt="empty-closet"
+        <img src="https://res.cloudinary.com/sjdfl12v/image/upload/v1784039212/empty-closet_pli1jc.jpg" alt="empty-closet"
           className='absolute w-full h-full z-[-10] object-cover'
         />
         <div className='text-center sm:py-20 py-10 sm:px-30 px-8 backdrop-blur-md bg-white/10 border border-white/20 rounded-2xl shadow-2xl'>

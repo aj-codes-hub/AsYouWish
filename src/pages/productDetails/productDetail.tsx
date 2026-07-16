@@ -12,6 +12,8 @@ import { useCart } from '../context/cartContext';
 import { useWishlist } from '../context/wishlistContext';
 import { getProductById } from '../../services/productService';
 import AddReviewModal from './Component/AddReviewModal';
+import LoginModal from '../../Auth/loginModal';
+import SignupModal from '../../Auth/signupModal';
 
 
 const ProductDetail: React.FC = () => {
@@ -25,6 +27,10 @@ const ProductDetail: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [openLoginModal, setOpenLoginModal] = useState(false);
+  const [openSignUpModal, setOpenSignUpModal] = useState(false);
+
+  
   
   // ✅ FIX 1: Initialize reviews as empty array
   const [reviews, setReviews] = useState<any[]>([]);
@@ -321,12 +327,18 @@ const ProductDetail: React.FC = () => {
             {/* ===== RIGHT SIDE - PRODUCT INFO ===== */}
             <div className="sm:space-y-6 space-y-1 p-4">
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 leading-tight">{product.title}</h1>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1">{renderStars(product.Rating || 5)}</div>
-                <span className="text-sm text-gray-500">({product.Rating || 5}.0)</span>
-                <span className="text-sm text-gray-400">|</span>
-                <span className="text-sm text-gray-500">{product.review?.length || 0} Reviews</span>
+             <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1">
+                {renderStars(product.rating || 0)}
               </div>
+              <span className="text-sm text-gray-500">
+                ({product.rating ? product.rating.toFixed(1) : '0'}.0)
+              </span>
+              <span className="text-sm text-gray-400">|</span>
+              <span className="text-sm text-gray-500">
+                {product.review?.length || 0} Reviews
+              </span>
+            </div>
               <div className="flex items-center gap-4">
                 <span className="text-3xl font-bold text-[#B76E79]">Rs. {product.price}</span>
                 {product.discount && product.discount > 0 && (
@@ -487,9 +499,19 @@ const ProductDetail: React.FC = () => {
             onClose={() => setIsReviewModalOpen(false)}
             onSubmit={handleAddReview}
             productId={product._id}
+            onOpenLogin={() => setOpenLoginModal(true)} 
           />
         </div>
       </div>
+
+
+        <LoginModal  hideLoginModal={setOpenLoginModal}
+                      isOpenLoginModal={openLoginModal} 
+                      showSignUpModal={setOpenSignUpModal}/>
+
+      <SignupModal hideSignUpModal={setOpenSignUpModal}
+                   isOpenSignUPModal={openSignUpModal} 
+                   showLoginModal={setOpenLoginModal}  />
 
       {/* ===== MOBILE FIXED BOTTOM BAR ===== */}
       <div className="lg:hidden fixed bottom-[60px] sm:bottom-0 left-0 right-0 bg-white shadow-2xl border-t border-gray-100 z-50 px-4 py-3">

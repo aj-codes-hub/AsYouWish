@@ -17,6 +17,7 @@ interface ProductType {
   isFeatured?: boolean;
   discount: number;
   details?: string;
+  rating?: number;
   moreImages: string[];
 }
 
@@ -125,6 +126,7 @@ const NewArrivals:React.FC = () => {
                           HoverImg={item.moreImages}
                           discount={item.discount}
                           DiscountPrice={Math.round((item.price) - item.price * item.discount / 100)}
+                          rating={item.rating || 0}
                          />
         </SwiperSlide>
        ))}

@@ -297,6 +297,7 @@ const Collection: React.FC = () => {
                   HoverImg={item.moreImages}
                   discount={item.discount}
                   DiscountPrice={Math.round((item.price) - (item.price * (item.discount || 0) / 100))}
+                  rating={item.rating || 0}
                 />
               ))}
             </div>

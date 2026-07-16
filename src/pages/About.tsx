@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   FaRegHeart, 
@@ -7,12 +7,147 @@ import {
   FaCheckCircle,
   FaAward,
   FaUsers,
-  FaGlobeAsia
+  FaGlobeAsia,
+  FaStar,
+  FaStarHalfAlt,
+  FaRegStar
 } from 'react-icons/fa';
-import { FiHeart, FiStar, FiTruck } from 'react-icons/fi';
-import {  TbRefresh, TbShieldCheck } from 'react-icons/tb';
+import { FiHeart, FiTruck } from 'react-icons/fi';
+import { TbRefresh, TbShieldCheck } from 'react-icons/tb';
+import { getProducts } from '../services/productService';
 
-const AboutPage:React.FC = () => {
+// ✅ FIXED INTERFACES
+interface ReviewType {
+  id?: string;
+  _id?: string;
+  customerName: string;
+  message: string;
+  Rating: number;
+  date?: string;
+  mainImage?: string;
+  city?: string;
+  country?: string;
+}
+
+interface ProductType {
+  _id?: string;
+  id?: number;
+  title: string;
+  price: number;
+  mainImage: string;
+  discount?: number;
+  rating?: number;        // ✅ ADDED
+  review?: ReviewType[];  // ✅ FIXED
+  moreImages?: string[];
+}
+
+
+const AboutPage: React.FC = () => {
+  const [topRatedProduct, setTopRatedProduct] = useState<ProductType | null>(null);
+  const [testimonials, setTestimonials] = useState<ReviewType[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [productsList, setProductsList] = useState<ProductType[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const products = await getProducts();
+        setProductsList(products);
+        
+        // ✅ Find product with highest rating and reviews
+        const productsWithReviews = products.filter((p: ProductType) => p.review && p.review.length > 0);
+        
+       if (productsWithReviews.length > 0) {
+          const sorted = [...productsWithReviews].sort((a: any, b: any) => {
+            const ratingA = a.rating || 0;
+            const ratingB = b.rating || 0;
+            if (ratingB !== ratingA) return ratingB - ratingA;
+            return (b.review?.length || 0) - (a.review?.length || 0);
+          });
+          setTopRatedProduct(sorted[0]);
+        }
+        
+        // ✅ Extract reviews for testimonials
+        const allReviews = products
+          .flatMap((p: ProductType) => 
+            (p.review || []).map((r: ReviewType) => ({
+              ...r,
+              city: r.city || getCityFromName(r.customerName),
+              country: r.country || 'Pakistan',
+            }))
+          )
+          .filter((r: ReviewType) => r.message && r.message.trim() !== '')
+          .sort((a: ReviewType, b: ReviewType) => {
+            const dateA = a.date ? new Date(a.date).getTime() : 0;
+            const dateB = b.date ? new Date(b.date).getTime() : 0;
+            return dateB - dateA;
+          });
+        
+        setTestimonials(allReviews.slice(0, 6));
+        
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  // ✅ Auto-slide for top rated product (every 10 seconds)
+  useEffect(() => {
+    if (productsList.length === 0) return;
+
+    const interval = setInterval(() => {
+      const productsWithReviews = productsList.filter((p: ProductType) => p.review && p.review.length > 0);
+      if (productsWithReviews.length <= 1) return;
+      
+      setCurrentIndex((prev) => (prev + 1) % productsWithReviews.length);
+      setTopRatedProduct(productsWithReviews[currentIndex]);
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [productsList, currentIndex]);
+
+  const getCityFromName = (name: string) => {
+    const cities = ['Lahore', 'Karachi', 'Islamabad', 'Rawalpindi', 'Faisalabad', 'Multan'];
+    return cities[Math.floor(Math.random() * cities.length)];
+  };
+
+  const renderStars = (rating: number) => {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 !== 0;
+
+    for (let i = 0; i < fullStars; i++) {
+      stars.push(<FaStar key={i} className="text-yellow-400 text-sm" />);
+    }
+    if (hasHalfStar) {
+      stars.push(<FaStarHalfAlt key="half" className="text-yellow-400 text-sm" />);
+    }
+    const emptyStars = 5 - stars.length;
+    for (let i = 0; i < emptyStars; i++) {
+      stars.push(<FaRegStar key={`empty-${i}`} className="text-yellow-400 text-sm" />);
+    }
+    return stars;
+  };
+
+  const getInitials = (name: string) => {
+    if (!name) return '?';
+    const parts = name.trim().split(' ');
+    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+    return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#B76E79] border-t-transparent"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 pt-[65px]">
       
@@ -74,32 +209,44 @@ const AboutPage:React.FC = () => {
                 </div>
               </div>
             </div>
+            
+            {/* ✅ Top Rated Product Showcase */}
             <div className="relative">
-              <div className="bg-gradient-to-br from-[#B76E79]/20 to-pink-100 rounded-3xl p-8">
-                <img 
-                  src="/images/about-story.jpg" 
-                  alt="Our Story" 
-                  className="rounded-2xl shadow-2xl w-full object-cover h-[400px]"
-                  onError={(e) => {
-                    e.currentTarget.src = 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=600';
-                  }}
-                />
-                <div className="absolute -bottom-4 -right-4 bg-white rounded-2xl shadow-xl p-4">
-                  <div className="flex items-center gap-3">
-                    <span className="text-3xl font-bold text-[#B76E79]">4.9</span>
-                    <div>
-                      <div className="flex text-yellow-400">
-                        <FiStar className="fill-current" />
-                        <FiStar className="fill-current" />
-                        <FiStar className="fill-current" />
-                        <FiStar className="fill-current" />
-                        <FiStar className="fill-current" />
+              {topRatedProduct ? (
+                <div className="bg-gradient-to-br from-[#B76E79]/20 to-pink-100 rounded-3xl p-8">
+                  <Link to={`/product-detail/${topRatedProduct._id || topRatedProduct.id}`}>
+                    <img 
+                      src={topRatedProduct.mainImage} 
+                      alt={topRatedProduct.title} 
+                      className="rounded-2xl shadow-2xl w-full object-cover h-[400px] hover:scale-105 transition-transform duration-500"
+                      onError={(e) => {
+                        e.currentTarget.src = 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=600';
+                      }}
+                    />
+                  </Link>
+                  <div className="absolute -bottom-4 -right-4 bg-white rounded-2xl shadow-xl p-4 cursor-pointer hover:shadow-2xl transition">
+                    <Link to={`/product-detail/${topRatedProduct._id || topRatedProduct.id}`}>
+                      <div className="flex items-center gap-3">
+                        <span className="text-3xl font-bold text-[#B76E79]">
+                          {topRatedProduct.rating || 4.9}
+                        </span>
+                        <div>
+                          <div className="flex text-yellow-400">
+                            {renderStars(topRatedProduct.rating || 5)}
+                          </div>
+                          <span className="text-xs text-gray-500">
+                            {topRatedProduct.review?.length || 0} Reviews
+                          </span>
+                        </div>
                       </div>
-                      <span className="text-xs text-gray-500">500+ Reviews</span>
-                    </div>
+                    </Link>
                   </div>
                 </div>
-              </div>
+              ) : (
+                <div className="bg-gradient-to-br from-[#B76E79]/20 to-pink-100 rounded-3xl p-8 flex items-center justify-center h-[400px]">
+                  <p className="text-gray-500">No products with reviews yet</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -245,68 +392,42 @@ const AboutPage:React.FC = () => {
           </div>
         </div>
 
-        {/* ===== TESTIMONIALS ===== */}
+        {/* ===== REAL TESTIMONIALS ===== */}
         <div className="py-16">
           <div className="text-center mb-12">
             <span className="text-[#B76E79] font-semibold text-sm tracking-wider uppercase">Testimonials</span>
             <h2 className="text-3xl font-bold text-gray-800 mt-2">What Our Customers Say</h2>
+            <p className="text-gray-500 mt-2">Real reviews from real customers</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
-              <FaQuoteLeft className="text-[#B76E79] text-2xl mb-4 opacity-50" />
-              <p className="text-gray-600 leading-relaxed text-sm">
-                "Absolutely love the quality and design! The abaya collection is 
-                stunning — perfect for both casual and formal wear. AS YOU WISH 
-                has become my go-to brand."
-              </p>
-              <div className="flex items-center gap-3 mt-4">
-                <div className="w-10 h-10 bg-[#B76E79]/20 rounded-full flex items-center justify-center text-[#B76E79] font-bold">
-                  SA
-                </div>
-                <div>
-                  <p className="font-semibold text-sm text-gray-800">Sarah Ahmed</p>
-                  <p className="text-xs text-gray-400">Lahore, Pakistan</p>
-                </div>
-              </div>
+          {testimonials.length === 0 ? (
+            <div className="text-center py-10">
+              <p className="text-gray-400">No reviews yet. Be the first to review!</p>
             </div>
-
-            <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
-              <FaQuoteLeft className="text-[#B76E79] text-2xl mb-4 opacity-50" />
-              <p className="text-gray-600 leading-relaxed text-sm">
-                "The attention to detail is incredible! I've received so many 
-                compliments on my outfit. The fabric is premium and the fit 
-                is just perfect. Highly recommended!"
-              </p>
-              <div className="flex items-center gap-3 mt-4">
-                <div className="w-10 h-10 bg-[#B76E79]/20 rounded-full flex items-center justify-center text-[#B76E79] font-bold">
-                  FK
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {testimonials.map((item, index) => (
+                <div key={item.id || item._id || index} className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl hover:scale-[1.05] cursor-pointer transition-all ">
+                  <FaQuoteLeft className="text-[#B76E79] text-2xl mb-4 opacity-50" />
+                  <p className="text-gray-600 leading-relaxed text-sm line-clamp-4">
+                    "{item.message}"
+                  </p>
+                  <div className="flex items-center gap-3 mt-4">
+                    <div className="w-10 h-10 bg-[#B76E79]/20 rounded-full flex items-center justify-center text-[#B76E79] font-bold text-sm">
+                      {getInitials(item.customerName)}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-sm text-gray-800">{item.customerName}</p>
+                      <p className="text-xs text-gray-400">{item.city || 'Pakistan'}, {item.country || 'Pakistan'}</p>
+                    </div>
+                    <div className="ml-auto flex items-center gap-0.5">
+                      {renderStars(item.Rating || 5)}
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-semibold text-sm text-gray-800">Fatima Khan</p>
-                  <p className="text-xs text-gray-400">Karachi, Pakistan</p>
-                </div>
-              </div>
+              ))}
             </div>
-
-            <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
-              <FaQuoteLeft className="text-[#B76E79] text-2xl mb-4 opacity-50" />
-              <p className="text-gray-600 leading-relaxed text-sm">
-                "Finally a brand that understands modern women! The designs are 
-                contemporary yet culturally rich. Shipping was fast and 
-                packaging was beautiful."
-              </p>
-              <div className="flex items-center gap-3 mt-4">
-                <div className="w-10 h-10 bg-[#B76E79]/20 rounded-full flex items-center justify-center text-[#B76E79] font-bold">
-                  ZH
-                </div>
-                <div>
-                  <p className="font-semibold text-sm text-gray-800">Zara Hussain</p>
-                  <p className="text-xs text-gray-400">Islamabad, Pakistan</p>
-                </div>
-              </div>
-            </div>
-          </div>
+          )}
         </div>
 
         {/* ===== CTA SECTION ===== */}

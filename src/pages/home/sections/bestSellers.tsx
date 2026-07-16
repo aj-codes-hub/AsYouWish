@@ -12,6 +12,7 @@ interface ProductType {
   discount: number;
   details?: string;
   moreImages: string[];
+  rating?: number;
 }
 
 const BestSellers: React.FC = () => {
@@ -109,6 +110,7 @@ const BestSellers: React.FC = () => {
               HoverImg={item.moreImages}
               discount={item.discount}
               DiscountPrice={Math.round((item.price) - item.price * item.discount / 100)}
+              rating={item.rating || 0}
               className="h-[500px]"
             />
           ))}

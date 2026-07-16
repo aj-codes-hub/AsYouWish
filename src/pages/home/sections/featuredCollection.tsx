@@ -11,6 +11,7 @@ interface ProductType {
   isFeatured?: boolean;
   discount: number;
   details?: string;
+  rating?: number;
   moreImages: string[];
 }
 
@@ -74,6 +75,7 @@ const FeaturedCollection: React.FC = () => {
               title={item.title}
               discount={item.discount}
               DiscountPrice={Math.round((item.price) - item.price * item.discount / 100)}
+              rating={item.rating || 0}
             />
           ))}
         </div>

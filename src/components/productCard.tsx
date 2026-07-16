@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCart } from '../pages/context/cartContext';
 import { IoHeart } from "react-icons/io5";
 import { useWishlist } from '../pages/context/wishlistContext';
-import { FaStar } from "react-icons/fa6";
+import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa"; 
 
 
 
@@ -18,9 +18,10 @@ interface ProductCardPrpos {
     discount?:number;
     DiscountPrice?: number;
     HoverImg?: any;
+    rating?: number; 
 }
 
-const ProductCard:React.FC<ProductCardPrpos> = ({Image,price,className,id,title,discount,DiscountPrice,HoverImg}) => {
+const ProductCard:React.FC<ProductCardPrpos> = ({Image,price,className,id,title,discount,DiscountPrice,HoverImg,rating = 0, }) => {
 
 
  const { addToWishlist , removeFromWishlist , isInWishlist } = useWishlist();   
@@ -49,6 +50,26 @@ const handleWishlistToggle = (e: React.MouseEvent) => {
     addToWishlist(product);
   }
 };
+
+ const renderStars = (rating: number) => {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 !== 0;
+
+    for (let i = 0; i < fullStars; i++) {
+      stars.push(<FaStar key={i} className="text-primary text-[10px] sm:text-[15px]" />);
+    }
+    if (hasHalfStar) {
+      stars.push(<FaStarHalfAlt key="half" className="text-primary text-[10px] sm:text-[15px]" />);
+    }
+    const emptyStars = 5 - stars.length;
+    for (let i = 0; i < emptyStars; i++) {
+      stars.push(<FaRegStar key={`empty-${i}`} className="text-gray-400 text-[10px] sm:text-[15px]" />);
+    }
+    return stars;
+  };
+
+
 // ✅ Update isLiked
 const isLiked = isInWishlist(id)
 
@@ -127,15 +148,11 @@ const [isMouse, setIsMouse] = useState(false);
                 </span>
             </h2>    
 
-            <span className='flex gap-1 text-primary'>
-              <FaStar />
-              <FaStar />
-              <FaStar />
-              <FaStar />
-              <FaStar />
-              
-            </span>
-
+            <div className="flex items-center gap-0.5">
+              {renderStars(rating || 2)}
+              <span className="text-[8px] sm:text-[9px] text-gray-400 ml-0.5">
+              </span>
+            </div>
             </div>
             </div>
         </div>

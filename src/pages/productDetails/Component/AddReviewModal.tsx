@@ -12,13 +12,16 @@ interface AddReviewModalProps {
     Rating: number;
     moreImages?: string[];
   }) => void;
-  productId: string;
+  productId?: string;  // ✅ OPTIONAL KARO
+  onOpenLogin?: () => void;
 }
 
 const AddReviewModal: React.FC<AddReviewModalProps> = ({
   isOpen,
   onClose,
   onSubmit,
+  productId,  // ✅ USE KARO YA NA KARO, NO ERROR
+  onOpenLogin,
 }) => {
   const { user, isLoggedIn } = useAuth();
   const [customerName, setCustomerName] = useState(user?.name || '');
@@ -37,6 +40,15 @@ const AddReviewModal: React.FC<AddReviewModalProps> = ({
       setCustomerName(user.name);
     }
   }, [isLoggedIn, user]);
+
+  // ✅ If not logged in, show alert and open login modal
+  useEffect(() => {
+    if (isOpen && !isLoggedIn) {
+      alert('You need to login or register first to add a review.');
+      onOpenLogin?.();
+      onClose();
+    }
+  }, [isOpen, isLoggedIn, onClose, onOpenLogin]);
 
   if (!isOpen) return null;
 
@@ -105,6 +117,14 @@ const AddReviewModal: React.FC<AddReviewModalProps> = ({
     setIsLoading(true);
     setError('');
 
+    if (!isLoggedIn) {
+      setError('Please login to submit a review');
+      onOpenLogin?.();
+      setIsLoading(false);
+      onClose();
+      return;
+    }
+
     if (!customerName.trim() || !message.trim()) {
       setError('Please fill all required fields');
       setIsLoading(false);
@@ -149,11 +169,11 @@ const AddReviewModal: React.FC<AddReviewModalProps> = ({
               value={customerName}
               onChange={(e) => setCustomerName(e.target.value)}
               className={`w-full px-4 py-2 border-2 rounded-xl focus:outline-none focus:border-[#B76E79] transition ${
-                !isLoggedIn ? 'border-gray-200' : 'border-[#B76E79]/30 bg-gray-50'
+                isLoggedIn ? 'border-[#B76E79]/30 bg-gray-50' : 'border-gray-200'
               }`}
               placeholder="Enter your name"
               required={!isLoggedIn}
-              disabled={!!isLoggedIn}
+              disabled={isLoggedIn}
             />
             {isLoggedIn && (
               <p className="text-xs text-gray-400 mt-1">Logged in as {user?.name}</p>
@@ -201,7 +221,7 @@ const AddReviewModal: React.FC<AddReviewModalProps> = ({
             />
           </div>
 
-          {/* ✅ Only More Images Upload (No Main Image) */}
+          {/* ✅ Upload Images */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Upload Images (Max 3, Optional)</label>
             <div className="flex items-center gap-3 mb-2">

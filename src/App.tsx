@@ -32,6 +32,7 @@ import { ProductProvider } from "./pages/context/ProductContext";
 import NotFoundPage from "./pages/NotFoundPage";
 import NotificationDetail from "./pages/Admin/NotificationDetail";
 import NotificationHistory from "./pages/Admin/NotificationHistory";
+import AdminSubscribers from "./pages/Admin/AdminSubscribers";
 
 function AppContent() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -91,6 +92,12 @@ function AppContent() {
             <NotificationHistory />
           </AdminRoute>
         } />
+         <Route path="/admin/subscribers" element={
+          <AdminRoute>
+            <AdminSubscribers />
+          </AdminRoute>
+         } />
+        
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
         <Footer /> 
