@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { getAdminStats } from '../../services/adminService';
+import { getSubscribers } from '../../services/subscriberService';  
 import { 
   FaBoxOpen, 
   FaShoppingBag, 
@@ -24,6 +25,7 @@ import { useAuth } from '../../Auth/authContext';
 const AdminDashboard: React.FC = () => {
   
    const { user, isLoggedIn, logout } = useAuth();
+   const [subscriberCount, setSubscriberCount] = useState(0);
   const navigate = useNavigate();
 
   // ✅ State for stats from backend
@@ -193,6 +195,18 @@ const AdminDashboard: React.FC = () => {
               Welcome back, <span className="font-semibold text-gray-700">{user?.name}</span> 👋
             </p>
           </div>
+
+        <Link 
+          to="/admin/subscribers" 
+          className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 rounded-xl transition text-gray-600 hover:text-gray-800"
+        >
+          <FaUsers className="text-sm" />
+          <span>Subscribers</span>
+          <span className="ml-auto bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full font-medium">
+            {subscriberCount}
+          </span>
+        </Link>
+
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-xl shadow-sm border border-gray-100">
               <div className="w-8 h-8 bg-[#B76E79]/10 rounded-full flex items-center justify-center text-[#B76E79] text-sm font-bold">
