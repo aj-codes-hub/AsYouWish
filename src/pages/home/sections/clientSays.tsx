@@ -73,6 +73,7 @@ const ClientSays: React.FC = () => {
   // ✅ Get city from name (mock)
   const getCityFromName = (name: string) => {
     const cities = ['Lahore', 'Karachi', 'Islamabad', 'Rawalpindi', 'Faisalabad'];
+    console.log(name);
     return cities[Math.floor(Math.random() * cities.length)];
   };
 

@@ -55,6 +55,11 @@ const AdminDashboard: React.FC = () => {
           totalUsers: data.totalUsers || 0,
           totalRevenue: data.totalRevenue || 0,
         });
+
+        const subscriberData = await getSubscribers();
+        setSubscriberCount(subscriberData.count || 0);
+
+
       } catch (error) {
         console.error('Error fetching stats:', error);
       } finally {

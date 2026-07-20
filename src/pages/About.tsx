@@ -112,6 +112,7 @@ const AboutPage: React.FC = () => {
 
   const getCityFromName = (name: string) => {
     const cities = ['Lahore', 'Karachi', 'Islamabad', 'Rawalpindi', 'Faisalabad', 'Multan'];
+    console.log(name);
     return cities[Math.floor(Math.random() * cities.length)];
   };
 

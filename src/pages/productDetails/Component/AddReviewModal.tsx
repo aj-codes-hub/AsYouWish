@@ -157,7 +157,9 @@ const AddReviewModal: React.FC<AddReviewModalProps> = ({
             <FaTimes />
           </button>
         </div>
-
+        <div className='hidden'>
+          {productId}
+        </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* ✅ Name - Auto-filled if logged in */}
           <div>
