@@ -4,11 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { 
   FaArrowLeft, 
   FaEye, 
-  FaClock, 
-  FaTruck, 
-  FaCheckCircle, 
   FaSpinner,
-  FaTimesCircle,
   FaUser,
   FaArrowCircleRight,
   FaShoppingBag
@@ -105,23 +101,6 @@ const AdminOrders: React.FC = () => {
       return flow[nextIndex];
     }
     return null;
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'delivered':
-        return <FaCheckCircle className="text-green-500 text-sm mr-1.5" />;
-      case 'shipped':
-        return <FaTruck className="text-blue-500 text-sm mr-1.5" />;
-      case 'processing':
-        return <FaSpinner className="text-yellow-500 text-sm mr-1.5 animate-spin" />;
-      case 'pending':
-        return <FaClock className="text-gray-500 text-sm mr-1.5" />;
-      case 'cancelled':
-        return <FaTimesCircle className="text-red-500 text-sm mr-1.5" />;
-      default:
-        return <FaClock className="text-gray-500 text-sm mr-1.5" />;
-    }
   };
 
   const getStatusColor = (status: string) => {

@@ -11,7 +11,6 @@ import {
   FaRupeeSign,
   FaCalendarAlt,
   FaBoxOpen,
-  FaUser
 } from 'react-icons/fa';
 import { useAuth } from '../../Auth/authContext';
 import { toast } from 'react-toastify';
