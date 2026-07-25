@@ -1,7 +1,20 @@
+// src/components/SearchModal.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiSearch, FiX } from 'react-icons/fi';
-import { Product } from '../data/productCard/product';
+import { getProducts } from '../services/productService';
+
+interface ProductType {
+  _id?: string;
+  id?: number;
+  title: string;
+  price: number;
+  mainImage: string;
+  discount?: number;
+  details?: string;
+  Event?: string;
+  category?: string;
+}
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -10,10 +23,30 @@ interface SearchModalProps {
 
 const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<ProductType[]>([]);
+  const [allProducts, setAllProducts] = useState<ProductType[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(true);
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
+
+  // ✅ Fetch all products when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      const fetchProducts = async () => {
+        setIsFetching(true);
+        try {
+          const data = await getProducts();
+          setAllProducts(data);
+        } catch (error) {
+          console.error('Error fetching products:', error);
+        } finally {
+          setIsFetching(false);
+        }
+      };
+      fetchProducts();
+    }
+  }, [isOpen]);
 
   // Focus input when modal opens
   useEffect(() => {
@@ -24,7 +57,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     }
   }, [isOpen]);
 
-  // Search logic
+  // ✅ Search logic - Real data
   useEffect(() => {
     if (searchTerm.trim() === '') {
       setSearchResults([]);
@@ -34,24 +67,27 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
 
     setIsLoading(true);
     const timer = setTimeout(() => {
-      const filtered = Product.filter((product) => {
-        const searchLower = searchTerm.toLowerCase().trim();
+      const searchLower = searchTerm.toLowerCase().trim();
+      
+      const filtered = allProducts.filter((product) => {
         return (
-          product.title.toLowerCase().includes(searchLower) ||
+          product.title?.toLowerCase().includes(searchLower) ||
           product.details?.toLowerCase().includes(searchLower) ||
           product.Event?.toLowerCase().includes(searchLower) ||
-          product.price.toString().includes(searchLower)
+          product.category?.toLowerCase().includes(searchLower) ||
+          product.price?.toString().includes(searchLower)
         );
       });
+      
       setSearchResults(filtered);
       setIsLoading(false);
-    }, 300); // Debounce for better performance
+    }, 300);
 
     return () => clearTimeout(timer);
-  }, [searchTerm]);
+  }, [searchTerm, allProducts]);
 
   // Handle product click
-  const handleProductClick = (productId: number) => {
+  const handleProductClick = (productId: string | number) => {
     navigate(`/product-detail/${productId}`);
     onClose();
     setSearchTerm('');
@@ -86,15 +122,35 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
 
   if (!isOpen) return null;
 
+  // Show loading while fetching products
+  if (isFetching) {
+    return (
+      <div className="fixed inset-0 z-[9999] animate-fadeIn">
+        <div onClick={() => {
+          onClose();
+          setSearchTerm('');
+          setSearchResults([]);
+        }} className='absolute h-full w-full bg-black/20 z-[10]'>
+        </div>
+        <div className="bg-white w-full max-w-2xl absolute sm:top-1/2 left-1/2 -translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl shadow-2xl overflow-hidden animate-slideDown z-[20] p-8 text-center">
+          <div className="flex justify-center items-center py-12">
+            <div className="w-8 h-8 border-4 border-[#B76E79] border-t-transparent rounded-full animate-spin"></div>
+            <p className="ml-3 text-gray-500">Loading products...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="fixed inset-0 z-[9999]  animate-fadeIn">
+    <div className="fixed inset-0 z-[9999] animate-fadeIn">
        
-       <div onClick={() => {
-              onClose();
-              setSearchTerm('');
-              setSearchResults([]);
-            }} className='absolute h-full w-full bg-black/20 z-[10]'>
-       </div>
+      <div onClick={() => {
+        onClose();
+        setSearchTerm('');
+        setSearchResults([]);
+      }} className='absolute h-full w-full bg-black/20 z-[10]'>
+      </div>
 
       <div className="bg-white w-full max-w-2xl absolute sm:top-1/2 left-1/2 -translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl shadow-2xl overflow-hidden animate-slideDown z-[20]">
         
@@ -147,14 +203,17 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
               <div className="space-y-3">
                 {searchResults.map((product) => (
                   <div
-                    key={product.id}
-                    onClick={() => handleProductClick(product.id)}
+                    key={product._id || product.id}
+                    onClick={() => handleProductClick(product._id as any || product.id)}
                     className="flex items-center gap-4 p-3 hover:bg-[#B76E79]/5 rounded-xl cursor-pointer transition-all hover:scale-[1.02] group"
                   >
                     <img
                       src={product.mainImage}
                       alt={product.title}
                       className="w-16 h-16 object-cover rounded-lg shadow-sm group-hover:shadow-md transition"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/60x60?text=No+Image';
+                      }}
                     />
                     <div className="flex-1 min-w-0">
                       <h4 className="font-semibold text-gray-800 truncate">
@@ -191,7 +250,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
           <div className="border-t border-gray-100 px-4 py-3">
             <p className="text-xs text-gray-400 mb-2">Popular searches:</p>
             <div className="flex flex-wrap gap-2">
-              {['Abaya', 'Dress', 'Kurta', 'Collection', 'New Arrival'].map((item) => (
+              {['Abaya', 'Dress', 'Kurta', 'Collection', 'New Arrival', 'Lawn'].map((item) => (
                 <button
                   key={item}
                   onClick={() => setSearchTerm(item)}
@@ -203,28 +262,21 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
             </div>
           </div>
         )}
-        
 
         <div className="border-t border-gray-100 px-4 py-6">
-            <p className="text-xs text-gray-400 mb-2">Menu Options</p>
-            <div className="flex flex-wrap gap-2">
-                <button onClick={()=> { navigate('/'); onClose();}} className="px-3 py-1 text-xs bg-gray-100 hover:bg-[#B76E79]/10 rounded-full text-gray-600 hover:text-[#B76E79] transition cursor-pointer">
-                  About us
-                </button>
-
-                 <button onClick={()=> { navigate('/'); onClose();}} className="px-3 py-1 text-xs bg-gray-100 hover:bg-[#B76E79]/10 rounded-full text-gray-600 hover:text-[#B76E79] transition cursor-pointer">
-                  Collections
-                </button>
-
-                 <button onClick={()=> { navigate('/'); onClose();}} className="px-3 py-1 text-xs bg-gray-100 hover:bg-[#B76E79]/10 rounded-full text-gray-600 hover:text-[#B76E79] transition cursor-pointer">
-                  Shop
-                </button>
-
-                 <button onClick={()=> { navigate('/'); onClose();}} className="px-3 py-1 text-xs bg-gray-100 hover:bg-[#B76E79]/10 rounded-full text-gray-600 hover:text-[#B76E79] transition cursor-pointer">
-                  Home
-                </button>
-            </div>
+          <p className="text-xs text-gray-400 mb-2">Menu Options</p>
+          <div className="flex flex-wrap gap-2">
+            <button onClick={() => { navigate('/'); onClose(); }} className="px-3 py-1 text-xs bg-gray-100 hover:bg-[#B76E79]/10 rounded-full text-gray-600 hover:text-[#B76E79] transition cursor-pointer">
+              Home
+            </button>
+            <button onClick={() => { navigate('/collection'); onClose(); }} className="px-3 py-1 text-xs bg-gray-100 hover:bg-[#B76E79]/10 rounded-full text-gray-600 hover:text-[#B76E79] transition cursor-pointer">
+              Collections
+            </button>
+            <button onClick={() => { navigate('/about'); onClose(); }} className="px-3 py-1 text-xs bg-gray-100 hover:bg-[#B76E79]/10 rounded-full text-gray-600 hover:text-[#B76E79] transition cursor-pointer">
+              About
+            </button>
           </div>
+        </div>
 
       </div>
     </div>

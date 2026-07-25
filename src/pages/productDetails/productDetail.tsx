@@ -6,6 +6,7 @@ import { IoShareSocialOutline } from "react-icons/io5";
 import { FiMinus, FiPlus, FiShoppingCart } from "react-icons/fi";
 import { IoCheckmarkCircle } from "react-icons/io5";
 import { TbTruckDelivery, TbRefresh, TbShieldCheck } from "react-icons/tb";
+import { FaFacebook, FaTwitter, FaWhatsapp, FaLink, FaCopy, FaCheckCircle } from "react-icons/fa";
 import ProductReview from './Component/productReview';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useCart } from '../context/cartContext';
@@ -14,7 +15,6 @@ import { getProductById } from '../../services/productService';
 import AddReviewModal from './Component/AddReviewModal';
 import LoginModal from '../../Auth/loginModal';
 import SignupModal from '../../Auth/signupModal';
-
 
 const ProductDetail: React.FC = () => {
   const navigate = useNavigate();
@@ -30,8 +30,10 @@ const ProductDetail: React.FC = () => {
   const [openLoginModal, setOpenLoginModal] = useState(false);
   const [openSignUpModal, setOpenSignUpModal] = useState(false);
 
-  
-  
+  // ✅ Share Modal State
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
+
   // ✅ FIX 1: Initialize reviews as empty array
   const [reviews, setReviews] = useState<any[]>([]);
 
@@ -51,21 +53,20 @@ const ProductDetail: React.FC = () => {
 
   // ✅ Fetch product from backend
   useEffect(() => {
-  const fetchProduct = async () => {
-    try {
-      const data = await getProductById(id!);
-      setProduct(data);
-      setSelectedImage(data.mainImage);
-      // ✅ Redline fix - use any
-      setReviews((data as any).review || []);
-    } catch (err: any) {
-      setError(err.message || 'Product not found');
-    } finally {
-      setLoading(false);
-    }
-  };
-  fetchProduct();
-}, [id]);
+    const fetchProduct = async () => {
+      try {
+        const data = await getProductById(id!);
+        setProduct(data);
+        setSelectedImage(data.mainImage);
+        setReviews((data as any).review || []);
+      } catch (err: any) {
+        setError(err.message || 'Product not found');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProduct();
+  }, [id]);
 
   // Handle quantity change
   const handleQuantityChange = (type: 'increment' | 'decrement') => {
@@ -215,7 +216,6 @@ const ProductDetail: React.FC = () => {
 
       const updatedReviews = await response.json();
 
-      // ✅ Update product and reviews state
       setProduct((prev: any) => ({
         ...prev,
         review: updatedReviews,
@@ -227,6 +227,44 @@ const ProductDetail: React.FC = () => {
     } catch (error) {
       console.error('Error submitting review:', error);
       alert('Failed to submit review. Please try again.');
+    }
+  };
+
+  // ✅ SHARE FUNCTIONS
+  const getShareUrl = () => {
+    return window.location.href;
+  };
+
+  const getShareText = () => {
+    return `Check out ${product?.title} - Only Rs. ${product?.price} on AS YOU WISH!`;
+  };
+
+  const shareOnFacebook = () => {
+    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(getShareUrl())}`;
+    window.open(url, '_blank', 'width=600,height=400');
+    setIsShareModalOpen(false);
+  };
+
+  const shareOnTwitter = () => {
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(getShareText())}&url=${encodeURIComponent(getShareUrl())}`;
+    window.open(url, '_blank', 'width=600,height=400');
+    setIsShareModalOpen(false);
+  };
+
+  const shareOnWhatsApp = () => {
+    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(getShareText() + ' ' + getShareUrl())}`;
+    window.open(url, '_blank');
+    setIsShareModalOpen(false);
+  };
+
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(getShareUrl());
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 3000);
+      setIsShareModalOpen(false);
+    } catch (err) {
+      alert('Failed to copy link');
     }
   };
 
@@ -327,18 +365,18 @@ const ProductDetail: React.FC = () => {
             {/* ===== RIGHT SIDE - PRODUCT INFO ===== */}
             <div className="sm:space-y-6 space-y-1 p-4">
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 leading-tight">{product.title}</h1>
-             <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1">
-                {renderStars(product.rating || 0)}
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1">
+                  {renderStars(product.rating || 0)}
+                </div>
+                <span className="text-sm text-gray-500">
+                  ({product.rating ? product.rating.toFixed(1) : '0'}.0)
+                </span>
+                <span className="text-sm text-gray-400">|</span>
+                <span className="text-sm text-gray-500">
+                  {product.review?.length || 0} Reviews
+                </span>
               </div>
-              <span className="text-sm text-gray-500">
-                ({product.rating ? product.rating.toFixed(1) : '0'}.0)
-              </span>
-              <span className="text-sm text-gray-400">|</span>
-              <span className="text-sm text-gray-500">
-                {product.review?.length || 0} Reviews
-              </span>
-            </div>
               <div className="flex items-center gap-4">
                 <span className="text-3xl font-bold text-[#B76E79]">Rs. {product.price}</span>
                 {product.discount && product.discount > 0 && (
@@ -402,8 +440,13 @@ const ProductDetail: React.FC = () => {
                   <p className="text-[10px] text-gray-400">100% secure checkout</p>
                 </div>
               </div>
+              
+              {/* ✅ SHARE BUTTON - UPDATED */}
               <div className="flex items-center gap-4 pt-2">
-                <button className="flex items-center gap-2 text-gray-500 hover:text-[#B76E79] transition text-sm cursor-pointer">
+                <button 
+                  onClick={() => setIsShareModalOpen(true)}
+                  className="flex items-center gap-2 text-gray-500 hover:text-[#B76E79] transition text-sm cursor-pointer"
+                >
                   <IoShareSocialOutline className="text-lg" /> Share
                 </button>
               </div>
@@ -493,7 +536,6 @@ const ProductDetail: React.FC = () => {
             )}
           </div>
 
-          {/* ✅ FIX 4: Pass productId to AddReviewModal */}
           <AddReviewModal
             isOpen={isReviewModalOpen}
             onClose={() => setIsReviewModalOpen(false)}
@@ -504,14 +546,82 @@ const ProductDetail: React.FC = () => {
         </div>
       </div>
 
+      {/* ✅ SHARE MODAL */}
+      {isShareModalOpen && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl animate-scale-up">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-gray-800">Share this product</h3>
+              <button
+                onClick={() => setIsShareModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600 p-1 cursor-pointer"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
 
-        <LoginModal  hideLoginModal={setOpenLoginModal}
-                      isOpenLoginModal={openLoginModal} 
-                      showSignUpModal={setOpenSignUpModal}/>
+            <div className="grid grid-cols-4 gap-3 mb-4">
+              {/* Facebook */}
+              <button
+                onClick={shareOnFacebook}
+                className="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-gray-50 transition cursor-pointer group"
+              >
+                <div className="w-12 h-12 bg-[#1877F2] rounded-full flex items-center justify-center text-white text-xl group-hover:scale-105 transition">
+                  <FaFacebook />
+                </div>
+                <span className="text-xs text-gray-500">Facebook</span>
+              </button>
 
-      <SignupModal hideSignUpModal={setOpenSignUpModal}
-                   isOpenSignUPModal={openSignUpModal} 
-                   showLoginModal={setOpenLoginModal}  />
+              {/* Twitter */}
+              <button
+                onClick={shareOnTwitter}
+                className="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-gray-50 transition cursor-pointer group"
+              >
+                <div className="w-12 h-12 bg-[#000000] rounded-full flex items-center justify-center text-white text-xl group-hover:scale-105 transition">
+                  <FaTwitter />
+                </div>
+                <span className="text-xs text-gray-500">Twitter</span>
+              </button>
+
+              {/* WhatsApp */}
+              <button
+                onClick={shareOnWhatsApp}
+                className="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-gray-50 transition cursor-pointer group"
+              >
+                <div className="w-12 h-12 bg-[#25D366] rounded-full flex items-center justify-center text-white text-xl group-hover:scale-105 transition">
+                  <FaWhatsapp />
+                </div>
+                <span className="text-xs text-gray-500">WhatsApp</span>
+              </button>
+
+              {/* Copy Link */}
+              <button
+                onClick={copyToClipboard}
+                className="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-gray-50 transition cursor-pointer group"
+              >
+                <div className={`w-12 h-12 ${copySuccess ? 'bg-green-500' : 'bg-gray-600'} rounded-full flex items-center justify-center text-white text-xl group-hover:scale-105 transition`}>
+                  {copySuccess ? <FaCheckCircle /> : <FaCopy />}
+                </div>
+                <span className="text-xs text-gray-500">Copy Link</span>
+              </button>
+            </div>
+
+            <div className="border-t border-gray-100 pt-4">
+              <div className="flex items-center gap-2 bg-gray-50 rounded-xl p-3">
+                <FaLink className="text-gray-400 text-sm" />
+                <span className="text-xs text-gray-500 truncate flex-1">
+                  {getShareUrl()}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <LoginModal hideLoginModal={setOpenLoginModal} isOpenLoginModal={openLoginModal} showSignUpModal={setOpenSignUpModal} />
+      <SignupModal hideSignUpModal={setOpenSignUpModal} isOpenSignUPModal={openSignUpModal} showLoginModal={setOpenLoginModal} />
 
       {/* ===== MOBILE FIXED BOTTOM BAR ===== */}
       <div className="lg:hidden fixed bottom-[60px] sm:bottom-0 left-0 right-0 bg-white shadow-2xl border-t border-gray-100 z-50 px-4 py-3">

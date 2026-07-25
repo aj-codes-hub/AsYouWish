@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaArrowLeft, FaUpload, FaTimes, FaImage } from 'react-icons/fa';
 import { useProducts } from '../context/ProductContext';
@@ -9,6 +9,7 @@ const AdminAddProduct = () => {
   const { addProduct: localAddProduct } = useProducts();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [subscriberTotal, setSubscriberTotal] = useState(0);
   
   const mainImageInputRef = useRef<HTMLInputElement>(null);
   const moreImageInputRef = useRef<HTMLInputElement>(null);
@@ -29,7 +30,25 @@ const AdminAddProduct = () => {
     pieces: '',
     color: '',
     size: '',
+    notifySubscribers: false,
+    subscriberCount: 2,
   });
+
+  useEffect(() => {
+  const fetchSubscriberCount = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/subscribers/subscribers', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      setSubscriberTotal(data.count || 0);
+    } catch (error) {
+      console.error('Error fetching subscriber count:', error);
+    }
+  };
+  fetchSubscriberCount();
+}, []);
 
   // ✅ Image Compression Function
   const compressImage = (file: File, maxWidth: number = 800, quality: number = 0.7): Promise<string> => {
@@ -150,7 +169,9 @@ const AdminAddProduct = () => {
         designType: formData.designType,
         pieces: formData.pieces,
         color: formData.color,
-        size: formData.size,
+        size: formData.size,      
+        notifySubscribers: formData.notifySubscribers,
+        subscriberCount: formData.subscriberCount || 2,
       };
 
       // ✅ API call to backend
@@ -522,6 +543,64 @@ const AdminAddProduct = () => {
                 </label>
               </div>
             </div>
+
+            <div className="border-t border-gray-200 pt-6">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">Email Notification</h3>
+          
+          <div className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              name="notifySubscribers"
+              checked={formData.notifySubscribers}
+              onChange={(e) => {
+                setFormData(prev => ({
+                  ...prev,
+                  notifySubscribers: e.target.checked,
+                  // ✅ Default 2 if not set
+                  subscriberCount: e.target.checked ? (prev.subscriberCount || 2) : 0
+                }));
+              }}
+              className="w-5 h-5 accent-[#B76E79] cursor-pointer"
+            />
+            <label className="text-sm font-medium text-gray-700">
+              Send notification to subscribers
+            </label>
+          </div>
+
+        {/* ✅ Subscriber Count Selection (only shows when checkbox is checked) */}
+        {formData.notifySubscribers && (
+          <div className="mt-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
+            <div className="flex flex-wrap items-center gap-4">
+              <label className="text-sm font-medium text-gray-700">
+                Number of subscribers to notify:
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  min={1}
+                  max={Math.min(50, subscriberTotal || 50)}
+                  value={formData.subscriberCount || 2}
+                  onChange={(e) => {
+                    const val = parseInt(e.target.value) || 1;
+                    const max = Math.min(50, subscriberTotal || 50);
+                    setFormData(prev => ({
+                      ...prev,
+                      subscriberCount: Math.min(Math.max(val, 1), max)
+                    }));
+                  }}
+                  className="w-20 px-3 py-2 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#B76E79] transition"
+                />
+                <span className="text-sm text-gray-500">
+                  out of {subscriberTotal} active subscribers
+                </span>
+              </div>
+            </div>
+            <p className="text-xs text-gray-400 mt-2">
+              ⚡ Random subscribers will be selected. Maximum 50 per notification.
+            </p>
+          </div>
+        )}
+      </div>
 
             {/* ===== SUBMIT BUTTONS ===== */}
             <div className="flex gap-4 pt-4 border-t border-gray-200">

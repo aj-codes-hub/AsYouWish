@@ -9,6 +9,7 @@ import {
     FaPhone, 
     FaMapMarkerAlt, 
     FaEdit, 
+    FaTimesCircle,
     FaSave, 
     FaTimes,
     FaShoppingBag,
@@ -24,7 +25,9 @@ import {
     FaHome,
     FaBuilding,
     FaMapPin,
-    FaSync
+    FaSync,
+    FaSpinner,
+    FaRupeeSign
 } from 'react-icons/fa';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -82,16 +85,23 @@ const UserProfilePage = () => {
         zipCode: '',
     });
 
-    // Orders state - with refresh function
-    const [orders, setOrders] = useState<OrderType[]>(() => {
-        const savedOrders = localStorage.getItem('userOrders');
-        return savedOrders ? JSON.parse(savedOrders) : [];
-    });
+    // ✅ Orders state - with loading
+    const [orders, setOrders] = useState<OrderType[]>([]);
+    const [ordersLoading, setOrdersLoading] = useState(true);
 
-    // ✅ Refresh orders function - Uses setOrders
+    // ✅ Refresh orders function
     const refreshOrders = () => {
-        const savedOrders = localStorage.getItem('userOrders');
-        setOrders(savedOrders ? JSON.parse(savedOrders) : []);
+        setOrdersLoading(true);
+        try {
+            const savedOrders = localStorage.getItem('userOrders');
+            const parsedOrders = savedOrders ? JSON.parse(savedOrders) : [];
+            setOrders(parsedOrders);
+        } catch (error) {
+            console.error('Error loading orders:', error);
+            setOrders([]);
+        } finally {
+            setOrdersLoading(false);
+        }
     };
 
     // Toast notifications
@@ -124,19 +134,16 @@ const UserProfilePage = () => {
         localStorage.setItem('userAddresses', JSON.stringify(addresses));
     }, [addresses]);
 
-    // ✅ Listen for order updates from checkout page
+    // ✅ Listen for order updates
     useEffect(() => {
-        // Initial load
         refreshOrders();
 
-        // Listen for storage changes (from other tabs)
         const handleStorageChange = (e: StorageEvent) => {
             if (e.key === 'userOrders') {
                 refreshOrders();
             }
         };
 
-        // Listen for custom event (same tab)
         const handleOrderUpdate = () => {
             refreshOrders();
         };
@@ -144,11 +151,15 @@ const UserProfilePage = () => {
         window.addEventListener('storage', handleStorageChange);
         window.addEventListener('order-updated', handleOrderUpdate);
 
+        // ✅ Refresh every 30 seconds
+        const interval = setInterval(refreshOrders, 30000);
+
         return () => {
             window.removeEventListener('storage', handleStorageChange);
             window.removeEventListener('order-updated', handleOrderUpdate);
+            clearInterval(interval);
         };
-    }, []); // ✅ Empty dependency array - runs once on mount
+    }, []);
 
     if (!isLoggedIn || !user) {
         return null;
@@ -236,11 +247,12 @@ const UserProfilePage = () => {
     // Get order status color
     const getOrderStatusColor = (status: string) => {
         switch (status) {
-            case 'delivered': return 'text-green-500 bg-green-50';
-            case 'shipped': return 'text-blue-500 bg-blue-50';
-            case 'processing': return 'text-yellow-500 bg-yellow-50';
-            case 'cancelled': return 'text-red-500 bg-red-50';
-            default: return 'text-gray-500 bg-gray-50';
+            case 'delivered': return 'bg-green-100 text-green-700 border-green-200';
+            case 'shipped': return 'bg-blue-100 text-blue-700 border-blue-200';
+            case 'processing': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+            case 'pending': return 'bg-gray-100 text-gray-700 border-gray-200';
+            case 'cancelled': return 'bg-red-100 text-red-700 border-red-200';
+            default: return 'bg-gray-100 text-gray-700 border-gray-200';
         }
     };
 
@@ -249,8 +261,22 @@ const UserProfilePage = () => {
         switch (status) {
             case 'delivered': return <FaCheckCircle className="text-green-500" />;
             case 'shipped': return <FaTruck className="text-blue-500" />;
-            case 'processing': return <FaClock className="text-yellow-500" />;
+            case 'processing': return <FaSpinner className="text-yellow-500 animate-spin" />;
+            case 'pending': return <FaClock className="text-gray-500" />;
+            case 'cancelled': return <FaTimesCircle className="text-red-500" />;
             default: return <FaClock className="text-gray-500" />;
+        }
+    };
+
+    // Get order status label
+    const getOrderStatusLabel = (status: string) => {
+        switch (status) {
+            case 'delivered': return 'Delivered';
+            case 'shipped': return 'Shipped';
+            case 'processing': return 'Processing';
+            case 'pending': return 'Pending';
+            case 'cancelled': return 'Cancelled';
+            default: return status.charAt(0).toUpperCase() + status.slice(1);
         }
     };
 
@@ -261,6 +287,16 @@ const UserProfilePage = () => {
             case 'Office': return <FaBuilding className="text-blue-500" />;
             default: return <FaMapPin className="text-gray-500" />;
         }
+    };
+
+    // ✅ Format date
+    const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+        });
     };
 
     return (
@@ -293,14 +329,21 @@ const UserProfilePage = () => {
                                     <FaUser className="text-sm" />
                                     <span>My Profile</span>
                                 </Link>
-                                <Link to="/orders" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 rounded-xl transition text-gray-600 hover:text-gray-800">
+                                <Link to="/my-orders" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 rounded-xl transition text-gray-600 hover:text-gray-800">
                                     <FaShoppingBag className="text-sm" />
                                     <span>My Orders</span>
-                                    <span className="ml-auto bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full font-medium">
-                                        {orders.length}
-                                    </span>
+                                    {!ordersLoading && (
+                                        <span className="ml-auto bg-[#B76E79] text-white text-xs px-2 py-1 rounded-full font-medium min-w-[20px] text-center">
+                                            {orders.length}
+                                        </span>
+                                    )}
+                                    {ordersLoading && (
+                                        <span className="ml-auto bg-gray-200 text-gray-500 text-xs px-2 py-1 rounded-full font-medium">
+                                            <FaSpinner className="animate-spin" />
+                                        </span>
+                                    )}
                                 </Link>
-                                <Link to="/wishlist" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 rounded-xl transition text-gray-600 hover:text-gray-800">
+                                <Link to="/favurite-product" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 rounded-xl transition text-gray-600 hover:text-gray-800">
                                     <FaHeart className="text-sm" />
                                     <span>Wishlist</span>
                                 </Link>
@@ -493,7 +536,6 @@ const UserProfilePage = () => {
                                     Recent Orders
                                 </h3>
                                 <div className="flex items-center gap-3">
-                                    {/* ✅ Refresh Button - Uses setOrders */}
                                     <button
                                         onClick={refreshOrders}
                                         className="text-[#B76E79] hover:text-[#B76E79]/80 hover:scale-110 transition cursor-pointer"
@@ -502,14 +544,19 @@ const UserProfilePage = () => {
                                         <FaSync className="text-sm" />
                                     </button>
                                     {orders.length > 3 && (
-                                        <Link to="/orders" className="text-[#B76E79] hover:underline text-sm font-medium">
+                                        <Link to="/my-orders" className="text-[#B76E79] hover:underline text-sm font-medium">
                                             View All →
                                         </Link>
                                     )}
                                 </div>
                             </div>
 
-                            {orders.length === 0 ? (
+                            {ordersLoading ? (
+                                <div className="flex justify-center items-center py-8">
+                                    <FaSpinner className="text-[#B76E79] text-2xl animate-spin" />
+                                    <span className="ml-3 text-gray-500">Loading orders...</span>
+                                </div>
+                            ) : orders.length === 0 ? (
                                 <div className="text-center py-12 bg-gray-50 rounded-xl">
                                     <FaShoppingBag className="text-6xl text-gray-300 mx-auto mb-4" />
                                     <h4 className="text-xl font-medium text-gray-600">No Orders Yet</h4>
@@ -524,20 +571,23 @@ const UserProfilePage = () => {
                                         <div key={index} className="border-2 border-gray-100 rounded-xl p-4 hover:border-[#B76E79]/30 hover:shadow-lg transition-all duration-300">
                                             <div className="flex flex-wrap items-center justify-between gap-3">
                                                 <div>
-                                                    <p className="font-bold text-gray-800">Order {order.id}</p>
-                                                    <p className="text-sm text-gray-500 flex items-center gap-2">
+                                                    <p className="font-bold text-gray-800 text-sm">Order #{order.id}</p>
+                                                    <p className="text-xs text-gray-500 flex items-center gap-1">
                                                         <FaCalendarAlt className="text-xs" />
-                                                        {order.date}
+                                                        {formatDate(order.date)}
                                                     </p>
                                                 </div>
-                                                <div>
-                                                    <span className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${getOrderStatusColor(order.status)}`}>
+                                                <div className="flex items-center gap-2">
+                                                    <span className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium border ${getOrderStatusColor(order.status)}`}>
                                                         {getOrderStatusIcon(order.status)}
-                                                        <span className="ml-1 capitalize">{order.status}</span>
+                                                        <span className="ml-1 capitalize">{getOrderStatusLabel(order.status)}</span>
                                                     </span>
                                                 </div>
                                                 <div className="text-right">
-                                                    <p className="font-bold text-[#B76E79] text-lg">Rs. {order.total}</p>
+                                                    <p className="font-bold text-[#B76E79] text-base flex items-center justify-end gap-0.5">
+                                                        <FaRupeeSign className="text-xs" />
+                                                        {order.total}
+                                                    </p>
                                                     <p className="text-xs text-gray-500">{order.items} items</p>
                                                 </div>
                                             </div>

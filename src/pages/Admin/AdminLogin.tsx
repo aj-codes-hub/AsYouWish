@@ -205,7 +205,7 @@ const AdminLogin = () => {
           <span>● AS YOU WISH — Admin Portal ●</span>
         </div>
       </div>
-    </div>
+    </div> 
   );
 };
 

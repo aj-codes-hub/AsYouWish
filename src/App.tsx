@@ -27,13 +27,17 @@ import { AdminProvider } from "./pages/context/AdminContext";
 import AdminProducts from "./pages/Admin/AdminProducts";
 import AdminAddProduct from "./pages/Admin/AdminAddProduct";
 import AdminEditProduct from "./pages/Admin/AdminEditProduct";
-// ✅ ProductProvider IMPORT KARO
 import { ProductProvider } from "./pages/context/ProductContext";
 import NotFoundPage from "./pages/NotFoundPage";
 import NotificationDetail from "./pages/Admin/NotificationDetail";
 import NotificationHistory from "./pages/Admin/NotificationHistory";
 import AdminSubscribers from "./pages/Admin/AdminSubscribers";
 import Unsubscribe from "./pages/Unsubscribe";
+import AdminOrders from "./pages/Admin/AdminOrders";
+import 'react-toastify/dist/ReactToastify.css';
+import AdminOrderDetail from "./pages/Admin/AdminOrderDetail";
+import MyOrders from "./pages/UserProfile/MyOrders";
+
 
 function AppContent() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -99,7 +103,21 @@ function AppContent() {
           </AdminRoute>
          } />
 
+         <Route path="/admin/orders" element={
+          <AdminRoute>
+            <AdminOrders />
+          </AdminRoute>
+         } />
+
+         <Route path="/admin/orders/:id" element={
+          <AdminRoute>
+            <AdminOrderDetail/>
+          </AdminRoute>
+         } />
+
          <Route path="/unsubscribe" element={<Unsubscribe />} />
+
+         <Route path="/my-orders" element={<MyOrders />} />
         
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
