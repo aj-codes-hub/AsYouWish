@@ -6,6 +6,7 @@ import { RxCross1 } from "react-icons/rx";
 import { useAuth } from './authContext';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../services/authService';
+import { loginWithGoogle } from '../services/socialAuthService';
 
 interface LoginProps {
     hideLoginModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -15,7 +16,7 @@ interface LoginProps {
 
 const LoginModal: React.FC<LoginProps> = ({ hideLoginModal, isOpenLoginModal, showSignUpModal }) => {
    
-  const { login: loginContext } = useAuth(); // ✅ Rename to avoid conflict
+  const { login: loginContext } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -33,19 +34,15 @@ const LoginModal: React.FC<LoginProps> = ({ hideLoginModal, isOpenLoginModal, sh
     setError('');
 
     try {
-      // ✅ Backend API call
       const data = await login({ email, password });
       
-      // ✅ Save token & user data
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data));
       
-      // ✅ Update context (optional)
-      loginContext(email, password); // If you have context setter
+      loginContext(email, password);
       
       hideLoginModal(false);
       
-      // ✅ Redirect based on role
       if (data.role === 'admin') {
         navigate('/admin/dashboard');
       } else {
@@ -54,6 +51,42 @@ const LoginModal: React.FC<LoginProps> = ({ hideLoginModal, isOpenLoginModal, sh
       
     } catch (err: any) {
       setError(err.message || 'Invalid email or password');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // ✅ FIXED Google Login Handler
+  const handleGoogleLogin = async () => {
+    try {
+      setIsLoading(true);
+      setError('');
+      
+      console.log('🔄 Google login starting...');
+      const data = await loginWithGoogle();
+      console.log('✅ Google login success:', data);
+      
+      // ✅ Save data
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data));
+      
+      console.log('✅ Token saved, user:', data);
+      console.log('✅ Token:', localStorage.getItem('token'));
+      
+      // ✅ IMPORTANT: Modal close karo
+      hideLoginModal(false);
+      
+      // ✅ FIR navigate karo
+      console.log('✅ Redirecting to profile...');
+      if (data.role === 'admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/profile');
+      }
+      
+    } catch (error: any) {
+      console.error('❌ Google login error:', error);
+      setError(error.message || 'Google login failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -99,7 +132,6 @@ const LoginModal: React.FC<LoginProps> = ({ hideLoginModal, isOpenLoginModal, sh
             />       
           </div>
 
-          {/* Error Message */}
           {error && (
             <div className='bg-red-50 text-red-600 text-sm px-4 py-2 rounded-lg mt-2'>
               {error}
@@ -129,7 +161,10 @@ const LoginModal: React.FC<LoginProps> = ({ hideLoginModal, isOpenLoginModal, sh
           </div>
 
           <div className='w-full flex items-center gap-4 justify-center text-[24px] my-[12px]'>
-            <FcGoogle className='cursor-pointer hover:scale-110 transition'/>
+            <FcGoogle 
+              onClick={handleGoogleLogin} 
+              className='cursor-pointer hover:scale-110 transition' 
+            />
             <FaFacebook className='text-[#0064E0] cursor-pointer hover:scale-110 transition'/>
           </div>
 
@@ -143,6 +178,7 @@ const LoginModal: React.FC<LoginProps> = ({ hideLoginModal, isOpenLoginModal, sh
             </span>
           </p>
         </form>
+
       </div>
     </div>
   );

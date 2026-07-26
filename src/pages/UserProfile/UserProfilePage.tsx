@@ -27,7 +27,9 @@ import {
     FaMapPin,
     FaSync,
     FaSpinner,
-    FaRupeeSign
+    FaRupeeSign,
+    FaChevronDown,
+    FaChevronUp
 } from 'react-icons/fa';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -61,7 +63,7 @@ const UserProfilePage = () => {
     const { user, isLoggedIn, logout, updateUser } = useAuth();
     const { totalItems } = useCart();
     const navigate = useNavigate();
-
+    const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
     // Edit mode state
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({
@@ -76,6 +78,10 @@ const UserProfilePage = () => {
         return savedAddresses ? JSON.parse(savedAddresses) : [];
     });
 
+    const toggleOrder = (id: string) => {
+  setExpandedOrderId(expandedOrderId === id ? null : id);
+    };
+
     // Add address modal
     const [showAddAddress, setShowAddAddress] = useState(false);
     const [newAddress, setNewAddress] = useState({
@@ -89,8 +95,74 @@ const UserProfilePage = () => {
     const [orders, setOrders] = useState<OrderType[]>([]);
     const [ordersLoading, setOrdersLoading] = useState(true);
 
+const fetchOrders = async () => {
+    setOrdersLoading(true);
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            setOrders([]);
+            setOrdersLoading(false);
+            return;
+        }
+
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+        const response = await fetch(`${API_URL}/orders/my-orders`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch orders');
+        }
+
+        const data = await response.json();
+        
+        // ✅ Format orders to match OrderType
+        const formattedOrders = data.map((order: any) => ({
+            id: order.orderId || '#' + order._id.slice(-6),
+            date: order.createdAt,
+            total: order.totalAmount || order.total || 0,
+            items: order.products?.length || 0,
+            status: order.orderStatus || 'pending',
+            products: order.products || [],
+            shippingAddress: order.shippingAddress?.address || '',
+            paymentMethod: order.paymentMethod || '',
+            customerName: order.shippingAddress?.name || order.user?.name || '',
+            customerEmail: order.shippingAddress?.email || order.user?.email || '',
+            customerPhone: order.shippingAddress?.phone || '',
+        }));
+
+        setOrders(formattedOrders);
+        
+        // ✅ Update localStorage for fallback
+        localStorage.setItem('userOrders', JSON.stringify(formattedOrders));
+        
+    } catch (error) {
+        console.error('Error fetching orders:', error);
+        // ✅ Fallback to localStorage
+        const savedOrders = localStorage.getItem('userOrders');
+        if (savedOrders) {
+            try {
+                const parsed = JSON.parse(savedOrders);
+                setOrders(parsed);
+            } catch {
+                setOrders([]);
+            }
+        } else {
+            setOrders([]);
+        }
+    } finally {
+        setOrdersLoading(false);
+    }
+};
+
+
+
     // ✅ Refresh orders function
     const refreshOrders = () => {
+        fetchOrders();
         setOrdersLoading(true);
         try {
             const savedOrders = localStorage.getItem('userOrders');
@@ -255,6 +327,36 @@ const UserProfilePage = () => {
             default: return 'bg-gray-100 text-gray-700 border-gray-200';
         }
     };
+
+// ✅ Update useEffect
+useEffect(() => {
+    if (isLoggedIn) {
+        fetchOrders();
+    }
+
+    const handleStorageChange = (e: StorageEvent) => {
+        if (e.key === 'userOrders') {
+            fetchOrders();
+        }
+    };
+
+    const handleOrderUpdate = () => {
+        fetchOrders();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('order-updated', handleOrderUpdate);
+
+    // ✅ Refresh every 30 seconds
+    const interval = setInterval(fetchOrders, 30000);
+
+    return () => {
+        window.removeEventListener('storage', handleStorageChange);
+        window.removeEventListener('order-updated', handleOrderUpdate);
+        clearInterval(interval);
+    };
+}, [isLoggedIn]);
+
 
     // Get order status icon
     const getOrderStatusIcon = (status: string) => {
@@ -528,14 +630,14 @@ const UserProfilePage = () => {
 
                         {/* ===== RECENT ORDERS ===== */}
                         <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
-                            <div className="flex items-center justify-between mb-6">
-                                <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                                <div className="flex items-center justify-between mb-6">
+                                    <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
                                     <div className="w-8 h-8 bg-[#B76E79]/15 rounded-lg flex items-center justify-center">
                                         <FaShoppingBag className="text-[#B76E79] text-sm" />
                                     </div>
                                     Recent Orders
-                                </h3>
-                                <div className="flex items-center gap-3">
+                                    </h3>
+                                    <div className="flex items-center gap-3">
                                     <button
                                         onClick={refreshOrders}
                                         className="text-[#B76E79] hover:text-[#B76E79]/80 hover:scale-110 transition cursor-pointer"
@@ -545,57 +647,98 @@ const UserProfilePage = () => {
                                     </button>
                                     {orders.length > 3 && (
                                         <Link to="/my-orders" className="text-[#B76E79] hover:underline text-sm font-medium">
-                                            View All →
+                                        View All →
                                         </Link>
                                     )}
+                                    </div>
                                 </div>
-                            </div>
 
-                            {ordersLoading ? (
-                                <div className="flex justify-center items-center py-8">
+                                {ordersLoading ? (
+                                    <div className="flex justify-center items-center py-8">
                                     <FaSpinner className="text-[#B76E79] text-2xl animate-spin" />
                                     <span className="ml-3 text-gray-500">Loading orders...</span>
-                                </div>
-                            ) : orders.length === 0 ? (
-                                <div className="text-center py-12 bg-gray-50 rounded-xl">
+                                    </div>
+                                ) : orders.length === 0 ? (
+                                    <div className="text-center py-12 bg-gray-50 rounded-xl">
                                     <FaShoppingBag className="text-6xl text-gray-300 mx-auto mb-4" />
                                     <h4 className="text-xl font-medium text-gray-600">No Orders Yet</h4>
                                     <p className="text-gray-400 mt-2">Start shopping to see your orders here</p>
                                     <Link to="/" className="inline-block mt-4 bg-[#B76E79] text-white px-6 py-2 rounded-xl hover:bg-[#B76E79]/90 transition">
                                         Start Shopping
                                     </Link>
-                                </div>
-                            ) : (
-                                <div className="space-y-4">
-                                    {orders.slice(0, 3).map((order, index) => (
-                                        <div key={index} className="border-2 border-gray-100 rounded-xl p-4 hover:border-[#B76E79]/30 hover:shadow-lg transition-all duration-300">
-                                            <div className="flex flex-wrap items-center justify-between gap-3">
-                                                <div>
-                                                    <p className="font-bold text-gray-800 text-sm">Order #{order.id}</p>
-                                                    <p className="text-xs text-gray-500 flex items-center gap-1">
-                                                        <FaCalendarAlt className="text-xs" />
-                                                        {formatDate(order.date)}
-                                                    </p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-3">
+                                    {orders.slice(0, 3).map((order, index) => {
+                                        const isExpanded = expandedOrderId === order.id;
+                                        
+                                        return (
+                                        <div key={index} className="border-2 border-gray-100 rounded-xl overflow-hidden hover:border-[#B76E79]/30 transition-all duration-300">
+                                            {/* ✅ Order Header - Click to toggle */}
+                                            <div 
+                                            className="p-4 cursor-pointer hover:bg-gray-50/80 transition flex flex-wrap items-center justify-between gap-3"
+                                            onClick={() => toggleOrder(order.id)}
+                                            >
+                                            <div>
+                                                <p className="font-bold text-gray-800 text-sm">Order #{order.id}</p>
+                                                <p className="text-xs text-gray-500 flex items-center gap-1">
+                                                <FaCalendarAlt className="text-xs" />
+                                                {formatDate(order.date)}
+                                                </p>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <span className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium border ${getOrderStatusColor(order.status)}`}>
+                                                {getOrderStatusIcon(order.status)}
+                                                <span className="ml-1 capitalize">{getOrderStatusLabel(order.status)}</span>
+                                                </span>
+                                                <span className="font-bold text-[#B76E79] text-sm flex items-center gap-0.5">
+                                                <FaRupeeSign className="text-xs" />
+                                                {order.total}
+                                                </span>
+                                                {isExpanded ? (
+                                                <FaChevronUp className="text-gray-400" />
+                                                ) : (
+                                                <FaChevronDown className="text-gray-400" />
+                                                )}
+                                            </div>
+                                            </div>
+
+                                            {/* ✅ Expanded Details */}
+                                            {isExpanded && (
+                                            <div className="px-4 pb-4 pt-2 border-t border-gray-100 space-y-3">
+                                                {/* Products */}
+                                                {order.products && order.products.length > 0 && (
+                                                <div className="space-y-2">
+                                                    {order.products.map((product, idx) => (
+                                                    <div key={idx} className="flex items-center gap-3 bg-gray-50 p-2 rounded-lg">
+                                                        <img 
+                                                        src={product.mainImage} 
+                                                        alt={product.title}
+                                                        className="w-12 h-12 object-cover rounded border border-gray-100"
+                                                        />
+                                                        <div className="flex-1">
+                                                        <p className="text-sm font-medium text-gray-800">{product.title}</p>
+                                                        <p className="text-xs text-gray-500">Qty: {product.quantity}</p>
+                                                        </div>
+                                                        <p className="text-sm font-semibold text-[#B76E79]">Rs. {product.price * product.quantity}</p>
+                                                    </div>
+                                                    ))}
                                                 </div>
-                                                <div className="flex items-center gap-2">
-                                                    <span className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium border ${getOrderStatusColor(order.status)}`}>
-                                                        {getOrderStatusIcon(order.status)}
-                                                        <span className="ml-1 capitalize">{getOrderStatusLabel(order.status)}</span>
-                                                    </span>
-                                                </div>
-                                                <div className="text-right">
-                                                    <p className="font-bold text-[#B76E79] text-base flex items-center justify-end gap-0.5">
-                                                        <FaRupeeSign className="text-xs" />
-                                                        {order.total}
-                                                    </p>
-                                                    <p className="text-xs text-gray-500">{order.items} items</p>
+                                                )}
+                                                
+                                                {/* Address */}
+                                                <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg">
+                                                <p className="font-medium text-gray-700">Shipping Address:</p>
+                                                <p>{order.shippingAddress}</p>
                                                 </div>
                                             </div>
+                                            )}
                                         </div>
-                                    ))}
+                                        );
+                                    })}
+                                    </div>
+                                )}
                                 </div>
-                            )}
-                        </div>
 
                         {/* ===== STATS CARDS ===== */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

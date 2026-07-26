@@ -1,11 +1,13 @@
 // Auth/signupModal.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Input from '../components/input';
 import { FcGoogle } from "react-icons/fc";
 import { FaFacebook } from "react-icons/fa";
 import { RxCross1 } from "react-icons/rx";
 import { useAuth } from './authContext';
-import { register } from '../services/authService'; // ✅ IMPORT API SERVICE
+import { register } from '../services/authService';
+import { useNavigate } from 'react-router-dom';
+import { loginWithGoogle } from '../services/socialAuthService';
 
 interface SignupModalProps {
     hideSignUpModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -15,7 +17,7 @@ interface SignupModalProps {
 
 const SignupModal: React.FC<SignupModalProps> = ({ hideSignUpModal, isOpenSignUPModal, showLoginModal }) => {
 
-    const { signup: signupContext } = useAuth(); // ✅ Rename to avoid conflict
+    const { signup: signupContext } = useAuth();
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
@@ -24,13 +26,34 @@ const SignupModal: React.FC<SignupModalProps> = ({ hideSignUpModal, isOpenSignUP
     const [phone, setPhone] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const navigate = useNavigate();
+
+    // ✅ Auto-fill name if user came from Google
+    useEffect(() => {
+        const userStr = localStorage.getItem('socialUser');
+        if (userStr) {
+            try {
+                const user = JSON.parse(userStr);
+                if (user.name) {
+                    const nameParts = user.name.split(' ');
+                    setFirstName(nameParts[0] || '');
+                    setLastName(nameParts.slice(1).join(' ') || '');
+                }
+                if (user.email) {
+                    setEmail(user.email);
+                }
+                localStorage.removeItem('socialUser');
+            } catch (e) {
+                console.error('Error parsing social user:', e);
+            }
+        }
+    }, []);
 
     const handleSignup = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
         setError('');
 
-        // ✅ Password match check
         if (password !== confirmPassword) {
             setError("Passwords don't match!");
             setIsLoading(false);
@@ -40,7 +63,6 @@ const SignupModal: React.FC<SignupModalProps> = ({ hideSignUpModal, isOpenSignUP
         try {
             const fullName = `${firstName} ${lastName}`.trim();
             
-            // ✅ Backend API call
             const data = await register({
                 name: fullName,
                 email,
@@ -48,19 +70,47 @@ const SignupModal: React.FC<SignupModalProps> = ({ hideSignUpModal, isOpenSignUP
                 phone,
             });
             
-            // ✅ Save token & user data in localStorage
             localStorage.setItem('token', data.token);
             localStorage.setItem('user', JSON.stringify(data));
             
-            // ✅ Update context (optional - if you have it)
             signupContext(fullName, email, password);
             
-            // ✅ Close signup modal and open login modal
             hideSignUpModal(false);
             showLoginModal(true);
             
         } catch (err: any) {
             setError(err.message || 'Registration failed. Please try again.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // ✅ Google Signup Handler
+    const handleGoogleSignup = async () => {
+        try {
+            setIsLoading(true);
+            setError('');
+            
+            const data = await loginWithGoogle();
+            
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(data));
+            localStorage.setItem('socialUser', JSON.stringify({
+                name: data.name,
+                email: data.email,
+                photoURL: data.photoURL || '',
+            }));
+            
+            hideSignUpModal(false);
+            
+            if (data.role === 'admin') {
+                navigate('/admin/dashboard');
+            } else {
+                navigate('/profile');
+            }
+            
+        } catch (err: any) {
+            setError(err.message || 'Google signup failed. Please try again.');
         } finally {
             setIsLoading(false);
         }
@@ -149,7 +199,6 @@ const SignupModal: React.FC<SignupModalProps> = ({ hideSignUpModal, isOpenSignUP
                             />
                         </div>
 
-                        {/* ✅ Error Message */}
                         {error && (
                             <div className='bg-red-50 text-red-600 text-sm px-4 py-2 rounded-lg mt-3'>
                                 {error}
@@ -175,6 +224,7 @@ const SignupModal: React.FC<SignupModalProps> = ({ hideSignUpModal, isOpenSignUP
                             take a look at our privacy policy.
                         </p>
 
+                        {/* ✅ OR SIGN-UP WITH - DESIGN WAISA HI */}
                         <div className='flex justify-between items-center my-[14px]'>
                             <div className='border-b w-[31%] border-black/30' />
                             <h2 className='text-[13px] text-black/70 font-bold'>
@@ -183,9 +233,15 @@ const SignupModal: React.FC<SignupModalProps> = ({ hideSignUpModal, isOpenSignUP
                             <div className='border-b w-[31%] border-black/30' />
                         </div>
 
+                        {/* ✅ Google & Facebook Icons - Functional */}
                         <div className='w-full flex items-center gap-4 justify-center text-[24px] my-[12px]'>
-                            <FcGoogle className='cursor-pointer hover:scale-110 transition' />
-                            <FaFacebook className='text-[#0064E0] cursor-pointer hover:scale-110 transition' />
+                            <FcGoogle 
+                                onClick={handleGoogleSignup}
+                                className='cursor-pointer hover:scale-110 transition' 
+                            />
+                            <FaFacebook 
+                                className='text-[#0064E0] cursor-pointer hover:scale-110 transition' 
+                            />
                         </div>
 
                     </div>

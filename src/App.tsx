@@ -37,6 +37,7 @@ import AdminOrders from "./pages/Admin/AdminOrders";
 import 'react-toastify/dist/ReactToastify.css';
 import AdminOrderDetail from "./pages/Admin/AdminOrderDetail";
 import MyOrders from "./pages/UserProfile/MyOrders";
+import AdminUsers from "./pages/Admin/AdminUsers";
 
 
 function AppContent() {
@@ -62,6 +63,7 @@ function AppContent() {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/product-detail/:id" element={<ProductDetail />} />
           <Route path="/cart" element={<CartPage />} />
+          <Route path="/my-orders" element={<MyOrders />} />
           <Route path="/favurite-product" element={<LikeProduct />} />
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/order-success" element={<OrderSuccessPage />} />
@@ -115,9 +117,13 @@ function AppContent() {
           </AdminRoute>
          } />
 
-         <Route path="/unsubscribe" element={<Unsubscribe />} />
+         <Route path="/admin/users" element={
+          <AdminRoute>
+            <AdminUsers />
+          </AdminRoute>
+         } />
 
-         <Route path="/my-orders" element={<MyOrders />} />
+         <Route path="/unsubscribe" element={<Unsubscribe />} />
         
           <Route path="*" element={<NotFoundPage />} />
         </Routes>

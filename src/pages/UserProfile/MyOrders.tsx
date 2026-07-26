@@ -1,4 +1,3 @@
-// src/pages/MyOrders/MyOrders.tsx
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
@@ -7,10 +6,16 @@ import {
   FaTruck, 
   FaSpinner, 
   FaClock,
-  FaEye,
   FaRupeeSign,
   FaCalendarAlt,
   FaBoxOpen,
+  FaUser,
+  FaChevronDown,
+  FaChevronUp,
+  FaMapMarkerAlt,
+  FaPhone,
+  FaEnvelope,
+  FaCreditCard
 } from 'react-icons/fa';
 import { useAuth } from '../../Auth/authContext';
 import { toast } from 'react-toastify';
@@ -32,14 +37,16 @@ interface OrderType {
   createdAt: string;
   products: OrderProduct[];
   shippingAddress: {
-    name: string;
-    email: string;
-    phone: string;
-    address: string;
-    city: string;
-    zipCode: string;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  zipCode: string;
   };
   paymentMethod: string;
+  totalAmount: any;
+  user: any;
 }
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -49,6 +56,7 @@ const MyOrders: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState<'all' | 'active' | 'delivered'>('all');
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const { isLoggedIn } = useAuth();
   const navigate = useNavigate();
 
@@ -82,6 +90,11 @@ const MyOrders: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // ✅ Toggle accordion
+  const toggleAccordion = (id: string) => {
+    setExpandedId(expandedId === id ? null : id);
   };
 
   // ✅ Filter orders based on tab
@@ -142,25 +155,6 @@ const MyOrders: React.FC = () => {
     });
   };
 
-  // ✅ Get delivery status message
-  const getDeliveryMessage = (order: OrderType) => {
-    if (order.status === 'delivered') {
-      const deliveredDate = new Date(order.createdAt);
-      deliveredDate.setDate(deliveredDate.getDate() + 5); // Assuming 5 days delivery
-      return `Delivered on ${formatDate(deliveredDate.toISOString())}`;
-    }
-    if (order.status === 'shipped') {
-      return 'Your order is on the way! 🚚';
-    }
-    if (order.status === 'processing') {
-      return 'Your order is being processed 🔄';
-    }
-    if (order.status === 'pending') {
-      return 'Order confirmed, waiting for processing ⏳';
-    }
-    return '';
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center pt-[65px]">
@@ -207,7 +201,7 @@ const MyOrders: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white pt-[65px] py-10">
-      <div className="container mx-auto px-4 max-w-5xl">
+      <div className="container mx-auto px-4 max-w-4xl">
         
         {/* Header */}
         <div className="mb-8">
@@ -235,21 +229,6 @@ const MyOrders: React.FC = () => {
               }`}
             >
               {tab.label}
-              {tab.key === 'all' && (
-                <span className="ml-2 bg-white/20 text-white rounded-full px-2 py-0.5 text-xs">
-                  {orders.length}
-                </span>
-              )}
-              {tab.key === 'active' && (
-                <span className="ml-2 bg-white/20 text-white rounded-full px-2 py-0.5 text-xs">
-                  {orders.filter(o => o.status !== 'delivered' && o.status !== 'cancelled').length}
-                </span>
-              )}
-              {tab.key === 'delivered' && (
-                <span className="ml-2 bg-white/20 text-white rounded-full px-2 py-0.5 text-xs">
-                  {orders.filter(o => o.status === 'delivered').length}
-                </span>
-              )}
             </button>
           ))}
         </div>
@@ -260,78 +239,118 @@ const MyOrders: React.FC = () => {
             <p className="text-gray-400">No orders in this category</p>
           </div>
         ) : (
-          <div className="space-y-6">
-            {filteredOrders.map((order) => (
-              <div 
-                key={order._id} 
-                className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow duration-300"
-              >
-                {/* Order Header */}
-                <div className="bg-gray-50/80 px-6 py-4 flex flex-wrap items-center justify-between gap-3 border-b border-gray-100">
-                  <div className="flex items-center gap-4">
-                    <span className="font-bold text-gray-800 text-sm">
-                      Order #{order.orderId || order._id.slice(-6)}
-                    </span>
-                    <span className="text-xs text-gray-400 flex items-center gap-1">
-                      <FaCalendarAlt size={12} />
-                      {formatDate(order.createdAt)}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm font-semibold text-[#B76E79] flex items-center gap-1">
-                      <FaRupeeSign size={12} />
-                      {order.total}
-                    </span>
-                    {getStatusBadge(order.status)}
-                  </div>
-                </div>
-
-                {/* Order Body */}
-                <div className="p-6">
-                  {/* Products */}
-                  <div className="space-y-3 mb-4">
-                    {order.products?.slice(0, 2).map((product, idx) => (
-                      <div key={idx} className="flex items-center gap-4">
-                        <img 
-                          src={product.mainImage} 
-                          alt={product.title}
-                          className="w-16 h-16 object-cover rounded-lg border border-gray-100"
-                        />
-                        <div className="flex-1">
-                          <p className="font-medium text-gray-800 text-sm">{product.title}</p>
-                          <p className="text-xs text-gray-500">Qty: {product.quantity}</p>
-                        </div>
-                        <p className="text-sm font-semibold text-[#B76E79]">
-                          Rs. {product.price * product.quantity}
-                        </p>
-                      </div>
-                    ))}
-                    {order.products && order.products.length > 2 && (
-                      <p className="text-xs text-gray-400 ml-20">
-                        +{order.products.length - 2} more items
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Delivery Message */}
-                  <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-gray-100">
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      {getStatusBadge(order.status)}
-                      <span className="text-xs text-gray-400">
-                        {getDeliveryMessage(order)}
+          <div className="space-y-4">
+            {filteredOrders.map((order) => {
+              const isExpanded = expandedId === order._id;
+              
+              return (
+                <div 
+                  key={order._id} 
+                  className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow duration-300"
+                >
+                  {/* ✅ Order Header - Click to toggle */}
+                  <div 
+                    className="bg-gray-50/80 px-6 py-4 flex flex-wrap items-center justify-between gap-3 cursor-pointer hover:bg-gray-100/80 transition"
+                    onClick={() => toggleAccordion(order._id)}
+                  >
+                    <div className="flex items-center gap-4">
+                      <span className="font-bold text-gray-800 text-sm">
+                        Order #{order.orderId || order._id.slice(-6)}
+                      </span>
+                      <span className="text-xs text-gray-400 flex items-center gap-1">
+                        <FaCalendarAlt size={12} />
+                        {formatDate(order.createdAt)}
                       </span>
                     </div>
-                    <Link 
-                      to={`/order/${order._id}`}
-                      className="flex items-center gap-1 text-[#B76E79] hover:text-[#B76E79]/80 text-sm font-medium transition"
-                    >
-                      <FaEye className="text-sm" />
-                      View Details
-                    </Link>
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm font-semibold text-[#B76E79] flex items-center gap-1">
+                        <FaRupeeSign size={12} />
+                        {order.totalAmount || order.total}
+                      </span>
+                      {getStatusBadge(order.status)}
+                      {isExpanded ? (
+                        <FaChevronUp className="text-gray-400" />
+                      ) : (
+                        <FaChevronDown className="text-gray-400" />
+                      )}
+                    </div>
                   </div>
+
+                  {/* ✅ Order Body - Expanded Details */}
+                  {isExpanded && (
+                    <div className="p-6 space-y-4 border-t border-gray-100">
+                      {/* Products */}
+                      <div>
+                        <h4 className="text-sm font-semibold text-gray-700 mb-3">Products</h4>
+                        <div className="space-y-3">
+                          {order.products?.map((product, idx) => (
+                            <div key={idx} className="flex items-center gap-4 bg-gray-50 p-3 rounded-xl">
+                              <img 
+                                src={product.mainImage} 
+                                alt={product.title}
+                                className="w-16 h-16 object-cover rounded-lg border border-gray-100"
+                              />
+                              <div className="flex-1">
+                                <p className="font-medium text-gray-800 text-sm">{product.title}</p>
+                                <p className="text-xs text-gray-500">Qty: {product.quantity}</p>
+                              </div>
+                              <p className="text-sm font-semibold text-[#B76E79]">
+                                Rs. {product.price * product.quantity}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Order Details Grid */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3 border-t border-gray-100">
+                        {/* Customer Info */}
+                        <div className="bg-gray-50 p-4 rounded-xl">
+                          <h5 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                            <FaUser className="inline mr-1" /> Customer
+                          </h5>
+                          <p className="text-sm font-medium text-gray-800">
+                            {order.shippingAddress?.name || order.user?.name || 'N/A'}
+                          </p>
+                          <p className="text-xs text-gray-500 flex items-center gap-1">
+                            <FaEnvelope className="text-[10px]" /> {order.shippingAddress?.email || order.user?.email || 'N/A'}
+                          </p>
+                          <p className="text-xs text-gray-500 flex items-center gap-1">
+                            <FaPhone className="text-[10px]" /> {order.shippingAddress?.phone || 'N/A'}
+                          </p>
+                        </div>
+
+                        {/* Shipping Info */}
+                        <div className="bg-gray-50 p-4 rounded-xl">
+                          <h5 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                            <FaMapMarkerAlt className="inline mr-1" /> Shipping Address
+                          </h5>
+                          <p className="text-sm text-gray-800">
+                            {order.shippingAddress?.address || 'N/A'}
+                          </p>
+                          <p className="text-sm text-gray-800">
+                            {order.shippingAddress?.city}, {order.shippingAddress?.zipCode}
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                            <FaCreditCard className="text-[10px]" /> {order.paymentMethod || 'COD'}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Order Total */}
+                      <div className="flex justify-end pt-3 border-t border-gray-100">
+                        <div className="text-right">
+                          <p className="text-sm text-gray-500">Total</p>
+                          <p className="text-xl font-bold text-[#B76E79]">
+                            Rs. {order.totalAmount || order.total}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

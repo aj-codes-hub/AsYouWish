@@ -1,3 +1,4 @@
+// src/pages/CheckoutPage.tsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from './context/cartContext';
@@ -48,7 +49,7 @@ const CheckoutPage = () => {
     return addresses ? JSON.parse(addresses) : [];
   });
 
-  // Save addresses to localStorage whenever they change
+  // ✅ Save addresses to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem('userAddresses', JSON.stringify(savedAddresses));
   }, [savedAddresses]);
@@ -84,6 +85,19 @@ const CheckoutPage = () => {
     zipCode: '',
   });
 
+  const isBuyNow = buyNowProduct !== null;
+  const checkoutProducts = isBuyNow ? [buyNowProduct] : cart;
+  const checkoutTotal = isBuyNow 
+    ? buyNowProduct.price * buyNowProduct.quantity 
+    : totalPrice;
+
+  // ✅ FIX: Use useEffect for redirect instead of direct render
+  useEffect(() => {
+    if (checkoutProducts.length === 0 || !checkoutProducts[0]) {
+      navigate('/');
+    }
+  }, [checkoutProducts, navigate]);
+
   // Auto-fill form when user is logged in
   useEffect(() => {
     if (user) {
@@ -110,17 +124,6 @@ const CheckoutPage = () => {
       }
     }
   }, [selectedAddressId, addressType, savedAddresses]);
-
-  const isBuyNow = buyNowProduct !== null;
-  const checkoutProducts = isBuyNow ? [buyNowProduct] : cart;
-  const checkoutTotal = isBuyNow 
-    ? buyNowProduct.price * buyNowProduct.quantity 
-    : totalPrice;
-
-  if (checkoutProducts.length === 0 || !checkoutProducts[0]) {
-    navigate('/');
-    return null;
-  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({
@@ -189,7 +192,6 @@ const CheckoutPage = () => {
     alert('Address saved successfully!');
   };
 
-  // ✅ Handle order submission with backend API
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -202,7 +204,7 @@ const CheckoutPage = () => {
           title: item.title,
           price: item.price,
           quantity: item.quantity || 1,
-          mainImage: item.mainImage
+          mainImage: item.mainImage,
         })),
         totalAmount: checkoutTotal + 200,
         shippingAddress: {
@@ -216,13 +218,9 @@ const CheckoutPage = () => {
         paymentMethod: formData.paymentMethod,
       };
 
-      // ✅ API call to backend
       await createOrder(orderData);
-
-      // Dispatch event for profile page
       window.dispatchEvent(new Event('order-updated'));
 
-      // Clear cart
       if (isBuyNow) {
         clearBuyNow();
       } else {
@@ -230,7 +228,6 @@ const CheckoutPage = () => {
       }
       
       navigate('/order-success');
-      
     } catch (error: any) {
       setOrderError(error.message || 'Order failed. Please try again.');
       setIsSubmitting(false);
@@ -248,7 +245,6 @@ const CheckoutPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 sm:py-12">
       <div className="container mx-auto px-4 max-w-6xl mt-[65px]">
-
         <div className="flex flex-col-reverse lg:flex-row gap-8">
           
           {/* ===== LEFT SIDE - FORM ===== */}
@@ -378,7 +374,7 @@ const CheckoutPage = () => {
                       </div>
                     )}
 
-                    {/* NEW ADDRESS FORM (inside checkout) */}
+                    {/* NEW ADDRESS FORM */}
                     {addressType === 'new' && showNewAddressForm && (
                       <div className="mt-4 p-4 border-2 border-[#B76E79]/30 rounded-xl bg-[#B76E79]/5">
                         <div className="flex justify-between items-center mb-3">

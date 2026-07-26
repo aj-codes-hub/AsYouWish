@@ -11,6 +11,7 @@ interface RegisterData {
   email: string;
   password: string;
   phone?: string;
+  uid?: string;
 }
 
 interface AuthResponse {
