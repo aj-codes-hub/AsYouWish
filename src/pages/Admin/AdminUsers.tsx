@@ -113,7 +113,6 @@ const AdminUsers: React.FC = () => {
         throw new Error('Failed to update user');
       }
 
-      const data = await response.json();
       
       // ✅ Update local state
       setUsers(prev => 
