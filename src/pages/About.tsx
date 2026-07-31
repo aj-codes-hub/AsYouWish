@@ -155,9 +155,9 @@ const AboutPage: React.FC = () => {
       {/* ===== HERO SECTION ===== */}
       <div className="relative bg-gradient-to-r from-[#B76E79] via-[#c97e89] to-[#B76E79] text-white py-20 sm:py-28 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 left-10 w-32 h-32 bg-white rounded-full"></div>
-          <div className="absolute bottom-10 right-10 w-48 h-48 bg-white rounded-full"></div>
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-white rounded-full"></div>
+          <div className="absolute top-10 left-10 w-32 h-32 bg-white rounded-full delay-100"></div>
+          <div className="absolute bottom-10 right-10 w-48 h-48 bg-white rounded-full delay-200"></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-white rounded-full "></div>
         </div>
         <div className="container mx-auto px-4 text-center relative z-10">
           <span className="inline-block bg-white/20 backdrop-blur-sm px-4 py-1 rounded-full text-sm font-medium mb-4">

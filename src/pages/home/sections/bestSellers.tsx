@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ProductCard from '../../../components/productCard';
 import { getProducts } from '../../../services/productService';
+import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 
 interface ProductType {
   _id?: string;
@@ -16,6 +17,9 @@ interface ProductType {
 }
 
 const BestSellers: React.FC = () => {
+
+const { ref, isVisible } = useIntersectionObserver({ threshold: 0.2 });
+
   const [allProducts, setAllProducts] = useState<ProductType[]>([]);
   const [currentProducts, setCurrentProducts] = useState<ProductType[]>([]);
   const [loading, setLoading] = useState(true);
@@ -91,15 +95,18 @@ const BestSellers: React.FC = () => {
   return (
     <div className="w-full bg-[#FFF8F5] py-[60px]">
       <div className="max-w-[1100px] mx-auto">
-        <h1 className="font-sans md:text-[45px] text-[35px] text-center md:leading-12 leading-10">
+        <h1 ref={ref} className={`font-sans md:text-[45px] text-[35px] text-center md:leading-12 leading-10
+                                 ${isVisible ? "animate-fade-in-up delay-100" : "opacity-0 scale-95"}`}>
           Best Sellers
         </h1>
-        <p className="md:text-[17px] text-[12px] text-center [word-spacing:3px]">
+        <p className={`md:text-[17px] text-[12px] text-center [word-spacing:3px]
+                       ${isVisible ? "animate-fade-in-up delay-200" : "opacity-0 scale-95"}`}>
           Customer favorites that never go out of style
         </p>
 
         {/* ✅ Products Grid - Sirf 3 Products */}
-        <div className="grid md:grid-cols-3 sm:grid-cols-2 grid-cols-1 justify-center items-center gap-6 mt-[40px] px-[30px]">
+        <div className={`grid md:grid-cols-3 sm:grid-cols-2 grid-cols-1 justify-center items-center gap-6 mt-[40px] px-[30px]
+                          ${isVisible ? "animate-scale-in delay-300" : "opacity-0 scale-95"}`}>
           {currentProducts.map((item, index) => (
             <ProductCard
               key={item._id || item.id || index}

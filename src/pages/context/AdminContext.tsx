@@ -1,5 +1,6 @@
 // src/context/AdminContext.tsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { login } from '../../services';
 
 interface AdminUser {
   id: number;
@@ -11,21 +12,11 @@ interface AdminUser {
 interface AdminContextType {
   admin: AdminUser | null;
   isAdminLoggedIn: boolean;
-  adminLogin: (email: string, password: string) => boolean;
+  adminLogin: (email: string, password: string) => Promise<boolean>;
   adminLogout: () => void;
 }
 
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
-
-// Default admin credentials
-const DEFAULT_ADMIN: AdminUser = {
-  id: 1,
-  email: 'admin@asyouwish.com',
-  name: 'Admin',
-  role: 'admin',
-};
-
-const ADMIN_PASSWORD = '123admin123';
 
 export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
   const [admin, setAdmin] = useState<AdminUser | null>(() => {
@@ -41,17 +32,40 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [admin]);
 
-  const adminLogin = (email: string, password: string): boolean => {
-    if (email === DEFAULT_ADMIN.email && password === ADMIN_PASSWORD) {
-      setAdmin(DEFAULT_ADMIN);
+  // ✅ Admin Login - Backend se verify karo
+  const adminLogin = async (email: string, password: string): Promise<boolean> => {
+    try {
+      const data = await login({ email, password });
+      
+      // ✅ Check if user is admin
+      if (data.role !== 'admin') {
+        console.log('❌ User is not admin:', data.role);
+        return false;
+      }
+      
+      const adminUser: AdminUser = {
+        id: Number(data._id),
+        email: data.email,
+        name: data.name,
+        role: 'admin',
+      };
+      
+      setAdmin(adminUser);
+      localStorage.setItem('adminUser', JSON.stringify(adminUser));
+      localStorage.setItem('token', data.token);
+      
       return true;
+      
+    } catch (error: any) {
+      console.error('❌ Admin login error:', error);
+      return false;
     }
-    return false;
   };
 
   const adminLogout = () => {
     setAdmin(null);
     localStorage.removeItem('adminUser');
+    localStorage.removeItem('token');
   };
 
   return (

@@ -5,6 +5,7 @@ import { Pagination , Navigation , Autoplay } from 'swiper/modules'
 import { FaAngleLeft , FaAngleRight } from "react-icons/fa6";
 import { useNavigate } from 'react-router-dom'
 import { getProducts } from '../../../services'
+import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 
 
 
@@ -22,6 +23,10 @@ interface ProductType {
 }
 
 const NewArrivals:React.FC = () => {
+
+ const { ref, isVisible } = useIntersectionObserver({ threshold: 0.2 })
+
+
   const navigate = useNavigate()
      const swiperRef = useRef<any>(null);
 
@@ -59,24 +64,28 @@ const NewArrivals:React.FC = () => {
         
         <div className='relative w-full px-[30px] xl:px-[0px]'>
 
-        <h1  className='font-sans md:text-[45px] sm:text-[35px] text-[30px]  md:leading-12 leading-8'>
+        <h1 ref={ref} className={`font-sans md:text-[45px] sm:text-[35px] text-[30px]  md:leading-12 leading-8
+                        ${isVisible ? "animate-fade-in-left delay-100" : "opacity-0 scale-95"}`}>
             New Arrivals
 
         </h1>
-        <p className='md:text-[17px] sm:text-[12px] text-[11px] [word-spacing:3px]'> 
+        <p className={`md:text-[17px] sm:text-[12px] text-[11px] [word-spacing:3px]
+                      ${isVisible ? "animate-fade-in-left delay-200" : "opacity-0 scale-95"}`}> 
             Fresh styles just for you
         </p>
 
-         <button onClick={() => navigate('/Collection')}
-                 className='py-[10px] sm:text-[12px] text-[10px] bg-transparent border-[B76E79] border-2 px-[24px] font-semibold text-primary rounded-full mx-auto flex items-center gap-2 
-                            absolute top-1/2 -translate-y-1/2 right-[30px] xl:right-[0px] cursor-pointer hover:scale-[1.05] transition duration-500 group'>
-                View All        
+         <button  onClick={() => navigate('/Collection')} 
+                 className={`py-[10px] sm:text-[12px] text-[10px] bg-transparent border-[B76E79] border-2 px-[24px] font-semibold text-primary rounded-full mx-auto flex items-center gap-2 
+                            absolute top-1/2 -translate-y-1/2 right-[30px] xl:right-[0px] cursor-pointer hover:scale-[1.05] transition duration-500 group
+                             ${isVisible ? "animate-fade-in-right delay-100" : "opacity-0 scale-95"}`}>
+                View All       
         </button>
 
 
         </div>
         
-       <div className='mt-[40px] sm:px-[30px] px-[12px] relative'>
+       <div className={`mt-[40px] sm:px-[30px] px-[12px] relative
+                      ${isVisible ? "animate-scale-in delay-300" : "opacity-0 scale-95"}`}>
       
        <Swiper
         onSwiper={(swiper) => (swiperRef.current = swiper)}

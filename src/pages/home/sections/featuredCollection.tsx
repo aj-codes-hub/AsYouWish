@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import ProductCard from '../../../components/productCard'
 import { getProducts } from '../../../services/productService';
+import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 
 interface ProductType {
   _id?: string;
@@ -16,6 +17,9 @@ interface ProductType {
 }
 
 const FeaturedCollection: React.FC = () => {
+
+const { ref, isVisible } = useIntersectionObserver({ threshold: 0.2 });
+
 
   // ✅ State ka type sahi karo
   const [products, setProducts] = useState<ProductType[]>([]);
@@ -57,14 +61,17 @@ const FeaturedCollection: React.FC = () => {
 
       <div className='max-w-[1100px] mx-auto'>
 
-        <h1 className='font-sans md:text-[45px] text-[35px] text-center md:leading-12 leading-10'>
+        <h1 ref={ref} className={`font-sans md:text-[45px] text-[35px] text-center md:leading-12 leading-10
+                                 ${isVisible ? "animate-fade-in-up delay-100" : "opacity-0 scale-95"}`}>
           Featured Collection
         </h1>
-        <p className='md:text-[17px] text-[12px] text-center [word-spacing:3px]'>
+        <p className={`md:text-[17px] text-[12px] text-center [word-spacing:3px]
+                       ${isVisible ? "animate-fade-in-up delay-200" : "opacity-0 scale-95"}`}>
           Handpicked styles for the modern woman
         </p>
 
-        <div className='grid xl:grid-cols-4 md:grid-cols-3 grid-cols-2 justify-center items-center sm:gap-6 gap-4 mt-[40px] sm:px-[30px] px-[10px]'>
+        <div className={`grid xl:grid-cols-4 md:grid-cols-3 grid-cols-2 justify-center items-center sm:gap-6 gap-4 mt-[40px] sm:px-[30px] px-[10px]
+                        ${isVisible ? "animate-scale-in delay-300" : "opacity-0 scale-95"}`}>
           {featuredProducts.map((item) => (
             <ProductCard
               key={item._id || item.id || Math.random().toString()}

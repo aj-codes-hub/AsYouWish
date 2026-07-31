@@ -23,20 +23,23 @@ const AdminLogin = () => {
   const { adminLogin } = useAdmin();
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
 
-    setTimeout(() => {
-      const success = adminLogin(email, password);
+    try {
+      const success = await adminLogin(email, password);
       if (success) {
         navigate('/admin/dashboard');
       } else {
-        setError('Invalid email or password');
+        setError('Invalid credentials or not an admin');
       }
+    } catch (err: any) {
+      setError(err.message || 'Login failed');
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   return (

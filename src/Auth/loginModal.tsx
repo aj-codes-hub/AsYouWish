@@ -7,6 +7,7 @@ import { useAuth } from './authContext';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../services/authService';
 import { loginWithGoogle } from '../services/socialAuthService';
+import { RxCrossCircled } from "react-icons/rx";
 
 interface LoginProps {
     hideLoginModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -16,12 +17,13 @@ interface LoginProps {
 
 const LoginModal: React.FC<LoginProps> = ({ hideLoginModal, isOpenLoginModal, showSignUpModal }) => {
    
-  const { login: loginContext } = useAuth();
+  const { login: loginContext, loginWithSocialData } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const [signWithFacebook, setSignWithFacebook] = useState(false);
 
   const handleOpenSignupModel = () => {
     hideLoginModal(false);
@@ -57,40 +59,63 @@ const LoginModal: React.FC<LoginProps> = ({ hideLoginModal, isOpenLoginModal, sh
   };
 
   // ✅ FIXED Google Login Handler
-  const handleGoogleLogin = async () => {
-    try {
-      setIsLoading(true);
-      setError('');
-      
-      console.log('🔄 Google login starting...');
-      const data = await loginWithGoogle();
-      console.log('✅ Google login success:', data);
-      
-      // ✅ Save data
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data));
-      
-      console.log('✅ Token saved, user:', data);
-      console.log('✅ Token:', localStorage.getItem('token'));
-      
-      // ✅ IMPORTANT: Modal close karo
-      hideLoginModal(false);
-      
-      // ✅ FIR navigate karo
-      console.log('✅ Redirecting to profile...');
-      if (data.role === 'admin') {
-        navigate('/admin/dashboard');
-      } else {
-        navigate('/profile');
-      }
-      
-    } catch (error: any) {
-      console.error('❌ Google login error:', error);
-      setError(error.message || 'Google login failed. Please try again.');
-    } finally {
-      setIsLoading(false);
+ const handleGoogleLogin = async () => {
+  try {
+    setIsLoading(true);
+    setError('');
+
+    const data = await loginWithGoogle();
+
+    if (!data || !data.token) {
+      throw new Error('No token received from server');
     }
-  };
+
+    // ✅ Context ko update karo — yahi missing step tha
+    loginWithSocialData(data);
+
+    hideLoginModal(false);
+
+    // ✅ navigate() use karo — full reload (window.location.href) ki zaroorat nahi
+    // kyunki context state ab already updated hai
+    if (data.role === 'admin') {
+      navigate('/admin/dashboard');
+    } else {
+      navigate('/profile');
+    }
+
+  } catch (error: any) {
+    console.error('❌ Google login error:', error);
+    setError(error.message || 'Google login failed. Please try again.');
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+
+     const faceBookSignAlert = () => {
+         setSignWithFacebook(true);
+     }
+         if(signWithFacebook){
+            return(
+                <div className='h-screen w-full bg-black/40 z-[999] backdrop-blur-[1px] fixed top-[0%] left-[0%] transition-all duration-500'
+                      onClick={() => setSignWithFacebook(false)}>
+                     <div className='bg-gradient-to-tl from-[#B76E79] to-[#752f3a] absolute -translate-y-1/2 -translate-x-1/2 top-1/2 left-1/2 
+                                     rounded-[10px] p-[15px] text-[#ffffffcf] text-center border-[#752f3a] border-2 sm:w-[400px] sm:h-[240px] w-[280px] h-[240px] transition duration-300'>
+                        
+                        <div onClick={() => setSignWithFacebook(false)}
+                             className='text-[30px] absolute right-[-38px] top-[-20px] cursor-pointer'>
+                            <RxCrossCircled />
+                        </div>
+                        
+                        <h1 className='text-[26px] mb-[6px]'>😕 <br/> we are sorry . </h1>
+                           <p>
+                            Continue with Facebook is temporarily unavailable,
+                           Please use your Google account or Email address to sign in.
+                           </p>
+                     </div>
+                </div>
+            )
+         };
 
   return (
     <div className={`fixed top-0 ${isOpenLoginModal ? "min-h-screen w-screen z-[9999]" : "hidden"}`}>
@@ -165,7 +190,8 @@ const LoginModal: React.FC<LoginProps> = ({ hideLoginModal, isOpenLoginModal, sh
               onClick={handleGoogleLogin} 
               className='cursor-pointer hover:scale-110 transition' 
             />
-            <FaFacebook className='text-[#0064E0] cursor-pointer hover:scale-110 transition'/>
+            <FaFacebook onClick={faceBookSignAlert}
+                        className='text-[#0064E0] cursor-pointer hover:scale-110 transition'/>
           </div>
 
           <p className='text-center text-[12px] mt-[20px]'>

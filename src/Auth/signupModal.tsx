@@ -8,6 +8,7 @@ import { useAuth } from './authContext';
 import { register } from '../services/authService';
 import { useNavigate } from 'react-router-dom';
 import { loginWithGoogle } from '../services/socialAuthService';
+import { RxCrossCircled } from "react-icons/rx";
 
 interface SignupModalProps {
     hideSignUpModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -17,7 +18,7 @@ interface SignupModalProps {
 
 const SignupModal: React.FC<SignupModalProps> = ({ hideSignUpModal, isOpenSignUPModal, showLoginModal }) => {
 
-    const { signup: signupContext } = useAuth();
+    const { signup: signupContext, loginWithSocialData } = useAuth();
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
@@ -27,6 +28,7 @@ const SignupModal: React.FC<SignupModalProps> = ({ hideSignUpModal, isOpenSignUP
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
+    const [signWithFacebook, setSignWithFacebook] = useState(false);
 
     // ✅ Auto-fill name if user came from Google
     useEffect(() => {
@@ -48,6 +50,31 @@ const SignupModal: React.FC<SignupModalProps> = ({ hideSignUpModal, isOpenSignUP
             }
         }
     }, []);
+  
+     const faceBookSignAlert = () => {
+         setSignWithFacebook(true);
+     }
+         if(signWithFacebook){
+            return(
+                <div className='h-screen w-full bg-black/40 z-[999] backdrop-blur-[1px] fixed top-[0%] left-[0%] transition-all duration-500'
+                      onClick={() => setSignWithFacebook(false)}>
+                     <div className='bg-gradient-to-tl from-[#B76E79] to-[#752f3a] absolute -translate-y-1/2 -translate-x-1/2 top-1/2 left-1/2 
+                                     rounded-[10px] p-[15px] text-[#ffffffcf] text-center border-[#752f3a] border-2 sm:w-[400px] sm:h-[240px] w-[280px] h-[240px] transition duration-300'>
+                        
+                        <div onClick={() => setSignWithFacebook(false)}
+                             className='text-[30px] absolute right-[-38px] top-[-20px] cursor-pointer'>
+                            <RxCrossCircled />
+                        </div>
+                        
+                        <h1 className='text-[26px] mb-[6px]'>😕 <br/> we are sorry . </h1>
+                           <p>
+                            Continue with Facebook is temporarily unavailable,
+                           Please use your Google account or Email address to sign in.
+                           </p>
+                     </div>
+                </div>
+            )
+         };
 
     const handleSignup = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -87,34 +114,33 @@ const SignupModal: React.FC<SignupModalProps> = ({ hideSignUpModal, isOpenSignUP
 
     // ✅ Google Signup Handler
     const handleGoogleSignup = async () => {
-        try {
-            setIsLoading(true);
-            setError('');
-            
-            const data = await loginWithGoogle();
-            
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('user', JSON.stringify(data));
-            localStorage.setItem('socialUser', JSON.stringify({
-                name: data.name,
-                email: data.email,
-                photoURL: data.photoURL || '',
-            }));
-            
-            hideSignUpModal(false);
-            
-            if (data.role === 'admin') {
-                navigate('/admin/dashboard');
-            } else {
-                navigate('/profile');
-            }
-            
-        } catch (err: any) {
-            setError(err.message || 'Google signup failed. Please try again.');
-        } finally {
-            setIsLoading(false);
+    try {
+        setIsLoading(true);
+        setError('');
+
+        const data = await loginWithGoogle();
+
+        if (!data || !data.token) {
+            throw new Error('No token received from server');
         }
-    };
+
+        // ✅ Context update
+        loginWithSocialData(data);
+
+        hideSignUpModal(false);
+
+        if (data.role === 'admin') {
+            navigate('/admin/dashboard');
+        } else {
+            navigate('/profile');
+        }
+
+    } catch (err: any) {
+        setError(err.message || 'Google signup failed. Please try again.');
+    } finally {
+        setIsLoading(false);
+    }
+};
 
     const handleOpenSignInModel = () => {
         hideSignUpModal(false);
@@ -240,6 +266,7 @@ const SignupModal: React.FC<SignupModalProps> = ({ hideSignUpModal, isOpenSignUP
                                 className='cursor-pointer hover:scale-110 transition' 
                             />
                             <FaFacebook 
+                                onClick={faceBookSignAlert}
                                 className='text-[#0064E0] cursor-pointer hover:scale-110 transition' 
                             />
                         </div>

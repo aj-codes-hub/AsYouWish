@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaQuoteLeft, FaStar, FaStarHalfAlt, FaRegStar } from 'react-icons/fa';
 import { getProducts } from '../../../services/productService';
+import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 
 interface ReviewType {
   id?: string;
@@ -24,6 +25,10 @@ interface ProductType {
 }
 
 const ClientSays: React.FC = () => {
+
+
+const { ref, isVisible } = useIntersectionObserver({ threshold: 0.2 });
+
   const [testimonials, setTestimonials] = useState<ReviewType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -118,10 +123,13 @@ const ClientSays: React.FC = () => {
     return (
       <div className="w-full bg-[#FFF8F5] py-[50px]">
         <div className="max-w-[1100px] mx-auto text-center">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">
+          <h1 ref={ref} className={`text-2xl md:text-3xl font-bold text-gray-800 mb-2
+                         ${isVisible ? "animate-fade-in-up delay-100" : "opacity-0 scale-95"}`}>
             What Our Customers Say
           </h1>
-          <p className="text-gray-400">No reviews yet. Be the first to review!</p>
+          <p className={`text-gray-400 ${isVisible ? "animate-fade-in-up delay-100" : "opacity-0 scale-95"}`}>
+               No reviews yet. Be the first to review!
+          </p>
         </div>
       </div>
     );
@@ -133,20 +141,25 @@ const ClientSays: React.FC = () => {
         
         {/* Header */}
         <div className="text-center mb-10">
-          <h1 className="font-sans text-2xl sm:text-[40px] text-gray-800 leading-8">
+          <h1 className={`font-sans text-2xl sm:text-[40px] text-gray-800 leading-8 ${isVisible ? "animate-fade-in-up delay-100" : "opacity-0 scale-95"}`}>
             What Our Customers Say
           </h1>
-          <p className="text-gray-400 text-xs sm:text-lg ">Real reviews from real customers</p>
-          <div className="w-16 h-0.5 bg-[#B76E79] mx-auto mt-2 rounded-full"></div>
+          <p className={`text-gray-400 text-xs sm:text-lg ${isVisible ? "animate-fade-in-up delay-200" : "opacity-0 scale-95"}`}>
+            Real reviews from real customers
+          </p>
+          <div className={`w-16 h-0.5 bg-[#B76E79] mx-auto mt-2 rounded-full ${isVisible ? "animate-fade-in-up delay-100" : "opacity-0 scale-95"}`}></div>
         </div>
 
         {/* ✅ 3 Reviews Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
+        <div ref={ref} className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
           {testimonials.map((item, index) => (
             <div
               key={item.id || item._id || index}
-              className="bg-white rounded-xl shadow-md p-5 sm:p-6 border border-gray-100 hover:shadow-xl transition-all hover:scale-[1.03] duration-150 flex flex-col cursor-pointer"
-            >
+              className={`bg-white rounded-xl shadow-md p-5 sm:p-6 border border-gray-100 hover:shadow-xl transition-all hover:scale-[1.03] duration-150 flex flex-col cursor-pointer
+                        ${isVisible ? `
+                                       ${index === 0 ? 'animate-fade-in-left' : 'opacity-0'}
+                                       ${index === 1 ? 'animate-fade-in-up ' :  'opacity-0'}
+                                       ${index === 2 ? 'animate-fade-in-right' : 'opacity-0'} ` : `` }`}>
               {/* Quote Icon */}
               <FaQuoteLeft className="text-[#B76E79] text-xl sm:text-2xl mb-3 opacity-50" />
               

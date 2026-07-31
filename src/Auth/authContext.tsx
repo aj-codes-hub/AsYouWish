@@ -30,6 +30,7 @@ interface AuthContextType {
     signup: (name: string, email: string, password: string, phone?: string) => Promise<boolean>;
     logout: () => void;
     updateUser: (data: Partial<UserType>) => Promise<void>;
+    loginWithSocialData: (data: AuthResponse) => void; 
     users: UserType[];
 }
 
@@ -140,6 +141,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         localStorage.removeItem('token');
     };
 
+     const loginWithSocialData = (data: AuthResponse) => {
+        const userData: UserType = {
+            id: Number(data._id),
+            name: data.name,
+            email: data.email,
+            phone: data.phone || '',
+            role: data.role || 'user',
+        };
+
+        setUser(userData);
+        setIsLoggedIn(true);
+        localStorage.setItem('currentUser', JSON.stringify(userData)); // ✅ same key jo mount pe padhi jati hai
+        localStorage.setItem('token', data.token);
+    };
+
     return (
         <AuthContext.Provider value={{
             user,
@@ -149,6 +165,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             logout,
             updateUser,
             users,
+            loginWithSocialData,
         }}>
             {children}
         </AuthContext.Provider>
