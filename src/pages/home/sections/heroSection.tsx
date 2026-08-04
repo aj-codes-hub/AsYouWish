@@ -10,7 +10,7 @@ import { FiClock } from "react-icons/fi";
 const HeroSection:React.FC = () => {
 
   return (
-    <div className='sm:h-[600px] h-[620px] w-full fixed sm:relative z-[-20] sm:z-[1] top-0 overflow-hidden'> 
+    <div className='sm:h-screen h-[620px] w-full fixed sm:relative z-[-20] sm:z-[1] top-0 overflow-hidden'> 
          
       <img src="./images/just.jpg"
            className='absolute z-10 w-full -translate-y-1/2 top-1/2 sm:scale-[1] scale-[1.3]'/>   
