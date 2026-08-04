@@ -94,7 +94,7 @@ const CheckoutPage = () => {
   // Redirect if no products
   useEffect(() => {
     if (checkoutProducts.length === 0 || !checkoutProducts[0]) {
-      navigate('/');
+      navigate('/order-success');
     }
   }, [checkoutProducts, navigate]);
 
