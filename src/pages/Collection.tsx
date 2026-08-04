@@ -198,7 +198,7 @@ const Collection: React.FC = () => {
 
       <div className="mx-auto">
         {/* ================= HERO ================= */}
-        <div ref={ref} className="text-center mb-4 fade-in-up overflow-hidden relative pr-[20%] h-[230px]">
+        <div ref={ref} className="flex flex-col justify-center gap-2 md:gap-0 mb-4 fade-in-up overflow-hidden relative h-[230px]">
 
          
         <div className='h-full w-[300px] absolute -translate-x-1/2 left-[71%]'>
@@ -216,19 +216,19 @@ const Collection: React.FC = () => {
           <div className='absolute w-full h-full -z-10 backdrop-blur-[2px] bg-white/6'></div>  
 
           <div className='absolute w-full h-full -z-1  bg-gradient-to-tl from-[#ffffff29] to-[#ffff]'></div>
-
-          <div className={`inline-flex items-center gap-2 text-[11px] tracking-[0.3em] uppercase text-[#B76E79] font-semibold mb-4 delay-200 ${isVisible ? "animate-fade-in-up" : "opacity-0"}`}>
+  
+          <div className={`inline-flex items-center lg:ml-[20%] ml-[8px] gap-2 text-[11px] tracking-[0.3em] uppercase text-[#B76E79] font-semibold md:mb-4 delay-200 ${isVisible ? "animate-fade-in-up" : "opacity-0"}`}>
             <LuSparkles className="text-sm" />
             Curated For You
           </div>
-          <h1 className={`font-['Playfair_Display'] text-4xl md:text-6xl font-semibold text-[#2A2422] mb-4 leading-tight delay-400 ${isVisible ? "animate-fade-in-up" : "opacity-0"}`}>
+          <h1 className={`font-['Playfair_Display'] lg:ml-[20%] ml-[8px] text-3xl sm:text-5xl md:text-6xl font-semibold text-[#2A2422] md:mb-4 leading-tight delay-400 ${isVisible ? "animate-fade-in-up" : "opacity-0"}`}>
             Our{' '}
             <span className="italic bg-gradient-to-r from-[#B76E79] to-[#8B4A56] bg-clip-text text-transparent">
               Collection
             </span>
           </h1>
-          <div className="h-[3px] bg-gradient-to-r from-[#B76E79] to-[#C9A24B] mx-auto rounded-full mb-5 underline-grow" />
-          <p className={`text-[#6B615D] text-base md:text-lg max-w-xl mx-auto font-['Inter'] delay-600 ${isVisible ? "animate-fade-in-up" : "opacity-0"}`}>
+          <div className="h-[3px] bg-gradient-to-r lg:ml-[20%] ml-[8px] from-[#B76E79] to-[#C9A24B] rounded-full md:mb-5 underline-grow" />
+          <p className={`text-[#6b5d63] text-left lg:ml-[20%] ml-[8px] text-sm w-[50%]  sm:w-[60%]  md:w-[40%] sm:text-lg max-w-xl font-['Inter'] delay-600 ${isVisible ? "animate-fade-in-up" : "opacity-0"}`}>
             Discover timeless elegance with our curated collection of premium women's fashion
           </p>
         </div>
@@ -456,16 +456,10 @@ const Collection: React.FC = () => {
         {/* ================= CUSTOMER FAVORITES (ranked) ================= */}
         {bestSellers.length > 0 && (
           <div className="mb-16 max-w-[1000px] mx-auto relative">
-            <div className="flex items-center gap-3 mb-6 px-1">
-              <h2 className="font-['Playfair_Display'] text-xl md:text-2xl font-semibold text-[#2A2422]">
-                Customer Favorites
-              </h2>
-              <div className="h-px flex-1 bg-gradient-to-r from-[#EFE0DD] to-transparent" />
-            </div>
 
             <Swiper
               modules={[Navigation, Pagination, Autoplay]}
-              spaceBetween={15}
+              spaceBetween={4}
               slidesPerView={2}
               pagination={{ clickable: true }}
               loop={true}
@@ -485,7 +479,7 @@ const Collection: React.FC = () => {
                   <div className="flex flex-col items-center text-center group relative">
                     <div className="relative">
                       <div
-                        className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full overflow-hidden border-[3px] border-white shadow-[0_0_0_2px_#B76E79] shadow-lg hover:shadow-xl transition-all cursor-pointer group-hover:scale-105 duration-300 mx-auto"
+                        className="w-34 h-34 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full overflow-hidden border-[3px] border-white shadow-[0_0_0_2px_#B76E79] shadow-lg hover:shadow-xl transition-all cursor-pointer group-hover:scale-105 duration-300 mx-auto"
                         onClick={() => (window.location.href = `/product-detail/${item._id || item.id}`)}
                       >
                         <img

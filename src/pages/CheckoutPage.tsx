@@ -49,16 +49,16 @@ const CheckoutPage = () => {
     return addresses ? JSON.parse(addresses) : [];
   });
 
-  // ✅ Save addresses to localStorage whenever they change
+  // Save addresses to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem('userAddresses', JSON.stringify(savedAddresses));
   }, [savedAddresses]);
 
   // Form state
   const [formData, setFormData] = useState({
-    name: user?.name || '',
-    email: user?.email || '',
-    phone: user?.phone || '',
+    name: '',
+    email: '',
+    phone: '',
     address: '',
     city: '',
     zipCode: '',
@@ -91,16 +91,16 @@ const CheckoutPage = () => {
     ? buyNowProduct.price * buyNowProduct.quantity 
     : totalPrice;
 
-  // ✅ FIX: Use useEffect for redirect instead of direct render
+  // Redirect if no products
   useEffect(() => {
     if (checkoutProducts.length === 0 || !checkoutProducts[0]) {
       navigate('/');
     }
   }, [checkoutProducts, navigate]);
 
-  // Auto-fill form when user is logged in
+  // ✅ FIX: Auto-fill form when user is logged in
   useEffect(() => {
-    if (user) {
+    if (user && isLoggedIn) {
       setFormData(prev => ({
         ...prev,
         name: user.name || '',
@@ -108,7 +108,7 @@ const CheckoutPage = () => {
         phone: user.phone || '',
       }));
     }
-  }, [user]);
+  }, [user, isLoggedIn]);
 
   // Auto-fill address when saved address is selected
   useEffect(() => {
@@ -192,8 +192,36 @@ const CheckoutPage = () => {
     alert('Address saved successfully!');
   };
 
+  // ✅ MAIN FIX: Handle form submission WITHOUT login check
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // ✅ Validate all required fields
+    if (!formData.name.trim()) {
+      setOrderError('Please enter your full name');
+      return;
+    }
+    if (!formData.email.trim()) {
+      setOrderError('Please enter your email address');
+      return;
+    }
+    if (!formData.email.includes('@')) {
+      setOrderError('Please enter a valid email address');
+      return;
+    }
+    if (!formData.phone.trim()) {
+      setOrderError('Please enter your phone number');
+      return;
+    }
+    if (!formData.address.trim()) {
+      setOrderError('Please enter your shipping address');
+      return;
+    }
+    if (!formData.city.trim()) {
+      setOrderError('Please enter your city');
+      return;
+    }
+
     setIsSubmitting(true);
     setOrderError('');
 
@@ -216,19 +244,28 @@ const CheckoutPage = () => {
           zipCode: formData.zipCode,
         },
         paymentMethod: formData.paymentMethod,
+        // ✅ Send user info if logged in, else null (guest)
+        userId: isLoggedIn && user ? user.id : null,
+        isGuest: !isLoggedIn,
       };
 
+      // ✅ Call order service (will handle both logged-in and guest)
       await createOrder(orderData);
+      
+      // Trigger order update event
       window.dispatchEvent(new Event('order-updated'));
 
+      // Clear cart/buy now
       if (isBuyNow) {
         clearBuyNow();
       } else {
         clearCart();
       }
       
+      // ✅ Navigate to success page
       navigate('/order-success');
     } catch (error: any) {
+      console.error('Order error:', error);
       setOrderError(error.message || 'Order failed. Please try again.');
       setIsSubmitting(false);
     }
@@ -271,7 +308,7 @@ const CheckoutPage = () => {
                       required
                       value={formData.name}
                       onChange={handleChange}
-                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#B76E79] focus:ring-2 focus:ring-[#B76E79]/20 transition cursor-pointer"
+                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#B76E79] focus:ring-2 focus:ring-[#B76E79]/20 transition"
                       placeholder="Enter your name"
                     />
                   </div>
@@ -285,11 +322,11 @@ const CheckoutPage = () => {
                       required
                       value={formData.email}
                       onChange={handleChange}
-                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#B76E79] focus:ring-2 focus:ring-[#B76E79]/20 transition cursor-pointer"
+                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#B76E79] focus:ring-2 focus:ring-[#B76E79]/20 transition"
                       placeholder="your@email.com"
                     />
                   </div>
-                  <div>
+                  <div className="sm:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-1.5">
                       Phone Number <span className="text-red-500">*</span>
                     </label>
@@ -299,7 +336,7 @@ const CheckoutPage = () => {
                       required
                       value={formData.phone}
                       onChange={handleChange}
-                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#B76E79] focus:ring-2 focus:ring-[#B76E79]/20 transition cursor-pointer"
+                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#B76E79] focus:ring-2 focus:ring-[#B76E79]/20 transition"
                       placeholder="03XX-XXXXXXX"
                     />
                   </div>
@@ -315,7 +352,7 @@ const CheckoutPage = () => {
                   Shipping Address
                 </h3>
 
-                {/* Address Type Selection */}
+                {/* ✅ Show saved addresses ONLY if logged in AND have saved addresses */}
                 {isLoggedIn && savedAddresses.length > 0 ? (
                   <div className="space-y-4">
                     <div className="flex flex-wrap gap-3">
@@ -374,7 +411,7 @@ const CheckoutPage = () => {
                       </div>
                     )}
 
-                    {/* NEW ADDRESS FORM */}
+                    {/* NEW ADDRESS FORM (for logged in users) */}
                     {addressType === 'new' && showNewAddressForm && (
                       <div className="mt-4 p-4 border-2 border-[#B76E79]/30 rounded-xl bg-[#B76E79]/5">
                         <div className="flex justify-between items-center mb-3">
@@ -453,8 +490,12 @@ const CheckoutPage = () => {
                   </div>
                 ) : null}
 
-                {/* New Address Form for non-logged in users */}
-                {(addressType === 'new' || (!isLoggedIn || savedAddresses.length === 0)) && (
+                {/* ✅ Always show address form for:
+                    1. Guest users (not logged in)
+                    2. Logged in but no saved addresses
+                    3. When "New Address" is selected
+                */}
+                {(!isLoggedIn || savedAddresses.length === 0 || addressType === 'new') && (
                   <div className="space-y-4 mt-4">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="sm:col-span-2">
@@ -467,7 +508,7 @@ const CheckoutPage = () => {
                           required
                           value={formData.address}
                           onChange={handleChange}
-                          className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#B76E79] focus:ring-2 focus:ring-[#B76E79]/20 transition cursor-pointer"
+                          className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#B76E79] focus:ring-2 focus:ring-[#B76E79]/20 transition"
                           placeholder="House #, Street, Area"
                         />
                       </div>
@@ -481,7 +522,7 @@ const CheckoutPage = () => {
                           required
                           value={formData.city}
                           onChange={handleChange}
-                          className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#B76E79] focus:ring-2 focus:ring-[#B76E79]/20 transition cursor-pointer"
+                          className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#B76E79] focus:ring-2 focus:ring-[#B76E79]/20 transition"
                           placeholder="Enter your city"
                         />
                       </div>
@@ -494,7 +535,7 @@ const CheckoutPage = () => {
                           name="zipCode"
                           value={formData.zipCode}
                           onChange={handleChange}
-                          className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#B76E79] focus:ring-2 focus:ring-[#B76E79]/20 transition cursor-pointer"
+                          className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#B76E79] focus:ring-2 focus:ring-[#B76E79]/20 transition"
                           placeholder="75000"
                         />
                       </div>
@@ -629,7 +670,7 @@ const CheckoutPage = () => {
 
               <div className="space-y-3 max-h-64 overflow-y-auto">
                 {checkoutProducts.map((item: any) => (
-                  <div key={item.id} className="flex items-center gap-3 bg-gray-50 p-3 rounded-xl">
+                  <div key={item.id || item._id} className="flex items-center gap-3 bg-gray-50 p-3 rounded-xl">
                     <img 
                       src={item.mainImage} 
                       alt={item.title}

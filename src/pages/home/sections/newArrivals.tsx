@@ -145,11 +145,13 @@ const NewArrivals:React.FC = () => {
 
       <div className='absolute xl:w-[105%] w-[100%] left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 md:flex justify-between items-center text-[22px] hidden'>  
         <button onClick={() => swiperRef.current?.slidePrev()}
-                className='p-[5px] cursor-pointer hover:scale-[1.2] transform duration-300'>
+                className='p-[6px] cursor-pointer hover:scale-[1.2] transform duration-300 
+                           bg-gradient-to-l from-[#b76e79] to-[#b76e79a4] text-white rounded-full'>
             <FaAngleLeft />
         </button>
          <button onClick={() => swiperRef.current?.slideNext()}
-                className='p-[5px] cursor-pointer hover:scale-[1.2] transform duration-300'>
+                className='p-[6px] cursor-pointer hover:scale-[1.2] transform duration-300
+                            bg-gradient-to-l from-[#b76e79] to-[#b76e79a4] text-white rounded-full'>
             <FaAngleRight />
         </button>
       </div>

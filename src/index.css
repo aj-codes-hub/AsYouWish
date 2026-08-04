@@ -645,4 +645,30 @@ h1{
   transform: scale(1.2);
 }
 
+/* ////////easdasdasdsad */
 
+::-webkit-scrollbar {
+  width: 10px;
+  background: transparent;
+}
+
+::-webkit-scrollbar-track {
+  background: black;
+}
+
+::-webkit-scrollbar-thumb {
+  background-image: linear-gradient(#B76E79,#b76e79a4) ;
+  border-radius: 10px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+/* Hover pe dikhe */
+:hover::-webkit-scrollbar-thumb {
+  opacity: 1;
+}
+
+/* Ya phir body hover pe */
+:hover::-webkit-scrollbar-thumb {
+  opacity: 1;
+}
