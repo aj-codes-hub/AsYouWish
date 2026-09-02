@@ -42,7 +42,6 @@ api.interceptors.response.use(
       console.log('🔴 401 Unauthorized - Logging out...');
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      window.location.href = '/login';
     }
     return Promise.reject(error);
   }
